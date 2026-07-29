@@ -32,7 +32,7 @@ export default function UploadPhotosStep() {
       currentStep={1}
       footer={
         <>
-          <Button variant="secondary" onClick={() => router.push("/")}>
+          <Button variant="secondary" onClick={() => router.push("/marketplace")}>
             Cancel
           </Button>
           <Button onClick={goNext}>Next: Item Details</Button>

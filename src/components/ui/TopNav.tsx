@@ -1,9 +1,18 @@
+import Link from "next/link";
 import React from "react";
 
-export function TopNav() {
+interface TopNavProps {
+  /** Which nav item to highlight as active. */
+  active?: "marketplace" | "listings" | "messages";
+}
+
+export function TopNav({ active = "marketplace" }: TopNavProps) {
+  const linkClass = (key: TopNavProps["active"]) =>
+    key === active ? "text-brand" : "text-gray-500 hover:text-gray-800";
+
   return (
     <header className="flex h-16 w-full items-center justify-between border-b border-gray-100 bg-white px-6">
-      <div className="flex items-center gap-2">
+      <Link href="/marketplace" className="flex items-center gap-2">
         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white">
           <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
             <path
@@ -21,26 +30,16 @@ export function TopNav() {
           </p>
           <p className="text-[10px] tracking-wide text-gray-400">STUDENT MARKETPLACE</p>
         </div>
-      </div>
+      </Link>
 
-      <div className="hidden flex-1 justify-center px-8 md:flex">
-        <div className="flex h-9 w-full max-w-md items-center gap-2 rounded-lg bg-gray-100 px-3">
-          <svg viewBox="0 0 20 20" fill="none" className="h-4 w-4 text-gray-400">
-            <path
-              d="M9 17A8 8 0 109 1a8 8 0 000 16zM19 19l-4.35-4.35"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-            />
-          </svg>
-          <span className="text-sm text-gray-400">Search books, cycles, electronics...</span>
-        </div>
-      </div>
-
-      <nav className="hidden items-center gap-6 text-sm font-medium text-gray-500 md:flex">
-        <span className="cursor-pointer hover:text-gray-800">Marketplace</span>
-        <span className="cursor-pointer text-brand">My Listings</span>
-        <span className="cursor-pointer hover:text-gray-800">Messages</span>
+      <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
+        <Link href="/marketplace" className={linkClass("marketplace")}>
+          Marketplace
+        </Link>
+        <Link href="/listing/create" className={linkClass("listings")}>
+          Sell an Item
+        </Link>
+        <span className="cursor-not-allowed text-gray-300">Messages</span>
       </nav>
 
       <div className="ml-6 flex items-center gap-2">

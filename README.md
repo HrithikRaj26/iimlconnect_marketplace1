@@ -4,13 +4,25 @@ A closed-campus marketplace web app for the IIM Lucknow community, where verifie
 students buy and sell pre-owned items. Built with **Next.js 14 (App Router)**,
 **TypeScript**, and **Tailwind CSS**.
 
-This repository currently implements **Feature 1 — Easy Item Listing with Photos**
-(the full 4-step listing creation flow + success screen). Features 2 (Search &
-Filters) and 3 (Make an Offer & In-App Chat) are scoped to be added next.
+This repository implements **Feature 2 — Search & Filters** (the marketplace
+browse experience, which is the app's landing page) and **Feature 1 — Easy Item
+Listing with Photos** (the 4-step listing creation flow). Feature 3 (Make an Offer
+& In-App Chat) is scoped to be added next.
+
+**The landing page is `/marketplace`** — the root URL `/` redirects there.
 
 ---
 
 ## Features implemented
+
+**Feature 2 — Search & Filters** (landing page)
+- Instant search-as-you-type (debounced) over listing titles
+- Left filter sidebar: category, condition (with colour dots), price range, pickup location — each with live facet counts
+- Sort options: Most Relevant, Newest First, Price Low→High, Price High→Low
+- Apply / Reset filters, mobile filter toggle
+- Loading (skeleton cards), empty / no-results, and error+retry states
+- "Load more" pagination placeholder (swap for infinite scroll when ready)
+- Listing cards → detail page; detail page links forward to Feature 3 actions
 
 **Feature 1 — Easy Item Listing with Photos**
 - 4-step guided flow: Upload Photos → Item Details → Pricing & Logistics → Preview & Publish
@@ -19,7 +31,7 @@ Filters) and 3 (Make an Offer & In-App Chat) are scoped to be added next.
 - Full form validation (image required, title required, category & condition required, positive price, description char limit)
 - Live listing preview that updates as you type
 - Loading, error, empty, and success states throughout
-- Mock service layer (`IListingService`) ready to swap for a real backend
+- Mock service layers (`IListingService`, `ISearchService`) ready to swap for a real backend
 
 ---
 

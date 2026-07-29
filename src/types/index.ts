@@ -66,6 +66,46 @@ export interface PublishedListing {
   createdAt: string;
 }
 
+// ── Search & Filters (Feature 2) ─────────────────────────────────────────────
+
+export type SortOption =
+  | "relevant"
+  | "newest"
+  | "price_low_high"
+  | "price_high_low";
+
+export type PickupFilter = "hostel" | "academic_block" | "library" | "other";
+
+export interface MarketplaceListing {
+  id: string;
+  title: string;
+  price: number;
+  category: ItemCategory;
+  condition: ItemCondition;
+  pickup: PickupFilter;
+  imageUrl: string;
+  sellerName: string;
+  sellerBatch: string;
+  location: string;
+  postedAgo: string;
+  createdAtOffsetMinutes: number; // used for "newest" sorting on mock data
+}
+
+export interface MarketplaceFilters {
+  query: string;
+  categories: ItemCategory[];
+  conditions: ItemCondition[];
+  pickups: PickupFilter[];
+  minPrice: number;
+  maxPrice: number;
+  sort: SortOption;
+}
+
+export interface SearchResult {
+  items: MarketplaceListing[];
+  total: number;
+}
+
 export type AsyncStatus = "idle" | "loading" | "success" | "error";
 
 export interface FieldErrors {

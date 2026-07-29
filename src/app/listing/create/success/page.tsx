@@ -60,7 +60,7 @@ export default function ListingSuccessPage() {
             Create Another Listing
           </Button>
           <Link
-            href="/"
+            href="/marketplace"
             className="mt-2 text-sm font-medium text-brand hover:underline"
             onClick={() => reset()}
           >
