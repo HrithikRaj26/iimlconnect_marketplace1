@@ -39,7 +39,9 @@ export function TopNav({ active = "marketplace" }: TopNavProps) {
         <Link href="/listing/create" className={linkClass("listings")}>
           Sell an Item
         </Link>
-        <span className="cursor-not-allowed text-gray-300">Messages</span>
+        <Link href="/messages" className={linkClass("messages")}>
+          Messages
+        </Link>
       </nav>
 
       <div className="ml-6 flex items-center gap-2">

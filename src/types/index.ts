@@ -108,6 +108,76 @@ export interface SearchResult {
 
 export type AsyncStatus = "idle" | "loading" | "success" | "error";
 
+// ── Make an Offer & In-App Chat (Feature 3) ──────────────────────────────────
+
+export type OfferStatus =
+  | "pending"      // awaiting the other party's response
+  | "accepted"
+  | "declined"
+  | "countered"    // superseded by a counter-offer
+  | "expired";
+
+export type OfferDirection = "sent" | "received";
+
+export interface Offer {
+  id: string;
+  amount: number;
+  status: OfferStatus;
+  direction: OfferDirection; // relative to the current user
+  createdAt: number;         // epoch ms, for ordering
+  note?: string;
+}
+
+export type MessageStatus = "sending" | "sent" | "delivered" | "read" | "failed";
+
+export type MessageKind = "text" | "offer";
+
+export interface ChatMessage {
+  id: string;
+  kind: MessageKind;
+  authorId: string;          // "me" or the counterparty id
+  createdAt: number;
+  status: MessageStatus;
+  // text messages
+  text?: string;
+  // offer messages carry a reference to an Offer
+  offer?: Offer;
+}
+
+export type TransactionStatus = "negotiating" | "agreed" | "completed";
+
+export interface Transaction {
+  status: TransactionStatus;
+  finalAmount?: number;
+  pickupLocation?: string;
+  pickupTime?: string;
+}
+
+export interface ChatParticipant {
+  id: string;
+  name: string;
+  batch: string;
+  online: boolean;
+  verified: boolean;
+  avatarColor: string; // simple avatar stand-in
+}
+
+export interface Conversation {
+  id: string;
+  participant: ChatParticipant;
+  listing: {
+    id: string;
+    title: string;
+    askingPrice: number;
+    imageUrl: string;
+  };
+  lastMessagePreview: string;
+  lastMessageAt: string;
+  unreadCount: number;
+  messages: ChatMessage[];
+  transaction: Transaction;
+}
+
 export interface FieldErrors {
   images?: string;
   title?: string;

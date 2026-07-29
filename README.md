@@ -4,10 +4,9 @@ A closed-campus marketplace web app for the IIM Lucknow community, where verifie
 students buy and sell pre-owned items. Built with **Next.js 14 (App Router)**,
 **TypeScript**, and **Tailwind CSS**.
 
-This repository implements **Feature 2 — Search & Filters** (the marketplace
-browse experience, which is the app's landing page) and **Feature 1 — Easy Item
-Listing with Photos** (the 4-step listing creation flow). Feature 3 (Make an Offer
-& In-App Chat) is scoped to be added next.
+This repository implements **all three MVP features**: Feature 2 (Search &
+Filters, the landing page), Feature 1 (Easy Item Listing with Photos), and
+Feature 3 (Make an Offer & In-App Chat).
 
 **The landing page is `/marketplace`** — the root URL `/` redirects there.
 
@@ -15,23 +14,35 @@ Listing with Photos** (the 4-step listing creation flow). Feature 3 (Make an Off
 
 ## Features implemented
 
-**Feature 2 — Search & Filters** (landing page)
+**Feature 2 — Search & Filters** (landing page, `/marketplace`)
 - Instant search-as-you-type (debounced) over listing titles
 - Left filter sidebar: category, condition (with colour dots), price range, pickup location — each with live facet counts
 - Sort options: Most Relevant, Newest First, Price Low→High, Price High→Low
 - Apply / Reset filters, mobile filter toggle
 - Loading (skeleton cards), empty / no-results, and error+retry states
 - "Load more" pagination placeholder (swap for infinite scroll when ready)
-- Listing cards → detail page; detail page links forward to Feature 3 actions
 
-**Feature 1 — Easy Item Listing with Photos**
+**Feature 1 — Easy Item Listing with Photos** (`/listing/create`)
 - 4-step guided flow: Upload Photos → Item Details → Pricing & Logistics → Preview & Publish
-- Multi-image upload with drag-and-drop, drag-to-reorder, delete, and automatic cover-photo selection
+- Multi-image upload with drag-and-drop, drag-to-reorder, delete, automatic cover-photo selection
 - Per-image upload lifecycle (uploading / uploaded / error) with retry-on-failure
-- Full form validation (image required, title required, category & condition required, positive price, description char limit)
-- Live listing preview that updates as you type
-- Loading, error, empty, and success states throughout
-- Mock service layers (`IListingService`, `ISearchService`) ready to swap for a real backend
+- Full form validation, live preview, loading / error / empty / success states
+
+**Feature 3 — Make an Offer & In-App Chat** (`/messages`, `/marketplace/[id]`)
+- Product detail page with gallery, specs, seller card, and Make an Offer / Chat / Save actions
+- Make an Offer modal: amount input, suggested-offer chips, optional message, respectful-offer notice, validation
+- Full chat screen: conversation list sidebar, pinned product header, verified badge, online status
+- Message bubbles with status ticks (sending / delivered / read) and read-receipt placeholder
+- Optimistic message sending with failed→retry handling
+- Offer cards rendered by state: sent-awaiting, declined, and incoming with Accept / Decline / Counter
+- Counter-offer reuses the offer modal; offer state machine drives the transaction status
+- Offer Accepted banner + Transaction Agreement card (final price, item, seller, pickup location & time)
+- Deal Closed state locks the chat input
+- Image attachment placeholder in the composer
+
+All network access sits behind mock service interfaces (`IListingService`,
+`ISearchService`, `IChatService`) — swap the mock bodies for real HTTP/WebSocket
+calls and no component code changes.
 
 ---
 
