@@ -30,8 +30,6 @@ export default function MarketplacePage() {
 
   return (
     <div className="min-h-screen bg-surface">
-      <TopNav />
-
       {/* Search + sell row */}
       <div className="border-b border-gray-100 bg-white">
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-6 py-4">

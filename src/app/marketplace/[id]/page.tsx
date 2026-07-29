@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { TopNav } from "@/components/ui/TopNav";
 import { Button } from "@/components/ui/Button";
 import { MakeOfferModal } from "@/components/chat/MakeOfferModal";
 import { MOCK_LISTINGS } from "@/constants/mockListings";
@@ -21,7 +20,6 @@ export default function ListingDetailPage() {
   if (!listing) {
     return (
       <div className="min-h-screen bg-surface">
-        <TopNav />
         <main className="mx-auto max-w-3xl px-6 py-24 text-center">
           <h1 className="text-lg font-semibold text-gray-900">Listing not found</h1>
           <p className="mt-2 text-sm text-gray-500">This listing may have been removed or sold.</p>
@@ -38,7 +36,6 @@ export default function ListingDetailPage() {
 
   return (
     <div className="min-h-screen bg-surface">
-      <TopNav />
       <main className="mx-auto max-w-6xl px-6 py-8">
         <nav className="mb-4 text-sm text-gray-500">
           <Link href="/marketplace" className="hover:text-brand">Marketplace</Link>
