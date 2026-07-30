@@ -39,7 +39,7 @@ export default function RootPage() {
 
   return (
     <AppLayout>
-      <WelcomeDashboard session={session} onLogout={() => setSession(null)} />
+      <WelcomeDashboard session={session} />
     </AppLayout>
   );
 }
