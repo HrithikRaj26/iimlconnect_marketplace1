@@ -1,65 +1,101 @@
 import { ListingDraft, PublishedListing } from "@/types";
+import { supabase } from "@/lib/supabase";
 import { generateId } from "@/utils/format";
 
-/**
- * Service interface — swap the mock implementation below for real HTTP calls
- * (e.g. fetch("/api/listings/images", ...)) once the backend is available.
- * Keeping this as an interface means screens never import fetch/axios directly.
- */
 export interface IListingService {
   uploadImage(file: File): Promise<{ remoteUrl: string }>;
   publishListing(draft: ListingDraft, imageUrls: string[]): Promise<PublishedListing>;
 }
 
-/** Simulates network latency and an occasional transient failure. */
-function delay<T>(value: T, ms = 900): Promise<T> {
-  return new Promise((resolve) => setTimeout(() => resolve(value), ms));
-}
-
-class MockListingService implements IListingService {
+class SupabaseListingService implements IListingService {
   async uploadImage(file: File): Promise<{ remoteUrl: string }> {
-    // Simulate a rare upload failure so the UI's error-handling path is exercised.
-    const shouldFail = Math.random() < 0.05;
-    await delay(null, 700 + Math.random() * 600);
-    if (shouldFail) {
-      throw new Error("Upload failed. Please check your connection and try again.");
+    // Generate a unique file name
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+    const filePath = `listings/${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from('marketplace-images')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) {
+      console.error("Storage upload error:", error);
+      throw new Error("Failed to upload image: " + error.message);
     }
-    // In production this would be the CDN/object-storage URL returned by the backend.
-    return { remoteUrl: URL.createObjectURL(file) };
+
+    // Get public URL
+    const { data: publicUrlData } = supabase.storage
+      .from('marketplace-images')
+      .getPublicUrl(filePath);
+
+    return { remoteUrl: publicUrlData.publicUrl };
   }
 
   async publishListing(
     draft: ListingDraft,
     imageUrls: string[]
   ): Promise<PublishedListing> {
-    await delay(null, 1100);
-
     if (!draft.category || !draft.condition || !draft.pickupLocationType) {
-      // Defensive guard — screens validate before calling this, but the service
-      // should never silently accept an incomplete draft.
       throw new Error("Listing is missing required fields.");
     }
 
-    return {
-      id: generateId(),
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session) {
+      throw new Error("You must be logged in to post a listing.");
+    }
+
+    const user = sessionData.session.user;
+    const metadata = user.user_metadata || {};
+    const fullName = metadata.full_name || metadata.name || 'Student';
+
+    const insertData = {
+      seller_id: user.id,
       title: draft.title.trim(),
       description: draft.description.trim(),
+      price: Number(draft.price),
       category: draft.category,
       condition: draft.condition,
+      pickup: draft.pickupLocationType,
+      image_url: imageUrls[0] || '', // Using first image as cover
+      location: draft.customPickupNote || draft.pickupLocationType,
+      seller_name: fullName,
+      seller_batch: 'Verified Student' // Could be updated based on profile builder
+    };
+
+    const { data, error } = await supabase
+      .from('listings')
+      .insert([insertData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Database insert error:", error);
+      throw new Error("Failed to publish listing: " + error.message);
+    }
+
+    return {
+      id: data.id,
+      title: data.title,
+      description: data.description,
+      category: data.category as any,
+      condition: data.condition as any,
       tags: draft.tags,
-      price: Number(draft.price),
+      price: Number(data.price),
       negotiable: draft.negotiable,
-      pickupLocationType: draft.pickupLocationType,
-      customPickupNote: draft.customPickupNote || undefined,
+      pickupLocationType: data.pickup as any,
+      customPickupNote: data.location,
       imageUrls,
-      coverImageUrl: imageUrls[0],
+      coverImageUrl: data.image_url,
       seller: {
-        name: "Aditya S.",
-        batch: "Batch of 2026",
+        name: data.seller_name,
+        batch: data.seller_batch,
       },
-      createdAt: new Date().toISOString(),
+      createdAt: data.created_at,
     };
   }
 }
 
-export const listingService: IListingService = new MockListingService();
+export const listingService: IListingService = new SupabaseListingService();
