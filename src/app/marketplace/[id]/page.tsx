@@ -16,18 +16,36 @@ export default function ListingDetailPage() {
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [listing, setListing] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<any>(null);
   const [offerOpen, setOfferOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    async function fetchListing() {
-      const { data, error } = await supabase.from('listings').select('*').eq('id', id).single();
-      if (!error && data) {
-        setListing(data);
-      }
+    async function fetchData() {
+      const [{ data: sessionData }, { data: listingData, error }] = await Promise.all([
+        supabase.auth.getSession(),
+        supabase.from('listings').select('*').eq('id', id).single()
+      ]);
+      
+      if (sessionData.session) setSession(sessionData.session);
+      if (!error && listingData) setListing(listingData);
+      
       setLoading(false);
     }
-    fetchListing();
+    fetchData();
   }, [id]);
+
+  const handleDelete = async () => {
+    if (!confirm("Are you sure you want to permanently delete this listing?")) return;
+    setIsDeleting(true);
+    const { error } = await supabase.from('listings').delete().eq('id', id);
+    if (!error) {
+      router.push("/marketplace");
+    } else {
+      alert("Failed to delete listing.");
+      setIsDeleting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -54,6 +72,7 @@ export default function ListingDetailPage() {
   const categoryLabel = FILTER_CATEGORY_OPTIONS.find((c) => c.value === listing.category)?.label || listing.category;
   const conditionLabel = FILTER_CONDITION_OPTIONS.find((c) => c.value === listing.condition)?.label || listing.condition;
   const postedAgo = new Date(listing.created_at).toLocaleDateString();
+  const isOwner = session?.user?.id === listing.seller_id;
 
   return (
     <div className="min-h-screen bg-surface">
@@ -104,7 +123,7 @@ export default function ListingDetailPage() {
                 </span>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-semibold text-gray-900">{listing.seller_name}</p>
+                    <p className="text-sm font-semibold text-gray-900">{listing.seller_name} {isOwner && "(You)"}</p>
                     <span className="rounded bg-brand-light px-1.5 py-0.5 text-[10px] font-semibold text-brand">Verified</span>
                   </div>
                   <p className="text-xs text-gray-500">{listing.seller_batch || 'Student'} · ★ 4.9</p>
@@ -118,18 +137,41 @@ export default function ListingDetailPage() {
 
             {/* Actions */}
             <div className="mt-5">
-              <Button fullWidth size="lg" onClick={() => setOfferOpen(true)}>
-                Make an Offer
-              </Button>
-              <div className="mt-3 grid grid-cols-2 gap-3">
-                <Button variant="secondary" onClick={() => router.push("/messages")}>
-                  Chat with Seller
-                </Button>
-                <Button variant="secondary">Save Listing</Button>
-              </div>
-              <p className="mt-3 text-center text-xs text-gray-400">
-                Secure transaction within IIML Connect. Only verified students can buy and sell.
-              </p>
+              {isOwner ? (
+                <>
+                  <Button fullWidth size="lg" variant="secondary" onClick={() => alert('Edit flow coming soon!')}>
+                    Edit Listing
+                  </Button>
+                  <div className="mt-3">
+                    <Button 
+                      fullWidth 
+                      loading={isDeleting}
+                      onClick={handleDelete} 
+                      className="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 shadow-none border border-red-100"
+                    >
+                      Delete Listing
+                    </Button>
+                  </div>
+                  <p className="mt-3 text-center text-xs text-gray-400">
+                    You posted this listing. You can edit or remove it at any time.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Button fullWidth size="lg" onClick={() => setOfferOpen(true)}>
+                    Make an Offer
+                  </Button>
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <Button variant="secondary" onClick={() => router.push("/messages")}>
+                      Chat with Seller
+                    </Button>
+                    <Button variant="secondary">Save Listing</Button>
+                  </div>
+                  <p className="mt-3 text-center text-xs text-gray-400">
+                    Secure transaction within IIML Connect. Only verified students can buy and sell.
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
