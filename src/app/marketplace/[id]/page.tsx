@@ -1,21 +1,41 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { MakeOfferModal } from "@/components/chat/MakeOfferModal";
-import { MOCK_LISTINGS } from "@/constants/mockListings";
 import { formatINR } from "@/utils/format";
 import { FILTER_CATEGORY_OPTIONS, FILTER_CONDITION_OPTIONS } from "@/constants/marketplace";
+import { supabase } from "@/lib/supabase";
 
 export default function ListingDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
-  const listing = MOCK_LISTINGS.find((l) => l.id === id);
+  const [listing, setListing] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [offerOpen, setOfferOpen] = useState(false);
+
+  useEffect(() => {
+    async function fetchListing() {
+      const { data, error } = await supabase.from('listings').select('*').eq('id', id).single();
+      if (!error && data) {
+        setListing(data);
+      }
+      setLoading(false);
+    }
+    fetchListing();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <p className="text-gray-500">Loading details...</p>
+      </div>
+    );
+  }
 
   if (!listing) {
     return (
@@ -31,8 +51,9 @@ export default function ListingDetailPage() {
     );
   }
 
-  const categoryLabel = FILTER_CATEGORY_OPTIONS.find((c) => c.value === listing.category)?.label;
-  const conditionLabel = FILTER_CONDITION_OPTIONS.find((c) => c.value === listing.condition)?.label;
+  const categoryLabel = FILTER_CATEGORY_OPTIONS.find((c) => c.value === listing.category)?.label || listing.category;
+  const conditionLabel = FILTER_CONDITION_OPTIONS.find((c) => c.value === listing.condition)?.label || listing.condition;
+  const postedAgo = new Date(listing.created_at).toLocaleDateString();
 
   return (
     <div className="min-h-screen bg-surface">
@@ -49,7 +70,7 @@ export default function ListingDetailPage() {
           {/* Gallery */}
           <div>
             <div className="relative h-96 w-full overflow-hidden rounded-2xl bg-gray-100">
-              <Image src={listing.imageUrl} alt={listing.title} fill sizes="600px" className="object-cover" unoptimized />
+              <Image src={listing.image_url || '/placeholder.png'} alt={listing.title} fill sizes="600px" className="object-cover" unoptimized />
               <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-success shadow-sm">
                 {conditionLabel} Condition
               </span>
@@ -64,31 +85,29 @@ export default function ListingDetailPage() {
             </div>
 
             <h1 className="text-2xl font-bold text-gray-900">{listing.title}</h1>
-            <p className="mt-1 text-sm text-gray-400">Posted {listing.postedAgo}</p>
+            <p className="mt-1 text-sm text-gray-400">Posted {postedAgo}</p>
 
             <p className="mt-4 text-3xl font-bold text-brand">{formatINR(listing.price)}</p>
 
             <hr className="my-6 border-gray-100" />
 
             <h2 className="mb-2 text-sm font-semibold text-gray-900">Description</h2>
-            <p className="text-sm leading-relaxed text-gray-600">
-              Selling my {listing.title}. Well-maintained and fully functional. Comes as shown in
-              the photos. Available for pickup at {listing.location} on campus. Message me to
-              arrange a convenient time — happy to answer any questions.
+            <p className="text-sm leading-relaxed text-gray-600 whitespace-pre-wrap">
+              {listing.description || `Selling my ${listing.title}. Well-maintained and fully functional. Available for pickup at ${listing.location} on campus. Message me to arrange a convenient time — happy to answer any questions.`}
             </p>
 
             {/* Seller card */}
             <div className="mt-6 flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4">
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand text-sm font-semibold text-white">
-                  {listing.sellerName.split(" ").map((w) => w[0]).slice(0, 2).join("")}
+                  {listing.seller_name ? listing.seller_name.split(" ").map((w: string) => w[0]).slice(0, 2).join("") : "?"}
                 </span>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-semibold text-gray-900">{listing.sellerName}</p>
+                    <p className="text-sm font-semibold text-gray-900">{listing.seller_name}</p>
                     <span className="rounded bg-brand-light px-1.5 py-0.5 text-[10px] font-semibold text-brand">Verified</span>
                   </div>
-                  <p className="text-xs text-gray-500">{listing.sellerBatch} · ★ 4.9</p>
+                  <p className="text-xs text-gray-500">{listing.seller_batch || 'Student'} · ★ 4.9</p>
                 </div>
               </div>
               <div className="text-right text-xs text-gray-400">
@@ -122,12 +141,11 @@ export default function ListingDetailPage() {
         listing={{
           title: listing.title,
           askingPrice: listing.price,
-          imageUrl: listing.imageUrl,
-          sellerName: listing.sellerName,
+          imageUrl: listing.image_url,
+          sellerName: listing.seller_name,
           sellerRating: 4.9,
         }}
         onSubmit={async () => {
-          // In production this posts the offer, then routes into the conversation.
           setOfferOpen(false);
           router.push("/messages");
         }}
