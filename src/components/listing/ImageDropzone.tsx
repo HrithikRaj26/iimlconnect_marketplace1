@@ -14,6 +14,7 @@ export function ImageDropzone({
   remainingSlots,
 }: ImageDropzoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [isDragActive, setIsDragActive] = useState(false);
 
   const handleDrop = useCallback(
@@ -57,8 +58,20 @@ export function ImageDropzone({
       <input
         ref={inputRef}
         type="file"
-        accept="image/png, image/jpeg"
+        accept="image/png, image/jpeg, image/heic"
         multiple
+        hidden
+        disabled={disabled || isFull}
+        onChange={(e) => {
+          if (e.target.files?.length) onFilesSelected(e.target.files);
+          e.target.value = "";
+        }}
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
         hidden
         disabled={disabled || isFull}
         onChange={(e) => {
@@ -84,10 +97,29 @@ export function ImageDropzone({
           <p className="text-sm font-semibold text-gray-800">
             Drag &amp; drop your photos here
           </p>
-          <p className="mt-1 text-sm font-medium text-brand">
-            or browse files from your computer
-          </p>
-          <p className="mt-2 text-xs text-gray-500">
+          <div className="mt-3 flex gap-3 z-10 relative">
+            <button
+              type="button"
+              className="rounded-full bg-white px-4 py-2 text-sm font-medium text-brand shadow-sm border border-brand/20 hover:bg-brand-50"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!disabled && !isFull) inputRef.current?.click();
+              }}
+            >
+              Browse Gallery
+            </button>
+            <button
+              type="button"
+              className="rounded-full bg-brand px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-light hover:text-brand"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!disabled && !isFull) cameraInputRef.current?.click();
+              }}
+            >
+              📷 Take Photo
+            </button>
+          </div>
+          <p className="mt-3 text-xs text-gray-500">
             Maximum {remainingSlots} more · JPG, PNG format
           </p>
         </>
