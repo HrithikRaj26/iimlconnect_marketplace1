@@ -70,8 +70,8 @@ export function ImageDropzone({
       <input
         ref={cameraInputRef}
         type="file"
-        accept="image/*"
-        capture
+        accept="image/*;capture=camera"
+        capture="environment"
         hidden
         disabled={disabled || isFull}
         onChange={(e) => {
