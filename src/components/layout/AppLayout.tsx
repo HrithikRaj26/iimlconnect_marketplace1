@@ -88,12 +88,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             >
               🛒 Buy and Sell
             </Link>
-            <Link 
-              href="#" 
+            <a 
+              href="https://mobile-liart-alpha.vercel.app/" 
+              target="_blank"
+              rel="noopener noreferrer"
               className={`block px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900`}
             >
               🔍 Lost and Found
-            </Link>
+            </a>
             <Link 
               href="#" 
               className={`block px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900`}
