@@ -88,14 +88,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             >
               🛒 Buy and Sell
             </Link>
-            <a 
-              href="https://mobile-liart-alpha.vercel.app/" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`block px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900`}
+            <Link
+              href="/lost-found"
+              onClick={() => setSidebarOpen(false)}
+              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/lost-found") ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`}
             >
               🔍 Lost and Found
-            </a>
+            </Link>
             <Link 
               href="#" 
               className={`block px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900`}

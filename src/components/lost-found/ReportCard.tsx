@@ -1,0 +1,80 @@
+"use client";
+
+import Image from "next/image";
+import React, { useEffect, useState } from "react";
+import { ReportSummary } from "@/types/lostFound";
+import { resolveLostFoundPhotoUrl } from "@/services/lostFoundService";
+
+const statusTone: Record<string, string> = {
+  open: "bg-brand-light text-brand-dark",
+  available: "bg-brand-light text-brand-dark",
+  matched: "bg-amber-100 text-amber-700",
+  resolved: "bg-success-light text-success",
+  archived: "bg-gray-100 text-gray-500",
+};
+
+const tierTone: Record<number, string> = {
+  1: "bg-success-light text-success",
+  2: "bg-amber-100 text-amber-700",
+  3: "bg-red-100 text-red-600",
+};
+
+const tierLabel: Record<number, string> = { 1: "Tier 1", 2: "Tier 2", 3: "Tier 3 · Sensitive" };
+
+export function ReportCard({ report, onView }: { report: ReportSummary; onView: (id: string) => void }) {
+  const [photo, setPhoto] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    resolveLostFoundPhotoUrl(report.photo_url).then((url) => {
+      if (!cancelled) setPhoto(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [report.photo_url]);
+
+  const location = report.type === "lost" ? report.last_seen_location : report.pickup_location;
+
+  return (
+    <article className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-card transition-shadow hover:shadow-md">
+      <div className="relative h-40 w-full bg-gray-100">
+        {photo ? (
+          <Image src={photo} alt={report.category} fill sizes="(max-width: 768px) 100vw, 320px" className="object-cover" unoptimized />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-3xl">
+            {report.sensitivity_tier === 3 ? "🔒" : "📷"}
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-1 flex-col p-4">
+        <div className="mb-2 flex items-center gap-2">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+            {report.type === "lost" ? "Lost" : "Found"}
+          </span>
+        </div>
+
+        <h3 className="text-sm font-semibold capitalize text-gray-900">{report.category}</h3>
+        <p className="mt-1 truncate text-xs text-gray-500">📍 {location}</p>
+
+        <div className="mt-3 flex items-center gap-2">
+          <span className={["rounded px-2 py-0.5 text-[11px] font-semibold capitalize", statusTone[report.status] ?? "bg-gray-100 text-gray-500"].join(" ")}>
+            {report.status}
+          </span>
+          <span className={["rounded px-2 py-0.5 text-[11px] font-semibold", tierTone[report.sensitivity_tier]].join(" ")}>
+            {tierLabel[report.sensitivity_tier]}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => onView(report.id)}
+          className="mt-3 h-9 w-full rounded-lg border border-gray-200 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+        >
+          View Details
+        </button>
+      </div>
+    </article>
+  );
+}
