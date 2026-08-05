@@ -3,7 +3,7 @@ import React from "react";
 
 interface TopNavProps {
   /** Which nav item to highlight as active. */
-  active?: "marketplace" | "listings" | "messages";
+  active?: "marketplace" | "listings" | "messages" | "ventures";
   onMenuClick?: () => void;
 }
 
@@ -44,6 +44,9 @@ export function TopNav({ active = "marketplace", onMenuClick }: TopNavProps) {
       <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
         <Link href="/marketplace" className={linkClass("marketplace")}>
           Marketplace
+        </Link>
+        <Link href="/ventures" className={linkClass("ventures")}>
+          Venture Hub
         </Link>
         <Link href="/listing/create" className={linkClass("listings")}>
           Sell an Item
