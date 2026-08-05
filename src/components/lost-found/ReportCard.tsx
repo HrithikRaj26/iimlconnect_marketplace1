@@ -44,7 +44,11 @@ export function ReportCard({
     <article
       className={[
         "card-wobble flex flex-col overflow-hidden rounded-xl border shadow-card transition-shadow hover:shadow-md",
-        report.is_sensitive ? "border-red-300 bg-red-50" : "border-gray-200 bg-white",
+        report.is_sensitive
+          ? "border-red-300 bg-red-50"
+          : report.type === "lost"
+            ? "border-rose-100 bg-rose-50/70"
+            : "border-green-100 bg-green-50/70",
       ].join(" ")}
     >
       <div className="relative h-40 w-full bg-gray-100">
