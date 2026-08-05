@@ -246,16 +246,26 @@ export default function LostFoundBrowsePage() {
           )}
 
           <div className="rounded-xl bg-brand-light/50 p-4">
-            <div className="grid grid-cols-1 items-start gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {/*
+              A uniform CSS grid sizes every row to its tallest cell, so a
+              card with a match banner (much taller than a plain card) left
+              a large blank gap under every shorter card sharing its row.
+              CSS multi-column layout packs each card right under the one
+              above it in the same column instead, so height differences
+              between cards no longer leave gaps — the standard no-JS
+              masonry trick.
+            */}
+            <div className="columns-1 gap-5 sm:columns-2 xl:columns-3">
               {tabResults.map((r) => (
-                <ReportCard
-                  key={r.id}
-                  report={r}
-                  onView={openDetail}
-                  onEdit={tab === "mine" ? editReport : undefined}
-                  matches={tab === "mine" ? matchesByReportId.get(r.id) : undefined}
-                  onViewMatch={openDetail}
-                />
+                <div key={r.id} className="mb-5 break-inside-avoid">
+                  <ReportCard
+                    report={r}
+                    onView={openDetail}
+                    onEdit={tab === "mine" ? editReport : undefined}
+                    matches={tab === "mine" ? matchesByReportId.get(r.id) : undefined}
+                    onViewMatch={openDetail}
+                  />
+                </div>
               ))}
             </div>
           </div>
