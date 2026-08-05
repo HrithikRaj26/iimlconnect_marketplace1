@@ -307,9 +307,28 @@ export default function VentureDiscovery() {
                 )}
               </div>
 
-              <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4 text-xs font-bold text-gray-400">
-                <span>View Details</span>
-                <span className="text-lg group-hover:translate-x-1 transition-transform">→</span>
+              {/* Card Footer CTA actions */}
+              <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between gap-3 text-xs font-extrabold">
+                {venture.contact_links?.website ? (
+                  <a
+                    href={venture.contact_links.website}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex-1 text-center py-2.5 rounded-xl bg-orange-600 text-white hover:bg-orange-700 active:scale-98 transition-all shadow-sm shadow-orange-600/10 flex items-center justify-center gap-1.5"
+                  >
+                    <span>Visit Website</span>
+                    <span className="text-sm">↗</span>
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    className="flex-1 text-center py-2.5 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 active:scale-98 transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <span>View Details</span>
+                    <span className="text-sm group-hover:translate-x-1 transition-transform">→</span>
+                  </button>
+                )}
               </div>
             </div>
           ))}
