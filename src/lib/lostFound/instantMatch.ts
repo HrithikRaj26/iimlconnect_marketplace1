@@ -58,6 +58,21 @@ function scorePair(a: Comparable, b: Comparable): ScoreBreakdown {
   return { total, categoryMatch, locationScore, descriptionScore };
 }
 
+/**
+ * Category alone is worth 60% of the score — enough on its own to clear
+ * MATCH_THRESHOLD (40%). Left unguarded, every found report would "match"
+ * every open lost report of the same category regardless of where either
+ * was seen or how they're described, which stops being a useful signal the
+ * moment there's more than a couple of reports per category. Category
+ * match is required (it's the top-priority signal) but not sufficient by
+ * itself — there also has to be *some* location or description overlap.
+ */
+function qualifies(breakdown: ScoreBreakdown): boolean {
+  if (breakdown.total < MATCH_THRESHOLD) return false;
+  if (!breakdown.categoryMatch) return true; // location+description alone can still clear the threshold on a strong text match
+  return breakdown.locationScore > 0 || breakdown.descriptionScore > 0;
+}
+
 export interface InstantMatchItem {
   sourceReportId: string;
   sourceType: 'lost' | 'found';
@@ -95,7 +110,7 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
         location: found.found_location ?? found.pickup_location ?? '',
         description: found.description ?? '',
       });
-      if (breakdown.total < MATCH_THRESHOLD) continue;
+      if (!qualifies(breakdown)) continue;
       results.push({
         sourceReportId: lost.id,
         sourceType: 'lost',
@@ -125,7 +140,7 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
         location: lost.last_seen_location ?? '',
         description: lost.description ?? '',
       });
-      if (breakdown.total < MATCH_THRESHOLD) continue;
+      if (!qualifies(breakdown)) continue;
       results.push({
         sourceReportId: found.id,
         sourceType: 'found',
