@@ -17,7 +17,6 @@
 
 .card-wobble {
   transform-style: preserve-3d;
-  will-change: transform;
 }
 
 .card-wobble:hover {
