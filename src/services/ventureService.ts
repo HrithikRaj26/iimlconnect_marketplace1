@@ -40,6 +40,7 @@ export interface IVentureService {
     pendingQueue: Venture[];
   }>;
   updateVentureStatus(id: string, status: "approved" | "rejected"): Promise<void>;
+  toggleVentureOpenStatus(id: string, isOpen: boolean): Promise<Venture>;
 }
 
 interface VerveEditData {
@@ -161,6 +162,7 @@ class SupabaseVentureService implements IVentureService {
       reviews_count: 0,
       owner_name: ownerName,
       owner_batch: ownerBatch,
+      is_open: false,
     };
 
     const { data: newVenture, error } = await supabase
@@ -189,6 +191,18 @@ class SupabaseVentureService implements IVentureService {
     }
 
     return updated as Venture;
+  }
+
+  async toggleVentureOpenStatus(id: string, isOpen: boolean): Promise<Venture> {
+    const { data, error } = await supabase
+      .from("ventures")
+      .update({ is_open: isOpen })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data as Venture;
   }
 
   async deleteVenture(id: string): Promise<void> {

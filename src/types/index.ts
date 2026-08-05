@@ -211,6 +211,7 @@ export interface Venture {
   };
   status: VentureStatus;
   is_featured: boolean;
+  is_open: boolean;
   average_rating: number;
   reviews_count: number;
   owner_name: string;

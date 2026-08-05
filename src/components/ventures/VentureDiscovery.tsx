@@ -258,9 +258,19 @@ export default function VentureDiscovery() {
                       className="h-full w-full object-cover"
                     />
                   </div>
-                  <span className="rounded-full bg-orange-50 px-2.5 py-1 text-[10px] font-bold text-orange-600">
-                    {venture.category}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-extrabold border ${
+                      venture.is_open 
+                        ? "bg-green-50 text-green-700 border-green-200" 
+                        : "bg-gray-50 text-gray-500 border-gray-200"
+                    }`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${venture.is_open ? "bg-green-500 animate-pulse" : "bg-gray-400"}`} />
+                      {venture.is_open ? "Open" : "Closed"}
+                    </span>
+                    <span className="rounded-full bg-orange-50 px-2.5 py-1 text-[10px] font-bold text-orange-600">
+                      {venture.category}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Info */}
@@ -344,6 +354,14 @@ export default function VentureDiscovery() {
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <h2 className="text-xl font-black text-gray-900 md:text-2xl">{activeVenture.name}</h2>
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold border ${
+                          activeVenture.is_open 
+                            ? "bg-green-50 text-green-700 border-green-200" 
+                            : "bg-gray-50 text-gray-500 border-gray-200"
+                        }`}>
+                          <span className={`h-2 w-2 rounded-full ${activeVenture.is_open ? "bg-green-500 animate-pulse" : "bg-gray-400"}`} />
+                          {activeVenture.is_open ? "Open Now" : "Closed"}
+                        </span>
                         <span className="rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-bold text-orange-600">
                           {activeVenture.category}
                         </span>

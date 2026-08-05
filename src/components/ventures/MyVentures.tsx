@@ -201,10 +201,37 @@ export default function MyVentures() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 w-full md:w-auto">
+                  <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
                     <span className="text-xs font-semibold text-gray-400 pl-2">
                       ⭐ {v.average_rating} ({v.reviews_count} reviews)
                     </span>
+                    {v.status === "approved" && (
+                      <div className="flex items-center gap-2 border-l border-gray-150 pl-4">
+                        <span className={`text-[10px] font-extrabold uppercase tracking-wider ${v.is_open ? "text-green-600" : "text-gray-400"}`}>
+                          {v.is_open ? "Open" : "Closed"}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              const updated = await ventureService.toggleVentureOpenStatus(v.id, !v.is_open);
+                              setMyVentures(prev => prev.map(item => item.id === v.id ? updated : item));
+                            } catch (err: any) {
+                              alert(err.message || "Failed to toggle status.");
+                            }
+                          }}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                            v.is_open ? "bg-green-500" : "bg-gray-300"
+                          }`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                              v.is_open ? "translate-x-5" : "translate-x-0"
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
