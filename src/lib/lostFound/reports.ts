@@ -14,6 +14,8 @@ export interface CreateLostReportInput {
   lostDate: string;
   photoUrl?: string;
   sensitivityTier?: 1 | 2 | 3;
+  /** "Show to public" toggle — false withholds the report from other users (staff + reporter still see it). Defaults true. */
+  visibleToPublic?: boolean;
 }
 
 export interface CreateFoundReportInput {
@@ -45,6 +47,7 @@ export async function createLostReport(user: LostFoundUser, input: CreateLostRep
       photo_url: input.photoUrl ?? null,
       sensitivity_tier: tier,
       status: 'open',
+      visible_to_public: input.visibleToPublic ?? true,
     })
     .select()
     .single();
@@ -119,6 +122,13 @@ function maybeHidePhoto(row: any, requester: LostFoundUser, ownerId: string): st
   return TIER3_HIDDEN_PHOTO;
 }
 
+/** "Show to public" toggle: a lost report with visible_to_public=false is withheld from everyone except the reporter and staff (custodian/admin). */
+function canSeeWithheldLostReport(row: any, requester: LostFoundUser): boolean {
+  if (row.visible_to_public !== false) return true;
+  if (requester.role === 'custodian' || requester.role === 'admin') return true;
+  return requester.id === row.reporter_id;
+}
+
 function toPublicLost(row: any, requester: LostFoundUser) {
   return { ...row, type: 'lost', photo_url: maybeHidePhoto(row, requester, row.reporter_id) };
 }
@@ -155,7 +165,9 @@ export async function browse(query: BrowseQuery, requester: LostFoundUser) {
   if (lostError) throw lostError;
   if (foundError) throw foundError;
 
-  const lostItems = (lost ?? []).map((r) => toPublicLost(r, requester));
+  const lostItems = (lost ?? [])
+    .filter((r) => canSeeWithheldLostReport(r, requester))
+    .map((r) => toPublicLost(r, requester));
   const foundItems = (found ?? []).map((r) => toPublicFound(r, requester));
 
   const combined = [...lostItems, ...foundItems].sort(
@@ -216,7 +228,13 @@ async function hydrateFoundDetail(found: any, requester: LostFoundUser) {
 
 export async function getById(id: string, requester: LostFoundUser) {
   const { data: lost } = await lostFoundAdmin.from('lost_report').select('*').eq('id', id).maybeSingle();
-  if (lost) return hydrateLostDetail(lost, requester);
+  if (lost) {
+    // Withheld report: treated as not-found for anyone who isn't the
+    // reporter or staff, same as a nonexistent id — no distinguishing
+    // "exists but hidden" response that would leak the fact of its existence.
+    if (!canSeeWithheldLostReport(lost, requester)) return null;
+    return hydrateLostDetail(lost, requester);
+  }
 
   const { data: found } = await lostFoundAdmin.from('found_report').select('*').eq('id', id).maybeSingle();
   if (found) return hydrateFoundDetail(found, requester);

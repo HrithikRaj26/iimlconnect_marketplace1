@@ -46,6 +46,7 @@ export interface LostReport {
   sensitivity_tier: SensitivityTier;
   status: 'open' | 'matched' | 'resolved' | 'archived';
   created_at: string;
+  visible_to_public: boolean;
   matchedFinderContact?: Contact;
 }
 

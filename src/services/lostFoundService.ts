@@ -42,6 +42,7 @@ export const lostFoundService = {
     lastSeenLocation: string;
     lostDate: string;
     photoUrl?: string;
+    visibleToPublic?: boolean;
   }) => request<LostReport>('POST', '/lost-reports', input),
 
   createFoundReport: (input: {

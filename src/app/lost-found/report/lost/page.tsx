@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { TextInput } from "@/components/ui/TextInput";
 import { TextArea } from "@/components/ui/TextArea";
 import { Button } from "@/components/ui/Button";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { CategoryPicker } from "@/components/lost-found/CategoryPicker";
 import { PhotoField } from "@/components/lost-found/PhotoField";
 import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
@@ -24,6 +25,7 @@ export default function ReportLostPage() {
   const [lastSeenLocation, setLastSeenLocation] = useState("");
   const [lostDate, setLostDate] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
+  const [showToPublic, setShowToPublic] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -45,6 +47,7 @@ export default function ReportLostPage() {
         lastSeenLocation,
         lostDate,
         photoUrl,
+        visibleToPublic: showToPublic,
       });
       router.push(`/lost-found/${created.id}`);
     } catch (e: any) {
@@ -90,6 +93,15 @@ export default function ReportLostPage() {
           />
 
           <PhotoField file={photo} onChange={setPhoto} label="Photo (optional)" />
+
+          <div>
+            <Checkbox checked={showToPublic} onChange={setShowToPublic} label="Show to public" />
+            <p className="mt-1 text-xs text-gray-500">
+              {showToPublic
+                ? "Visible to everyone browsing Lost & Found."
+                : "Withheld from other users — only you and staff (custodian/admin) can see this report."}
+            </p>
+          </div>
 
           {error && <p className="text-sm font-medium text-red-500">{error}</p>}
           <Button size="lg" fullWidth loading={submitting} onClick={submit}>

@@ -22,6 +22,7 @@ interface Detail {
   last_seen_location?: string;
   pickup_location?: string;
   contents_withheld?: boolean;
+  visible_to_public?: boolean;
   finderContact?: Contact;
   matchedFinderContact?: Contact;
 }
@@ -109,6 +110,11 @@ export default function ReportDetailPage() {
               <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-red-100 text-red-600">
                 Tier {report.sensitivity_tier}
               </span>
+              {report.type === "lost" && report.visible_to_public === false && (
+                <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-gray-100 text-gray-600">
+                  Withheld from public
+                </span>
+              )}
             </div>
 
             <p className="text-sm text-gray-700">{report.description}</p>
