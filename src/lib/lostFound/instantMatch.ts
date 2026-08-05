@@ -16,12 +16,15 @@ const DESCRIPTION_WEIGHT = 0.15;
 export const MATCH_THRESHOLD = 0.4;
 
 function tokenize(text: string): Set<string> {
-  return new Set(
-    text
-      .toLowerCase()
-      .split(/[^a-z0-9]+/)
-      .filter(Boolean),
-  );
+  const normalized = text
+    .toLowerCase()
+    // Insert a boundary between letters and digits so "CR102" and "CR 102"
+    // tokenize the same way — campus location codes are typed both ways
+    // ("CR102" vs "CR 102", "H9" vs "H 9") and without this they'd never
+    // overlap even though they mean the same place.
+    .replace(/([a-z])(\d)/g, '$1 $2')
+    .replace(/(\d)([a-z])/g, '$1 $2');
+  return new Set(normalized.split(/[^a-z0-9]+/).filter(Boolean));
 }
 
 function jaccardSimilarity(a: string, b: string): number {
