@@ -44,6 +44,7 @@ export default function ReportDetailPage() {
   const [itemLabel, setItemLabel] = useState("");
   const [busy, setBusy] = useState(false);
   const [matches, setMatches] = useState<InstantMatch[]>([]);
+  const [claimAcknowledged, setClaimAcknowledged] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -208,9 +209,23 @@ export default function ReportDetailPage() {
               !report.is_sensitive &&
               !report.claimant_id &&
               !isFinder && (
-                <Button fullWidth loading={busy} onClick={claim}>
-                  Claim this Item
-                </Button>
+                <div className="space-y-2">
+                  <label className="flex items-start gap-2 text-xs text-gray-600">
+                    <input
+                      type="checkbox"
+                      checked={claimAcknowledged}
+                      onChange={(e) => setClaimAcknowledged(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-brand focus:ring-brand"
+                    />
+                    <span>
+                      Claiming the item will record you as owner and details will be retained for next 30 days for
+                      dispute resolution purposes
+                    </span>
+                  </label>
+                  <Button fullWidth loading={busy} disabled={!claimAcknowledged} onClick={claim}>
+                    Claim this Item
+                  </Button>
+                </div>
               )}
 
             {report.type === "found" && report.status === "available" && report.is_sensitive && (
