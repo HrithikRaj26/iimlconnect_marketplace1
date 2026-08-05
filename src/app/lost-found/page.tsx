@@ -213,17 +213,19 @@ export default function LostFoundBrowsePage() {
             </p>
           )}
 
-          <div className="grid grid-cols-1 items-start gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {tabResults.map((r) => (
-              <ReportCard
-                key={r.id}
-                report={r}
-                onView={openDetail}
-                onEdit={tab === "mine" ? editReport : undefined}
-                matches={tab === "mine" ? matchesByReportId.get(r.id) : undefined}
-                onViewMatch={openDetail}
-              />
-            ))}
+          <div className="rounded-xl bg-brand-light/50 p-4">
+            <div className="grid grid-cols-1 items-start gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {tabResults.map((r) => (
+                <ReportCard
+                  key={r.id}
+                  report={r}
+                  onView={openDetail}
+                  onEdit={tab === "mine" ? editReport : undefined}
+                  matches={tab === "mine" ? matchesByReportId.get(r.id) : undefined}
+                  onViewMatch={openDetail}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </main>
