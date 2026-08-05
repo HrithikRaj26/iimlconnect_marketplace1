@@ -246,7 +246,7 @@ export default function VentureDiscovery() {
             <div
               key={venture.id}
               onClick={() => handleCardClick(venture.id)}
-              className="group flex flex-col justify-between rounded-2xl bg-white p-6 border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all cursor-pointer"
+              className="group flex flex-col justify-between rounded-2xl bg-white/70 backdrop-blur-md p-6 border border-white/80 shadow-md hover:shadow-xl hover:bg-white/90 hover:border-orange-500/20 hover:-translate-y-1 transition-all duration-300 cursor-pointer"
             >
               <div>
                 {/* Logo and Category */}
