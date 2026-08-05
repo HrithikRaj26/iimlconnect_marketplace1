@@ -31,6 +31,7 @@ export default function VentureDiscovery() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [showFirstReviewSuccess, setShowFirstReviewSuccess] = useState(false);
 
   // Featured Carousel Index
   const [carouselIndex, setCarouselIndex] = useState(0);
@@ -112,6 +113,18 @@ export default function VentureDiscovery() {
       
       setReviewContent("");
       setRating(5);
+
+      // Check if this was the user's first review
+      if (currentUserId) {
+        const { count } = await supabase
+          .from("reviews")
+          .select("*", { count: "exact", head: true })
+          .eq("reviewer_id", currentUserId);
+        
+        if (count === 1) {
+          setShowFirstReviewSuccess(true);
+        }
+      }
     } catch (err: any) {
       setReviewError(err.message || "Failed to submit review.");
     } finally {
@@ -567,6 +580,76 @@ export default function VentureDiscovery() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* First Review Milestone Confetti Success Modal */}
+      {showFirstReviewSuccess && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <style>{`
+            @keyframes confetti-fall {
+              0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+              100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+            }
+            .confetti-particle {
+              position: absolute;
+              top: -20px;
+              animation: confetti-fall 3s linear infinite;
+            }
+          `}</style>
+          
+          {/* Confetti container */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
+            {[...Array(35)].map((_, i) => {
+              const colors = ["#f97316", "#3b82f6", "#10b981", "#eab308", "#ec4899", "#8b5cf6"];
+              const color = colors[i % colors.length];
+              const left = `${Math.random() * 100}%`;
+              const delay = `${Math.random() * 2.5}s`;
+              const duration = `${2 + Math.random() * 2}s`;
+              const size = `${6 + Math.random() * 8}px`;
+              const shape = i % 2 === 0 ? "rounded-full" : "rounded-sm";
+              return (
+                <div
+                  key={i}
+                  className={`confetti-particle ${shape}`}
+                  style={{
+                    left,
+                    backgroundColor: color,
+                    width: size,
+                    height: size,
+                    animationDelay: delay,
+                    animationDuration: duration,
+                  }}
+                />
+              );
+            })}
+          </div>
+
+          {/* Success Dialog */}
+          <div className="relative bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-gray-100 z-20 text-center space-y-6 animate-in zoom-in-95 duration-300">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-500 border border-amber-100 shadow-sm animate-bounce">
+              <span className="text-3xl">⭐️</span>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-xl font-black text-gray-900">🎉 Milestone Unlocked!</h3>
+              <p className="text-xs font-semibold text-orange-600 uppercase tracking-widest">First Review Submitted</p>
+              <p className="text-sm font-medium text-gray-500 leading-relaxed pt-2">
+                Congratulations! You have successfully submitted your **first venture review** on the IIM Lucknow Venture Hub.
+              </p>
+              <p className="text-xs text-gray-400 leading-relaxed bg-gray-50 p-3 rounded-xl border">
+                Your ratings and feedback help student startups improve their offerings, build credibility, and gain traction on campus. Keep supporting student founders!
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowFirstReviewSuccess(false)}
+              className="w-full rounded-xl bg-orange-600 px-5 py-3 text-xs font-black text-white hover:bg-orange-700 shadow-md transition-colors"
+            >
+              Awesome! 🚀
+            </button>
           </div>
         </div>
       )}
