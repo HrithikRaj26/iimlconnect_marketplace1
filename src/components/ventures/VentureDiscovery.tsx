@@ -37,6 +37,12 @@ export default function VentureDiscovery() {
   // Featured Carousel Index
   const [carouselIndex, setCarouselIndex] = useState(0);
 
+  // Scratch card states
+  const [revealedEmail, setRevealedEmail] = useState(false);
+  const [revealedWhatsapp, setRevealedWhatsapp] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
+  const [whatsappCopied, setWhatsappCopied] = useState(false);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -79,6 +85,10 @@ export default function VentureDiscovery() {
   const handleCardClick = async (id: string) => {
     setDetailLoading(true);
     setShowDetailModal(true);
+    setRevealedEmail(false);
+    setRevealedWhatsapp(false);
+    setEmailCopied(false);
+    setWhatsappCopied(false);
     try {
       const data = await ventureService.getVentureById(id);
       setActiveVenture(data);
@@ -485,35 +495,97 @@ export default function VentureDiscovery() {
                         </ul>
                       </div>
                     )}
-
                     {/* Social coordinates */}
                     <div className="space-y-3">
                       <h3 className="text-sm font-extrabold text-gray-900 uppercase tracking-wider">Connect Details</h3>
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-3">
+                        {/* WhatsApp Scratch Card */}
                         {activeVenture.contact_links.whatsapp && (
-                          <a
-                            href={`https://wa.me/${activeVenture.contact_links.whatsapp.replace(/\D/g, '')}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 py-2 text-xs font-bold text-white shadow-sm hover:bg-green-600 transition-colors"
-                          >
-                            💬 Chat on WhatsApp
-                          </a>
+                          <div className="flex flex-col gap-1.5">
+                            <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">WhatsApp Contact</span>
+                            {!revealedWhatsapp ? (
+                              <button
+                                type="button"
+                                onClick={() => setRevealedWhatsapp(true)}
+                                className="w-full relative overflow-hidden rounded-xl border border-dashed border-green-300 bg-green-50/30 p-3 text-center cursor-pointer hover:bg-green-50 transition-colors flex items-center justify-center gap-2 group animate-in fade-in duration-200"
+                              >
+                                <span className="text-xs font-black text-green-700 flex items-center gap-1.5">
+                                  <span>💬</span>
+                                  <span>Tap to reveal WhatsApp</span>
+                                </span>
+                                <div className="absolute inset-0 bg-white/10 backdrop-blur-xs group-hover:backdrop-blur-none transition-all duration-300" />
+                              </button>
+                            ) : (
+                              <div className="flex flex-col gap-2 p-3 bg-green-50/50 rounded-xl border border-green-100 animate-in zoom-in-95 duration-200">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-xs font-bold text-gray-700 select-all">{activeVenture.contact_links.whatsapp}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(activeVenture.contact_links.whatsapp || "");
+                                      setWhatsappCopied(true);
+                                      setTimeout(() => setWhatsappCopied(false), 2000);
+                                    }}
+                                    className="shrink-0 bg-green-600 hover:bg-green-700 text-white rounded-lg px-2.5 py-1 text-[10px] font-black tracking-wider uppercase transition-colors"
+                                  >
+                                    {whatsappCopied ? "✓ Copied" : "📋 Copy"}
+                                  </button>
+                                </div>
+                                <a
+                                  href={`https://wa.me/${activeVenture.contact_links.whatsapp.replace(/\D/g, '')}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="w-full text-center bg-green-500 hover:bg-green-600 text-white rounded-lg py-1.5 text-[10px] font-black tracking-wider uppercase transition-colors flex items-center justify-center gap-1 shadow-sm"
+                                >
+                                  <span>Open WhatsApp</span>
+                                  <span>↗</span>
+                                </a>
+                              </div>
+                            )}
+                          </div>
                         )}
+
+                        {/* Email Scratch Card */}
                         {activeVenture.contact_links.email && (
-                          <a
-                            href={`mailto:${activeVenture.contact_links.email}?subject=Inquiry%20regarding%20${encodeURIComponent(activeVenture.name)}`}
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-orange-600 py-2 text-xs font-bold text-white shadow-sm hover:bg-orange-700 transition-colors"
-                          >
-                            ✉️ Email Venture
-                          </a>
+                          <div className="flex flex-col gap-1.5">
+                            <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">Email Contact</span>
+                            {!revealedEmail ? (
+                              <button
+                                type="button"
+                                onClick={() => setRevealedEmail(true)}
+                                className="w-full relative overflow-hidden rounded-xl border border-dashed border-orange-300 bg-orange-50/30 p-3 text-center cursor-pointer hover:bg-orange-50 transition-colors flex items-center justify-center gap-2 group animate-in fade-in duration-200"
+                              >
+                                <span className="text-xs font-black text-orange-700 flex items-center gap-1.5">
+                                  <span>✉️</span>
+                                  <span>Tap to reveal email</span>
+                                </span>
+                                <div className="absolute inset-0 bg-white/10 backdrop-blur-xs group-hover:backdrop-blur-none transition-all duration-300" />
+                              </button>
+                            ) : (
+                              <div className="flex items-center justify-between gap-2 p-3 bg-orange-50/50 rounded-xl border border-orange-100 animate-in zoom-in-95 duration-200">
+                                <span className="text-xs font-bold text-gray-700 truncate select-all">{activeVenture.contact_links.email}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(activeVenture.contact_links.email || "");
+                                    setEmailCopied(true);
+                                    setTimeout(() => setEmailCopied(false), 2000);
+                                  }}
+                                  className="shrink-0 bg-orange-600 hover:bg-orange-700 text-white rounded-lg px-2.5 py-1 text-[10px] font-black tracking-wider uppercase transition-colors"
+                                >
+                                  {emailCopied ? "✓ Copied" : "📋 Copy"}
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         )}
+
                         {activeVenture.contact_links.instagram && (
                           <a
                             href={`https://instagram.com/${activeVenture.contact_links.instagram}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 py-2 text-xs font-bold text-white shadow-sm hover:opacity-90 transition-opacity"
+                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 py-2 text-xs font-bold text-white shadow-sm hover:opacity-90 transition-opacity mt-1"
                           >
                             📸 Instagram Profile
                           </a>

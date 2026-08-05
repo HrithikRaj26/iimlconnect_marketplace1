@@ -34,7 +34,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     if (!fName && fullName) {
       fName = fullName.split(' ')[0];
     }
-    const avatar = metadata.avatar_url || metadata.picture || '';
+    const avatar = metadata.custom_avatar || metadata.avatar_url || metadata.picture || '';
     setProfile({ name: fullName || fName || "Student", avatar });
   };
 

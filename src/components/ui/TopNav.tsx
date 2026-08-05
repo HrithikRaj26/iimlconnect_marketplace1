@@ -94,9 +94,6 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
           <Link href="/marketplace" className={linkClass("marketplace")}>
             Marketplace
           </Link>
-          <Link href="/ventures" className={linkClass("ventures")}>
-            Venture Hub
-          </Link>
           <Link href="/listing/create" className={linkClass("listings")}>
             Sell an Item
           </Link>

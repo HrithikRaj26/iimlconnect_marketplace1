@@ -27,7 +27,7 @@ export default function ProfileBuilder() {
           setLastName(metadata.last_name || metadata.full_name?.split(" ").slice(1).join(" ") || "");
           setBatch(metadata.batch || "");
           setBio(metadata.bio || "");
-          setAvatarUrl(metadata.avatar_url || "");
+          setAvatarUrl(metadata.custom_avatar || metadata.avatar_url || "");
         }
       } catch (e) {
         console.error("Error loading user profile:", e);
@@ -99,6 +99,7 @@ export default function ProfileBuilder() {
           batch: batch,
           bio: bio.trim(),
           avatar_url: avatarUrl,
+          custom_avatar: avatarUrl,
         },
       });
 
