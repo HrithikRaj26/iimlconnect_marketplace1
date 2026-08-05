@@ -86,6 +86,7 @@ export interface InstantMatch {
   description: string;
   location: string;
   isSensitive: boolean;
+  visibleToPublic: boolean;
   categoryMatch: boolean;
   locationScore: number;
   descriptionScore: number;

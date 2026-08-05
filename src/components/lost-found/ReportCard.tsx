@@ -13,10 +13,18 @@ const statusTone: Record<string, string> = {
   archived: "bg-gray-100 text-gray-500",
 };
 
-// Sensitive found items are physically deposited at PGP Office, so a lost
-// report's match to one is something the owner can go collect themselves.
-// Sensitive lost items aren't held anywhere — the finder can't hand
-// anything over, the system just notifies the owner instead.
+// A sensitive matched found item is always physically deposited at PGP
+// Office regardless of anything else, so it's never a clickable link. A
+// sensitive matched lost report is different — sensitivity alone doesn't
+// block viewing it, only the owner's own "withhold from public" choice
+// does (the detail page 404s for non-owners in that case). So a sensitive
+// but still-public lost report gets the normal clickable button.
+function isMatchBlocked(match: InstantMatch): boolean {
+  if (!match.isSensitive) return false;
+  if (match.matchedType === "found") return true;
+  return !match.visibleToPublic;
+}
+
 function sensitiveMatchLabel(match: InstantMatch): string {
   return match.matchedType === "found" ? "Collect from PGP Office" : "Owner Notified";
 }
@@ -115,7 +123,7 @@ export function ReportCard({
               >
                 View all {matches.length} {topMatch.matchedType} matches
               </button>
-            ) : topMatch.isSensitive ? (
+            ) : isMatchBlocked(topMatch) ? (
               <div className="mt-2 flex h-8 w-full items-center justify-center rounded-lg bg-gray-200 text-xs font-semibold text-gray-600">
                 {sensitiveMatchLabel(topMatch)}
               </div>
@@ -150,7 +158,7 @@ export function ReportCard({
                       </span>
                     </div>
                     <MatchBreakdown match={m} />
-                    {m.isSensitive ? (
+                    {isMatchBlocked(m) ? (
                       <div className="mt-2 flex h-8 w-full items-center justify-center rounded-lg bg-gray-200 text-xs font-semibold text-gray-600">
                         {sensitiveMatchLabel(m)}
                       </div>

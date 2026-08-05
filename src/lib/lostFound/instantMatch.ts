@@ -139,6 +139,8 @@ export interface InstantMatchItem {
   description: string;
   location: string;
   isSensitive: boolean;
+  /** Whether the matched report can actually be opened by someone who isn't its owner/staff. Found reports have no such concept (always true); a lost report can be true even when sensitive — only its own visible_to_public flag withholds it. */
+  visibleToPublic: boolean;
   categoryMatch: boolean;
   locationScore: number;
   descriptionScore: number;
@@ -177,6 +179,7 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
         description: found.description,
         location: found.found_location ?? found.pickup_location,
         isSensitive: found.sensitivity_tier === 3,
+        visibleToPublic: true,
         categoryMatch: breakdown.categoryMatch,
         locationScore: breakdown.locationScore,
         descriptionScore: breakdown.descriptionScore,
@@ -207,6 +210,7 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
         description: lost.description,
         location: lost.last_seen_location,
         isSensitive: lost.sensitivity_tier === 3,
+        visibleToPublic: lost.visible_to_public !== false,
         categoryMatch: breakdown.categoryMatch,
         locationScore: breakdown.locationScore,
         descriptionScore: breakdown.descriptionScore,
