@@ -91,7 +91,8 @@ export function ReportCard({
         {topMatch && matches && (
           <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
             <p className="text-xs font-semibold text-amber-900">
-              Possible match with {matches.length > 1 ? `${matches.length} ${topMatch.matchedType} reports` : `a ${topMatch.matchedType} report`}
+              This {report.type} report may match{" "}
+              {matches.length > 1 ? `${matches.length} different ${topMatch.matchedType} reports` : `a ${topMatch.matchedType} report`}
             </p>
             <MatchBreakdown match={topMatch} />
             {matches.length > 1 ? (
@@ -100,7 +101,7 @@ export function ReportCard({
                 onClick={() => setOverlayOpen(true)}
                 className="mt-2 h-8 w-full rounded-lg bg-amber-500 text-xs font-semibold text-white transition-colors hover:bg-amber-600"
               >
-                View all {matches.length} matches
+                View all {matches.length} {topMatch.matchedType} matches
               </button>
             ) : (
               <button
@@ -108,23 +109,26 @@ export function ReportCard({
                 onClick={() => onViewMatch?.(topMatch.matchedReportId)}
                 className="mt-2 h-8 w-full rounded-lg bg-amber-500 text-xs font-semibold text-white transition-colors hover:bg-amber-600"
               >
-                View matching {topMatch.matchedType} item
+                View the matching {topMatch.matchedType} item →
               </button>
             )}
           </div>
         )}
 
-        {matches && matches.length > 1 && (
+        {matches && matches.length > 1 && topMatch && (
           <Modal open={overlayOpen} onClose={() => setOverlayOpen(false)} labelledBy="matches-overlay-title">
             <div className="max-h-[80vh] overflow-y-auto p-5">
-              <h2 id="matches-overlay-title" className="mb-3 text-base font-bold text-gray-900">
-                All matches for this {report.type} report
+              <h2 id="matches-overlay-title" className="mb-1 text-base font-bold text-gray-900 capitalize">
+                {topMatch.matchedType} reports matching your {report.category} ({report.type} report)
               </h2>
+              <p className="mb-3 text-xs text-gray-500">
+                Every item below is a <span className="font-semibold capitalize">{topMatch.matchedType}</span> report — pick the one that&apos;s actually yours.
+              </p>
               <div className="space-y-3">
                 {matches.map((m) => (
                   <div key={m.matchedReportId} className="rounded-lg border border-amber-200 bg-amber-50 p-3">
                     <div className="mb-1 flex items-center justify-between">
-                      <span className="text-xs font-semibold capitalize text-amber-900">{m.matchedType} · {m.category}</span>
+                      <span className="text-xs font-semibold capitalize text-amber-900">{m.matchedType} report · {m.category}</span>
                       <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-amber-200 text-amber-900">
                         {Math.round(m.score * 100)}% match
                       </span>
@@ -138,7 +142,7 @@ export function ReportCard({
                       }}
                       className="mt-2 h-8 w-full rounded-lg bg-amber-500 text-xs font-semibold text-white transition-colors hover:bg-amber-600"
                     >
-                      View this {m.matchedType} item
+                      View this {m.matchedType} item →
                     </button>
                   </div>
                 ))}

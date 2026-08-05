@@ -143,5 +143,18 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
     }
   }
 
-  return results.sort((a, b) => b.score - a.score);
+  // Belt-and-suspenders: sourceType/matchedType must always be opposite —
+  // a lost report can only ever match found reports and vice versa. This
+  // can't actually happen given how `results` is built above (each loop
+  // only ever draws matchedReportId from the opposite table), but this
+  // guards against a future regression silently shipping same-type matches.
+  const safe = results.filter((r) => {
+    if (r.sourceType === r.matchedType) {
+      console.error(`instantMatch: dropped same-type match ${r.sourceReportId} -> ${r.matchedReportId} (${r.sourceType})`);
+      return false;
+    }
+    return true;
+  });
+
+  return safe.sort((a, b) => b.score - a.score);
 }
