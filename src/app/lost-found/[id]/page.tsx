@@ -10,6 +10,11 @@ import { lostFoundService, ApiError } from "@/services/lostFoundService";
 import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
 import { Contact, InstantMatch } from "@/types/lostFound";
 
+function formatDate(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  return new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+}
+
 interface Detail {
   id: string;
   type: "lost" | "found";
@@ -201,6 +206,12 @@ export default function ReportDetailPage() {
                 {report.claimantContact.name && <p className="text-sm text-gray-700">{report.claimantContact.name}</p>}
                 {report.claimantContact.phone && <p className="text-sm text-gray-700">{report.claimantContact.phone}</p>}
                 {report.claimantContact.email && <p className="text-sm text-gray-700">{report.claimantContact.email}</p>}
+                {formatDate(report.claimed_at) && (
+                  <p className="mt-1 text-xs text-gray-500">Claimed on {formatDate(report.claimed_at)}</p>
+                )}
+                {report.status === "resolved" && formatDate(report.transfer_completed_at) && (
+                  <p className="text-xs text-gray-500">Resolved on {formatDate(report.transfer_completed_at)}</p>
+                )}
               </div>
             )}
 
