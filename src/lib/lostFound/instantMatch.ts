@@ -73,7 +73,7 @@ export interface InstantMatchItem {
   descriptionScore: number;
 }
 
-/** Best cross-type match (if any, above MATCH_THRESHOLD) for each of the user's own active reports. */
+/** Every cross-type candidate above MATCH_THRESHOLD (not just the top one) for each of the user's own active reports — sorted best-first within each source report. */
 export async function computeInstantMatches(user: LostFoundUser): Promise<InstantMatchItem[]> {
   const [{ data: myLost }, { data: myFound }, { data: allLost }, { data: allFound }] = await Promise.all([
     lostFoundAdmin.from('lost_report').select('*').eq('reporter_id', user.id).eq('status', 'open'),
@@ -86,7 +86,6 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
 
   for (const lost of myLost ?? []) {
     const lostComparable: Comparable = { category: lost.category, location: lost.last_seen_location ?? '', description: lost.description ?? '' };
-    let best: { row: any; breakdown: ScoreBreakdown } | null = null;
     for (const found of allFound ?? []) {
       const breakdown = scorePair(lostComparable, {
         category: found.category,
@@ -96,22 +95,20 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
         location: found.found_location ?? found.pickup_location ?? '',
         description: found.description ?? '',
       });
-      if (breakdown.total >= MATCH_THRESHOLD && (!best || breakdown.total > best.breakdown.total)) best = { row: found, breakdown };
-    }
-    if (best) {
+      if (breakdown.total < MATCH_THRESHOLD) continue;
       results.push({
         sourceReportId: lost.id,
         sourceType: 'lost',
-        matchedReportId: best.row.id,
+        matchedReportId: found.id,
         matchedType: 'found',
-        score: best.breakdown.total,
-        category: best.row.category,
-        description: best.row.description,
-        location: best.row.found_location ?? best.row.pickup_location,
-        isSensitive: best.row.sensitivity_tier === 3,
-        categoryMatch: best.breakdown.categoryMatch,
-        locationScore: best.breakdown.locationScore,
-        descriptionScore: best.breakdown.descriptionScore,
+        score: breakdown.total,
+        category: found.category,
+        description: found.description,
+        location: found.found_location ?? found.pickup_location,
+        isSensitive: found.sensitivity_tier === 3,
+        categoryMatch: breakdown.categoryMatch,
+        locationScore: breakdown.locationScore,
+        descriptionScore: breakdown.descriptionScore,
       });
     }
   }
@@ -122,29 +119,26 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
       location: found.found_location ?? found.pickup_location ?? '',
       description: found.description ?? '',
     };
-    let best: { row: any; breakdown: ScoreBreakdown } | null = null;
     for (const lost of allLost ?? []) {
       const breakdown = scorePair(foundComparable, {
         category: lost.category,
         location: lost.last_seen_location ?? '',
         description: lost.description ?? '',
       });
-      if (breakdown.total >= MATCH_THRESHOLD && (!best || breakdown.total > best.breakdown.total)) best = { row: lost, breakdown };
-    }
-    if (best) {
+      if (breakdown.total < MATCH_THRESHOLD) continue;
       results.push({
         sourceReportId: found.id,
         sourceType: 'found',
-        matchedReportId: best.row.id,
+        matchedReportId: lost.id,
         matchedType: 'lost',
-        score: best.breakdown.total,
-        category: best.row.category,
-        description: best.row.description,
-        location: best.row.last_seen_location,
-        isSensitive: best.row.sensitivity_tier === 3,
-        categoryMatch: best.breakdown.categoryMatch,
-        locationScore: best.breakdown.locationScore,
-        descriptionScore: best.breakdown.descriptionScore,
+        score: breakdown.total,
+        category: lost.category,
+        description: lost.description,
+        location: lost.last_seen_location,
+        isSensitive: lost.sensitivity_tier === 3,
+        categoryMatch: breakdown.categoryMatch,
+        locationScore: breakdown.locationScore,
+        descriptionScore: breakdown.descriptionScore,
       });
     }
   }

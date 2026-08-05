@@ -78,7 +78,13 @@ export default function LostFoundBrowsePage() {
     tab === "mine"
       ? results.filter((r) => (r.type === "lost" ? r.reporter_id === userId : r.finder_id === userId))
       : results.filter((r) => r.type === tab);
-  const matchByReportId = new Map(matches.map((m) => [m.sourceReportId, m]));
+  const matchesByReportId = new Map<string, InstantMatch[]>();
+  for (const m of matches) {
+    const list = matchesByReportId.get(m.sourceReportId) ?? [];
+    list.push(m);
+    matchesByReportId.set(m.sourceReportId, list);
+  }
+  for (const list of matchesByReportId.values()) list.sort((a, b) => b.score - a.score);
 
   return (
     <div className="min-h-screen bg-surface">
@@ -188,7 +194,7 @@ export default function LostFoundBrowsePage() {
                 report={r}
                 onView={openDetail}
                 onEdit={tab === "mine" ? editReport : undefined}
-                match={tab === "mine" ? matchByReportId.get(r.id) : undefined}
+                matches={tab === "mine" ? matchesByReportId.get(r.id) : undefined}
                 onViewMatch={openDetail}
               />
             ))}

@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 import { InstantMatch, ReportSummary } from "@/types/lostFound";
+import { Modal } from "@/components/ui/Modal";
 
 const statusTone: Record<string, string> = {
   open: "bg-brand-light text-brand-dark",
@@ -12,20 +13,32 @@ const statusTone: Record<string, string> = {
   archived: "bg-gray-100 text-gray-500",
 };
 
+function MatchBreakdown({ match }: { match: InstantMatch }) {
+  return (
+    <ul className="mt-1.5 space-y-0.5 text-[11px] text-amber-800">
+      <li>{match.categoryMatch ? "✓" : "✗"} Category {match.categoryMatch ? "matches" : "differs"} ({match.category})</li>
+      <li>{match.locationScore > 0 ? "✓" : "✗"} Location similarity: {Math.round(match.locationScore * 100)}% ({match.location})</li>
+      <li>{match.descriptionScore > 0 ? "✓" : "✗"} Description similarity: {Math.round(match.descriptionScore * 100)}%</li>
+    </ul>
+  );
+}
+
 export function ReportCard({
   report,
   onView,
   onEdit,
-  match,
+  matches,
   onViewMatch,
 }: {
   report: ReportSummary;
   onView: (id: string) => void;
   onEdit?: (id: string) => void;
-  match?: InstantMatch;
+  matches?: InstantMatch[];
   onViewMatch?: (id: string) => void;
 }) {
+  const [overlayOpen, setOverlayOpen] = useState(false);
   const location = report.type === "lost" ? report.last_seen_location : report.found_location || report.pickup_location;
+  const topMatch = matches?.[0];
 
   return (
     <article
@@ -68,31 +81,77 @@ export function ReportCard({
           {report.is_sensitive && (
             <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-red-100 text-red-600">Sensitive</span>
           )}
-          {match && (
+          {topMatch && (
             <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-800">
-              {Math.round(match.score * 100)}% match
+              {Math.round(topMatch.score * 100)}% match
             </span>
           )}
         </div>
 
-        {match && (
+        {topMatch && matches && (
           <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
             <p className="text-xs font-semibold text-amber-900">
-              Possible match with a {match.matchedType} report
+              Possible match with {matches.length > 1 ? `${matches.length} ${topMatch.matchedType} reports` : `a ${topMatch.matchedType} report`}
             </p>
-            <ul className="mt-1.5 space-y-0.5 text-[11px] text-amber-800">
-              <li>{match.categoryMatch ? "✓" : "✗"} Category {match.categoryMatch ? "matches" : "differs"} ({match.category})</li>
-              <li>{match.locationScore > 0 ? "✓" : "✗"} Location similarity: {Math.round(match.locationScore * 100)}% ({match.location})</li>
-              <li>{match.descriptionScore > 0 ? "✓" : "✗"} Description similarity: {Math.round(match.descriptionScore * 100)}%</li>
-            </ul>
-            <button
-              type="button"
-              onClick={() => onViewMatch?.(match.matchedReportId)}
-              className="mt-2 h-8 w-full rounded-lg bg-amber-500 text-xs font-semibold text-white transition-colors hover:bg-amber-600"
-            >
-              View matching {match.matchedType} item
-            </button>
+            <MatchBreakdown match={topMatch} />
+            {matches.length > 1 ? (
+              <button
+                type="button"
+                onClick={() => setOverlayOpen(true)}
+                className="mt-2 h-8 w-full rounded-lg bg-amber-500 text-xs font-semibold text-white transition-colors hover:bg-amber-600"
+              >
+                View all {matches.length} matches
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onViewMatch?.(topMatch.matchedReportId)}
+                className="mt-2 h-8 w-full rounded-lg bg-amber-500 text-xs font-semibold text-white transition-colors hover:bg-amber-600"
+              >
+                View matching {topMatch.matchedType} item
+              </button>
+            )}
           </div>
+        )}
+
+        {matches && matches.length > 1 && (
+          <Modal open={overlayOpen} onClose={() => setOverlayOpen(false)} labelledBy="matches-overlay-title">
+            <div className="max-h-[80vh] overflow-y-auto p-5">
+              <h2 id="matches-overlay-title" className="mb-3 text-base font-bold text-gray-900">
+                All matches for this {report.type} report
+              </h2>
+              <div className="space-y-3">
+                {matches.map((m) => (
+                  <div key={m.matchedReportId} className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                    <div className="mb-1 flex items-center justify-between">
+                      <span className="text-xs font-semibold capitalize text-amber-900">{m.matchedType} · {m.category}</span>
+                      <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-amber-200 text-amber-900">
+                        {Math.round(m.score * 100)}% match
+                      </span>
+                    </div>
+                    <MatchBreakdown match={m} />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOverlayOpen(false);
+                        onViewMatch?.(m.matchedReportId);
+                      }}
+                      className="mt-2 h-8 w-full rounded-lg bg-amber-500 text-xs font-semibold text-white transition-colors hover:bg-amber-600"
+                    >
+                      View this {m.matchedType} item
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setOverlayOpen(false)}
+                className="mt-4 h-9 w-full rounded-lg border border-gray-200 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                Close
+              </button>
+            </div>
+          </Modal>
         )}
 
         <div className="mt-3 flex gap-2">
