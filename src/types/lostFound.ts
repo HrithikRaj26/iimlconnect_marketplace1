@@ -63,6 +63,7 @@ export interface FoundReport {
   photo_url: string | null;
   contents_withheld: boolean;
   pickup_location: string;
+  found_location: string;
   is_sensitive: boolean;
   status: 'available' | 'matched' | 'resolved' | 'archived';
   created_at: string;

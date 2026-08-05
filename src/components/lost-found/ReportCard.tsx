@@ -21,7 +21,7 @@ export function ReportCard({
   onView: (id: string) => void;
   onEdit?: (id: string) => void;
 }) {
-  const location = report.type === "lost" ? report.last_seen_location : report.pickup_location;
+  const location = report.type === "lost" ? report.last_seen_location : report.found_location || report.pickup_location;
 
   return (
     <article

@@ -76,7 +76,10 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
     for (const found of allFound ?? []) {
       const score = scorePair(lostComparable, {
         category: found.category,
-        location: found.pickup_location ?? '',
+        // found_location (where it was actually found) is what's comparable to a
+        // lost report's last-seen location — pickup_location is just the drop-off
+        // point and is pinned to "PGP Office" for every sensitive item.
+        location: found.found_location ?? found.pickup_location ?? '',
         description: found.description ?? '',
       });
       if (score >= MATCH_THRESHOLD && (!best || score > best.score)) best = { row: found, score };
@@ -90,14 +93,18 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
         score: best.score,
         category: best.row.category,
         description: best.row.description,
-        location: best.row.pickup_location,
+        location: best.row.found_location ?? best.row.pickup_location,
         isSensitive: best.row.sensitivity_tier === 3,
       });
     }
   }
 
   for (const found of myFound ?? []) {
-    const foundComparable: Comparable = { category: found.category, location: found.pickup_location ?? '', description: found.description ?? '' };
+    const foundComparable: Comparable = {
+      category: found.category,
+      location: found.found_location ?? found.pickup_location ?? '',
+      description: found.description ?? '',
+    };
     let best: { row: any; score: number } | null = null;
     for (const lost of allLost ?? []) {
       const score = scorePair(foundComparable, {

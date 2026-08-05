@@ -51,6 +51,7 @@ export const lostFoundService = {
     photoUrl: string;
     contentsWithheld?: boolean;
     pickupLocation?: string;
+    foundLocation: string;
   }) => request<FoundReport>('POST', '/found-reports', input),
 
   checkin: (foundReportId: string, input: { itemLabel: string; storageRef?: string }) =>

@@ -17,6 +17,7 @@ export default function ReportFoundPage() {
   const router = useRouter();
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
+  const [foundLocation, setFoundLocation] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [locationChoice, setLocationChoice] = useState<"pgp" | "custom">("pgp");
   const [customLocation, setCustomLocation] = useState("");
@@ -30,8 +31,8 @@ export default function ReportFoundPage() {
 
   const submit = async () => {
     setError(null);
-    if (!category || !description) {
-      setError("Category and description are required.");
+    if (!category || !description || !foundLocation) {
+      setError("Category, description, and found location are required.");
       return;
     }
     if (!photo) {
@@ -49,6 +50,7 @@ export default function ReportFoundPage() {
         category,
         description,
         photoUrl,
+        foundLocation,
         pickupLocation: effectiveLocationChoice === "pgp" ? PGP_OFFICE_LOCATION : customLocation.trim(),
       });
       router.push(`/lost-found/${created.id}`);
@@ -82,8 +84,17 @@ export default function ReportFoundPage() {
 
           <PhotoField file={photo} onChange={setPhoto} label="Photo (required)" />
 
+          <TextInput
+            label="Where did you find this item?"
+            required
+            value={foundLocation}
+            onChange={(e) => setFoundLocation(e.target.value)}
+            placeholder="e.g. Academic Block 1, Room 204"
+          />
+
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-800">Pickup location</label>
+            <p className="mb-2 text-xs text-gray-500">Where the owner can collect it from — may be different from where you found it.</p>
             <div className="space-y-2">
               <RadioCard
                 selected={effectiveLocationChoice === "pgp"}

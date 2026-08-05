@@ -21,6 +21,7 @@ interface Detail {
   lost_date?: string;
   visible_to_public?: boolean;
   pickup_location?: string;
+  found_location?: string;
 }
 
 /** Edit an existing lost/found report — "My Reports" edit action. Photo isn't editable here; only text fields. */
@@ -39,6 +40,7 @@ export default function EditReportPage() {
   const [showToPublic, setShowToPublic] = useState(true);
   const [locationChoice, setLocationChoice] = useState<"pgp" | "custom">("pgp");
   const [customLocation, setCustomLocation] = useState("");
+  const [foundLocation, setFoundLocation] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -56,6 +58,7 @@ export default function EditReportPage() {
         const isPgp = data.pickup_location === PGP_OFFICE_LOCATION;
         setLocationChoice(isPgp ? "pgp" : "custom");
         setCustomLocation(isPgp ? "" : data.pickup_location ?? "");
+        setFoundLocation(data.found_location ?? "");
       }
     } catch (e: any) {
       setError(e.message ?? "Could not load report");
@@ -97,6 +100,11 @@ export default function EditReportPage() {
           visibleToPublic: showToPublic,
         });
       } else {
+        if (!foundLocation.trim()) {
+          setError("Where you found the item is required.");
+          setSubmitting(false);
+          return;
+        }
         if (effectiveLocationChoice === "custom" && !customLocation.trim()) {
           setError("Enter a pickup location, or choose PGP Office.");
           setSubmitting(false);
@@ -105,6 +113,7 @@ export default function EditReportPage() {
         await lostFoundService.updateReport(report.id, {
           category,
           description,
+          foundLocation: foundLocation.trim(),
           pickupLocation: effectiveLocationChoice === "pgp" ? PGP_OFFICE_LOCATION : customLocation.trim(),
         });
       }
@@ -170,37 +179,46 @@ export default function EditReportPage() {
               </div>
             </>
           ) : (
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-800">Pickup location</label>
-              <div className="space-y-2">
-                <RadioCard
-                  selected={effectiveLocationChoice === "pgp"}
-                  onSelect={() => setLocationChoice("pgp")}
-                  label={PGP_OFFICE_LOCATION}
-                  helperText="Central drop-off point."
-                />
-                <div className={sensitive ? "pointer-events-none opacity-40" : undefined}>
+            <div className="space-y-5">
+              <TextInput
+                label="Where did you find this item?"
+                required
+                value={foundLocation}
+                onChange={(e) => setFoundLocation(e.target.value)}
+              />
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-800">Pickup location</label>
+                <p className="mb-2 text-xs text-gray-500">Where the owner can collect it from — may be different from where you found it.</p>
+                <div className="space-y-2">
                   <RadioCard
-                    selected={effectiveLocationChoice === "custom"}
-                    onSelect={() => !sensitive && setLocationChoice("custom")}
-                    label="Custom location"
-                    helperText="Choose a specific spot to hand the item off."
+                    selected={effectiveLocationChoice === "pgp"}
+                    onSelect={() => setLocationChoice("pgp")}
+                    label={PGP_OFFICE_LOCATION}
+                    helperText="Central drop-off point."
                   />
+                  <div className={sensitive ? "pointer-events-none opacity-40" : undefined}>
+                    <RadioCard
+                      selected={effectiveLocationChoice === "custom"}
+                      onSelect={() => !sensitive && setLocationChoice("custom")}
+                      label="Custom location"
+                      helperText="Choose a specific spot to hand the item off."
+                    />
+                  </div>
                 </div>
+                {effectiveLocationChoice === "custom" && (
+                  <TextInput
+                    className="mt-2"
+                    value={customLocation}
+                    onChange={(e) => setCustomLocation(e.target.value)}
+                    placeholder="e.g. Hostel 4 warden's office"
+                  />
+                )}
+                {sensitive && (
+                  <p className="mt-2 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-600">
+                    You have found a sensitive item. Sensitive items can only be deposited at PGP office
+                  </p>
+                )}
               </div>
-              {effectiveLocationChoice === "custom" && (
-                <TextInput
-                  className="mt-2"
-                  value={customLocation}
-                  onChange={(e) => setCustomLocation(e.target.value)}
-                  placeholder="e.g. Hostel 4 warden's office"
-                />
-              )}
-              {sensitive && (
-                <p className="mt-2 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-600">
-                  You have found a sensitive item. Sensitive items can only be deposited at PGP office
-                </p>
-              )}
             </div>
           )}
 

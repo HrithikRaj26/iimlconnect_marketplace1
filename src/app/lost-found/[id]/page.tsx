@@ -22,6 +22,7 @@ interface Detail {
   finder_id?: string;
   last_seen_location?: string;
   pickup_location?: string;
+  found_location?: string;
   contents_withheld?: boolean;
   visible_to_public?: boolean;
   finderContact?: Contact;
@@ -152,9 +153,14 @@ export default function ReportDetailPage() {
             </div>
 
             <p className="text-sm text-gray-700">{report.description}</p>
-            <p className="text-sm text-gray-500">
-              📍 {report.type === "lost" ? report.last_seen_location : report.pickup_location}
-            </p>
+            {report.type === "lost" ? (
+              <p className="text-sm text-gray-500">📍 Last seen: {report.last_seen_location}</p>
+            ) : (
+              <>
+                <p className="text-sm text-gray-500">📍 Found near: {report.found_location}</p>
+                <p className="text-sm text-gray-500">🏢 Pickup: {report.pickup_location}</p>
+              </>
+            )}
             {report.type === "found" && report.contents_withheld && (
               <p className="text-sm text-gray-500">Contents withheld from public view</p>
             )}

@@ -49,6 +49,8 @@ export interface CreateFoundReportInput {
   isSensitive?: boolean;
   /** Ignored (forced to PGP_OFFICE_LOCATION server-side) when the item is sensitive — never trust the client for this. */
   pickupLocation?: string;
+  /** Where the item was actually found — distinct from pickupLocation (where it can be collected). This is what the matching algorithm compares against a lost report's last-seen location. */
+  foundLocation: string;
 }
 
 /** Auto-classify by category (SENSITIVE_CATEGORIES); a custodian/admin caller may override it. */
@@ -102,6 +104,7 @@ export async function createFoundReport(user: LostFoundUser, input: CreateFoundR
       photo_url: input.photoUrl,
       contents_withheld: input.contentsWithheld ?? false,
       pickup_location: pickupLocation,
+      found_location: input.foundLocation,
       sensitivity_tier: sensitivityTierColumn(sensitive),
       status: 'available',
     })
@@ -205,7 +208,8 @@ export async function browse(query: BrowseQuery, requester: LostFoundUser) {
   }
   if (query.location) {
     lostQuery = lostQuery.ilike('last_seen_location', `%${query.location}%`);
-    foundQuery = foundQuery.ilike('pickup_location', `%${query.location}%`);
+    // Matches either where it was found or where it can be picked up.
+    foundQuery = foundQuery.or(`pickup_location.ilike.%${query.location}%,found_location.ilike.%${query.location}%`);
   }
   if (query.date) {
     lostQuery = lostQuery.eq('lost_date', query.date);
@@ -430,6 +434,7 @@ export type EditableReportInput = Partial<{
   lostDate: string; // lost only
   visibleToPublic: boolean; // lost only
   pickupLocation: string; // found only
+  foundLocation: string; // found only
 }>;
 
 export type MutateResult = 'ok' | 'not_found' | 'forbidden';
@@ -470,6 +475,7 @@ export async function updateFoundReport(id: string, user: LostFoundUser, input: 
   if (input.category !== undefined) patch.category = input.category;
   if (input.description !== undefined) patch.description = input.description;
   if (input.photoUrl !== undefined) patch.photo_url = input.photoUrl;
+  if (input.foundLocation !== undefined) patch.found_location = input.foundLocation;
   if (input.category !== undefined) patch.sensitivity_tier = sensitivityTierColumn(sensitive);
   // Sensitive items are pinned to PGP Office regardless of what was requested — same rule as create().
   if (input.pickupLocation !== undefined || input.category !== undefined) {

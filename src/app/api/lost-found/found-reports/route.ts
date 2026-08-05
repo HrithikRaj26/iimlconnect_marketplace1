@@ -8,8 +8,11 @@ export async function POST(req: NextRequest) {
   if ('error' in auth) return auth.error;
 
   const body = await req.json();
-  if (!body.category || !body.description || !body.photoUrl) {
-    return NextResponse.json({ message: 'category, description, and photoUrl are required' }, { status: 400 });
+  if (!body.category || !body.description || !body.photoUrl || !body.foundLocation) {
+    return NextResponse.json(
+      { message: 'category, description, photoUrl, and foundLocation are required' },
+      { status: 400 },
+    );
   }
 
   const report = await createFoundReport(auth.user, body);
