@@ -75,16 +75,19 @@ export default function LostFoundBrowsePage() {
     setLoading(true);
     setError(null);
     try {
-      // "matched" is derived client-side (see isEffectivelyMatched), not a
-      // real query param — sending it to the API would return nothing.
-      const data = await lostFoundService.browse({ category, location, status: status === "matched" ? undefined : status });
+      // Status filtering happens entirely client-side (see matchesStatus)
+      // rather than as a query param — lost reports use 'open' and found
+      // reports use 'available' for the same "still active" state, and the
+      // server-side .eq('status', ...) filter can't express "either of
+      // these", so passing it through would silently drop one whole type.
+      const data = await lostFoundService.browse({ category, location });
       setResults(data);
     } catch (e: any) {
       setError(e.message ?? "Could not load reports");
     } finally {
       setLoading(false);
     }
-  }, [category, location, status]);
+  }, [category, location]);
 
   const loadMatches = useCallback(async () => {
     if (!userId) return;
@@ -131,11 +134,20 @@ export default function LostFoundBrowsePage() {
     setStatus(undefined); // status pills differ per tab, so a stale selection could silently filter to nothing
   };
   const statusOptions = tab === "mine" ? MINE_STATUS_OPTIONS : BROWSE_STATUS_OPTIONS;
+  // "Open" covers both a lost report's 'open' status and a found report's
+  // 'available' status — they mean the same thing ("still active, not yet
+  // resolved") on the two different tables, just spelled differently.
+  const matchesStatus = (r: ReportSummary): boolean => {
+    if (!status) return true;
+    if (status === "matched") return isEffectivelyMatched(r, results, userId);
+    if (status === "open") return r.status === "open" || r.status === "available";
+    return r.status === status;
+  };
   const tabResults = (
     tab === "mine"
       ? results.filter((r) => (r.type === "lost" ? r.reporter_id === userId : r.finder_id === userId))
       : results.filter((r) => r.type === tab)
-  ).filter((r) => (status === "matched" ? isEffectivelyMatched(r, results, userId) : true));
+  ).filter(matchesStatus);
   const matchesByReportId = new Map<string, InstantMatch[]>();
   for (const m of matches) {
     const list = matchesByReportId.get(m.sourceReportId) ?? [];
