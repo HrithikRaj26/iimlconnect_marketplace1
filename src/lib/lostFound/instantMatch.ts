@@ -5,9 +5,12 @@ import { LostFoundUser } from '../lostFoundAuth';
  * Live, non-persisted fuzzy matching shown to a reporter right after they
  * file (or whenever they revisit Browse) — separate from the custodian
  * queue's persisted `match_candidate`/Postgres `match_score()` pipeline in
- * `matching.ts`, which stays untouched. This one is deliberately simple:
- * token-overlap (Jaccard) text similarity, weighted category > location >
+ * `matching.ts`, which stays untouched. Weighted category > location >
  * description per the requested priority order, computed on read.
+ * Location and category use strict exact-token matching (a 1-character
+ * difference can mean a genuinely different room number or category);
+ * description uses edit-distance-tolerant fuzzy word matching, so a typo
+ * like "Jewwllery" still matches "Jewelry".
  */
 
 const CATEGORY_WEIGHT = 0.6;
@@ -37,6 +40,59 @@ function jaccardSimilarity(a: string, b: string): number {
   return union === 0 ? 0 : intersection / union;
 }
 
+function levenshteinDistance(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : 1 + Math.min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]);
+    }
+  }
+  return dp[m][n];
+}
+
+const FUZZY_WORD_MIN_LENGTH = 5;
+const FUZZY_WORD_SIMILARITY_THRESHOLD = 0.6;
+
+/** Words shorter than FUZZY_WORD_MIN_LENGTH must match exactly (a 1-char edit on "keys" can mean an entirely different word — "keds" — so fuzzing short words trades typo-tolerance for false positives). Longer words are considered the same if their edit-distance similarity clears the threshold, so "Jewwllery" still matches "Jewelry". */
+function wordsMatch(a: string, b: string): boolean {
+  if (a === b) return true;
+  if (a.length < FUZZY_WORD_MIN_LENGTH || b.length < FUZZY_WORD_MIN_LENGTH) return false;
+  const maxLen = Math.max(a.length, b.length);
+  const similarity = 1 - levenshteinDistance(a, b) / maxLen;
+  return similarity >= FUZZY_WORD_SIMILARITY_THRESHOLD;
+}
+
+/** Jaccard-style overlap, but a word in `a` counts toward the intersection if it fuzzy-matches (see wordsMatch) any not-yet-used word in `b`, not just an exact one. Used for description only — location keeps strict exact-token matching, since a 1-character edit there can mean a genuinely different room number. */
+function fuzzyTextSimilarity(a: string, b: string): number {
+  const ta = [...tokenize(a)];
+  const tb = [...tokenize(b)];
+  if (ta.length === 0 || tb.length === 0) return 0;
+  const usedB = new Set<number>();
+  let matches = 0;
+  for (const wa of ta) {
+    let bestIdx = -1;
+    for (let i = 0; i < tb.length; i++) {
+      if (usedB.has(i)) continue;
+      if (wordsMatch(wa, tb[i])) {
+        bestIdx = i;
+        break;
+      }
+    }
+    if (bestIdx >= 0) {
+      usedB.add(bestIdx);
+      matches++;
+    }
+  }
+  const union = ta.length + tb.length - matches;
+  return union === 0 ? 0 : matches / union;
+}
+
 interface Comparable {
   category: string;
   location: string;
@@ -53,7 +109,7 @@ interface ScoreBreakdown {
 function scorePair(a: Comparable, b: Comparable): ScoreBreakdown {
   const categoryMatch = a.category.trim().toLowerCase() === b.category.trim().toLowerCase();
   const locationScore = jaccardSimilarity(a.location, b.location);
-  const descriptionScore = jaccardSimilarity(a.description, b.description);
+  const descriptionScore = fuzzyTextSimilarity(a.description, b.description);
   const total = (categoryMatch ? 1 : 0) * CATEGORY_WEIGHT + locationScore * LOCATION_WEIGHT + descriptionScore * DESCRIPTION_WEIGHT;
   return { total, categoryMatch, locationScore, descriptionScore };
 }
