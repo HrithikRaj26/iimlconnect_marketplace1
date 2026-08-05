@@ -8,7 +8,7 @@ import { TextInput } from "@/components/ui/TextInput";
 import { useLostFoundAuth } from "@/hooks/useLostFoundAuth";
 import { lostFoundService, ApiError } from "@/services/lostFoundService";
 import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
-import { Contact } from "@/types/lostFound";
+import { Contact, InstantMatch } from "@/types/lostFound";
 
 interface Detail {
   id: string;
@@ -43,6 +43,7 @@ export default function ReportDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [itemLabel, setItemLabel] = useState("");
   const [busy, setBusy] = useState(false);
+  const [matches, setMatches] = useState<InstantMatch[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -61,6 +62,14 @@ export default function ReportDetailPage() {
     load();
   }, [load]);
 
+  useEffect(() => {
+    if (!userId) return;
+    lostFoundService
+      .myMatches()
+      .then(setMatches)
+      .catch(() => setMatches([]));
+  }, [userId]);
+
   if (loading) return <div className="p-10 text-center text-sm text-gray-500">Loading…</div>;
   if (error || !report) return <div className="p-10 text-center text-sm font-medium text-red-500">{error ?? "Report not found"}</div>;
 
@@ -69,6 +78,9 @@ export default function ReportDetailPage() {
   const isFinder = userId === report.finder_id;
   const isClaimant = !!userId && userId === report.claimant_id;
   const contact = report.finderContact ?? report.matchedFinderContact;
+  // If the viewer already has a found report that matches this lost report,
+  // they don't need the "file a found report" prompt again.
+  const hasExistingFoundMatch = matches.some((m) => m.sourceType === "found" && m.matchedReportId === report.id);
 
   const claim = async () => {
     setBusy(true);
@@ -213,7 +225,7 @@ export default function ReportDetailPage() {
               </Button>
             )}
 
-            {report.type === "lost" && !isOwner && report.status === "open" && (
+            {report.type === "lost" && !isOwner && report.status === "open" && !hasExistingFoundMatch && (
               <Button
                 fullWidth
                 variant="secondary"
