@@ -516,33 +516,28 @@ class SupabaseVentureService implements IVentureService {
 
     if (error) throw new Error(error.message);
 
-    // If approved, trigger Serial Entrepreneur badge checks and print mock email
+    // If approved, trigger Serial Entrepreneur badge checks and trigger Resend email route
     if (status === "approved" && updated) {
       await this.checkAndGrantSerialEntrepreneur(updated.owner_id);
 
       const studentEmail = updated.contact_links?.email || `${updated.owner_name.toLowerCase().replace(/\s+/g, '')}@iiml.ac.in`;
-      console.log(`
-======================================================================
-📧 [MOCK EMAIL SERVICE] SENDING CONGRATULATORY EMAIL
-To: ${studentEmail}
-Subject: Congratulations! Your venture "${updated.name}" is now LIVE!
-Date: ${new Date().toLocaleString()}
-----------------------------------------------------------------------
-Dear ${updated.owner_name},
 
-Great news! Your student venture "${updated.name}" has been approved by the admin and successfully enlisted in the IIM Lucknow Venture Hub portal!
-
-You can now:
-1. Toggle its live status (Open vs. Closed) in your dashboard.
-2. Broadcast news, updates, or events to the campus feed.
-3. Receive rating reviews and direct inquiries from students.
-
-View it now: http://localhost:3000/ventures
-
-Best regards,
-The IIML Connect Team
-======================================================================
-      `);
+      try {
+        await fetch("/api/ventures/approve-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ventureName: updated.name,
+            ownerName: updated.owner_name,
+            recipientEmail: studentEmail,
+          }),
+        });
+        console.log(`📧 Congratulatory email triggered for "${updated.name}" to ${studentEmail}`);
+      } catch (err) {
+        console.error("Failed to send approval email via API route:", err);
+      }
     }
   }
 
