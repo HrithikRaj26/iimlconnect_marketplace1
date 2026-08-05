@@ -57,8 +57,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {profile?.avatar ? (
               <img src={profile.avatar} alt="Profile" className="h-20 w-20 rounded-full object-cover shadow-sm mb-3 border-2 border-white" />
             ) : (
-              <div className="h-20 w-20 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl font-bold shadow-sm mb-3 border-2 border-white">
-                {profile?.name ? profile.name[0].toUpperCase() : "?"}
+              <div className="h-20 w-20 rounded-full bg-gradient-to-r from-orange-500 to-amber-600 flex items-center justify-center text-white text-2xl font-bold shadow-sm mb-3 border-2 border-white">
+                {profile?.name ? profile.name[0].toUpperCase() : "👤"}
               </div>
             )}
             <h2 className="text-lg font-bold text-gray-900 text-center leading-tight truncate w-full px-2">{profile?.name || "Welcome"}</h2>

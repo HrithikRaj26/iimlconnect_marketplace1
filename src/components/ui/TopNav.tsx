@@ -67,7 +67,7 @@ export function TopNav({ active = "marketplace", onMenuClick, profile }: TopNavP
           {profile?.avatar ? (
             <img src={profile.avatar} alt="User Avatar" className="h-8 w-8 rounded-full object-cover border border-gray-200" />
           ) : (
-            <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-r from-orange-500 to-amber-600 flex items-center justify-center text-white text-[10px] font-bold shadow-sm">
               {profile?.name ? profile.name[0].toUpperCase() : "👤"}
             </div>
           )}
