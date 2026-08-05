@@ -7,20 +7,20 @@ import { Button } from "@/components/ui/Button";
 import { lostFoundService, ApiError } from "@/services/lostFoundService";
 import { DOCUMENTARY_PROOF_TYPES, ProofType } from "@/types/lostFound";
 
-const TIER_1_2_PROOF_OPTIONS: ProofType[] = ["verbal", ...DOCUMENTARY_PROOF_TYPES];
+const STANDARD_PROOF_OPTIONS: ProofType[] = ["verbal", ...DOCUMENTARY_PROOF_TYPES];
 
 /**
- * "Handover / Claim" (Section 2.3). Proof options scaled by tier (FR-4.1):
- * Tier 1/2 allow 'verbal'; Tier 3 requires documentary/technical proof
- * (AC-8). approver_id is never collected here — the API derives it from the
- * authenticated custodian's own token.
+ * "Handover / Claim" (Section 2.3). Proof options scaled by sensitivity:
+ * non-sensitive items allow 'verbal'; sensitive items require documentary/
+ * technical proof (AC-8). approver_id is never collected here — the API
+ * derives it from the authenticated custodian's own token.
  */
 export default function HandoverPage() {
   const params = useParams<{ foundReportId: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const tier = Number(searchParams.get("tier") ?? "1") as 1 | 2 | 3;
-  const proofOptions = tier === 3 ? DOCUMENTARY_PROOF_TYPES : TIER_1_2_PROOF_OPTIONS;
+  const isSensitive = searchParams.get("sensitive") === "true";
+  const proofOptions = isSensitive ? DOCUMENTARY_PROOF_TYPES : STANDARD_PROOF_OPTIONS;
 
   const [proofType, setProofType] = useState<ProofType | undefined>(undefined);
   const [claimantId, setClaimantId] = useState("");
@@ -64,9 +64,9 @@ export default function HandoverPage() {
       <div className="mx-auto max-w-2xl px-6 py-8">
         <h1 className="mb-6 text-xl font-bold text-gray-900">Process handover</h1>
         <div className="space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-card">
-          {tier === 3 && (
+          {isSensitive && (
             <p className="rounded-lg bg-red-50 p-3 text-sm font-medium text-red-600">
-              Tier 3 item — documentary/technical proof required. Verbal description alone is not accepted.
+              Sensitive item — documentary/technical proof required. Verbal description alone is not accepted.
             </p>
           )}
 

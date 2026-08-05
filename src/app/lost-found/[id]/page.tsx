@@ -15,7 +15,7 @@ interface Detail {
   category: string;
   description: string;
   status: string;
-  sensitivity_tier: 1 | 2 | 3;
+  is_sensitive: boolean;
   photo_url: string | null;
   reporter_id?: string;
   finder_id?: string;
@@ -107,9 +107,11 @@ export default function ReportDetailPage() {
               <span className="rounded px-2 py-0.5 text-[11px] font-semibold capitalize bg-brand-light text-brand-dark">
                 {report.status}
               </span>
-              <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-red-100 text-red-600">
-                Tier {report.sensitivity_tier}
-              </span>
+              {report.is_sensitive && (
+                <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-red-100 text-red-600">
+                  Sensitive
+                </span>
+              )}
               {report.type === "lost" && report.visible_to_public === false && (
                 <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-gray-100 text-gray-600">
                   Withheld from public
@@ -141,7 +143,7 @@ export default function ReportDetailPage() {
             )}
 
             {report.type === "found" && isCustodian && report.status === "matched" && (
-              <Button fullWidth onClick={() => router.push(`/lost-found/handover/${report.id}?tier=${report.sensitivity_tier}`)}>
+              <Button fullWidth onClick={() => router.push(`/lost-found/handover/${report.id}?sensitive=${report.is_sensitive}`)}>
                 Process handover
               </Button>
             )}

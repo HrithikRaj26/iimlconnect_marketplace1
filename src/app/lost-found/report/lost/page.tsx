@@ -10,7 +10,7 @@ import { CategoryPicker } from "@/components/lost-found/CategoryPicker";
 import { PhotoField } from "@/components/lost-found/PhotoField";
 import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
 import { lostFoundService, uploadLostFoundPhoto } from "@/services/lostFoundService";
-import { suggestTierForCategory } from "@/types/lostFound";
+import { isSensitiveCategory } from "@/types/lostFound";
 
 /**
  * "Report Lost" (Section 2.3 of the original PRD). Photo optional (AC-1) —
@@ -39,7 +39,7 @@ export default function ReportLostPage() {
     try {
       let photoUrl: string | undefined;
       if (photo) {
-        photoUrl = await uploadLostFoundPhoto(photo, "lost", suggestTierForCategory(category));
+        photoUrl = await uploadLostFoundPhoto(photo, "lost", isSensitiveCategory(category));
       }
       const created = await lostFoundService.createLostReport({
         category,

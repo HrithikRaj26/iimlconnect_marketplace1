@@ -10,7 +10,7 @@ import { CategoryPicker } from "@/components/lost-found/CategoryPicker";
 import { PhotoField } from "@/components/lost-found/PhotoField";
 import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
 import { lostFoundService, uploadLostFoundPhoto } from "@/services/lostFoundService";
-import { suggestTierForCategory } from "@/types/lostFound";
+import { isSensitiveCategory } from "@/types/lostFound";
 
 /** "Report Found" (Section 2.3). Photo is required (AC-2). */
 export default function ReportFoundPage() {
@@ -34,7 +34,7 @@ export default function ReportFoundPage() {
     }
     setSubmitting(true);
     try {
-      const photoUrl = await uploadLostFoundPhoto(photo, "found", suggestTierForCategory(category));
+      const photoUrl = await uploadLostFoundPhoto(photo, "found", isSensitiveCategory(category));
       const created = await lostFoundService.createFoundReport({
         category,
         description,

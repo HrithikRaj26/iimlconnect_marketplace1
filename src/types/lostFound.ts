@@ -1,31 +1,32 @@
-export type SensitivityTier = 1 | 2 | 3;
 export type ProofType = 'verbal' | 'receipt' | 'serial' | 'imei' | 'device_unlock';
 
 export const DOCUMENTARY_PROOF_TYPES: ProofType[] = ['receipt', 'serial', 'imei', 'device_unlock'];
 
-export const CATEGORY_TIER_MAP: Record<string, SensitivityTier> = {
-  'water bottle': 1,
-  apparel: 1,
-  books: 1,
-  umbrella: 1,
-  stationery: 1,
-  keys: 2,
-  charger: 2,
-  headphones: 2,
-  spectacles: 2,
-  laptop: 3,
-  phone: 3,
-  wallet: 3,
-  cash: 3,
-  jewellery: 3,
-  'id card': 3,
-  medication: 3,
-};
+/** All selectable categories (Report Lost / Report Found category picker). */
+export const CATEGORIES = [
+  'water bottle',
+  'apparel',
+  'books',
+  'umbrella',
+  'stationery',
+  'keys',
+  'charger',
+  'headphones',
+  'spectacles',
+  'laptop',
+  'phone',
+  'wallet',
+  'cash',
+  'jewellery',
+  'id card',
+  'medication',
+];
 
-export const CATEGORIES = Object.keys(CATEGORY_TIER_MAP);
+/** Binary sensitivity model (no tiers) — these categories are treated as sensitive. */
+export const SENSITIVE_CATEGORIES = ['headphones', 'laptop', 'jewellery', 'wallet', 'cash', 'phone'];
 
-export function suggestTierForCategory(category: string): SensitivityTier {
-  return CATEGORY_TIER_MAP[category.trim().toLowerCase()] ?? 2;
+export function isSensitiveCategory(category: string): boolean {
+  return SENSITIVE_CATEGORIES.includes(category.trim().toLowerCase());
 }
 
 export interface Contact {
@@ -43,7 +44,7 @@ export interface LostReport {
   last_seen_location: string;
   lost_date: string;
   photo_url: string | null;
-  sensitivity_tier: SensitivityTier;
+  is_sensitive: boolean;
   status: 'open' | 'matched' | 'resolved' | 'archived';
   created_at: string;
   visible_to_public: boolean;
@@ -59,7 +60,7 @@ export interface FoundReport {
   photo_url: string | null;
   contents_withheld: boolean;
   pickup_location: string;
-  sensitivity_tier: SensitivityTier;
+  is_sensitive: boolean;
   status: 'available' | 'matched' | 'resolved' | 'archived';
   created_at: string;
   finderContact?: Contact;
@@ -80,7 +81,7 @@ export interface MatchQueueEntry {
     last_seen_location: string;
     lost_date: string;
     photo_url: string | null;
-    sensitivity_tier: SensitivityTier;
+    is_sensitive: boolean;
     reporter_id: string;
   };
   found_report: {
@@ -89,7 +90,7 @@ export interface MatchQueueEntry {
     description: string;
     pickup_location: string;
     photo_url: string | null;
-    sensitivity_tier: SensitivityTier;
+    is_sensitive: boolean;
     contents_withheld: boolean;
     finder_id: string;
   };

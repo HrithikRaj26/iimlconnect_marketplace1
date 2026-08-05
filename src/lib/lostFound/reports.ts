@@ -1,11 +1,11 @@
 import { lostFoundAdmin } from '../lostFoundSupabaseAdmin';
 import { LostFoundUser } from '../lostFoundAuth';
-import { suggestTierForCategory } from './tiers';
+import { isSensitiveCategory } from './tiers';
 import { getContact } from './identity';
 import { notifyThankYou } from './notifications';
 import * as matching from './matching';
 
-const TIER3_HIDDEN_PHOTO = null;
+const SENSITIVE_HIDDEN_PHOTO = null;
 
 export interface CreateLostReportInput {
   category: string;
@@ -13,7 +13,7 @@ export interface CreateLostReportInput {
   lastSeenLocation: string;
   lostDate: string;
   photoUrl?: string;
-  sensitivityTier?: 1 | 2 | 3;
+  isSensitive?: boolean;
   /** "Show to public" toggle — false withholds the report from other users (staff + reporter still see it). Defaults true. */
   visibleToPublic?: boolean;
 }
@@ -23,19 +23,24 @@ export interface CreateFoundReportInput {
   description: string;
   photoUrl: string;
   contentsWithheld?: boolean;
-  sensitivityTier?: 1 | 2 | 3;
+  isSensitive?: boolean;
 }
 
-/** FR-1.3: auto-suggest by category; a custodian/admin caller may override it. */
-function resolveTier(category: string, requestedTier: 1 | 2 | 3 | undefined, user: LostFoundUser): 1 | 2 | 3 {
-  if (requestedTier && (user.role === 'custodian' || user.role === 'admin')) {
-    return requestedTier;
+/** Auto-classify by category (SENSITIVE_CATEGORIES); a custodian/admin caller may override it. */
+function resolveSensitivity(category: string, requestedOverride: boolean | undefined, user: LostFoundUser): boolean {
+  if (requestedOverride !== undefined && (user.role === 'custodian' || user.role === 'admin')) {
+    return requestedOverride;
   }
-  return suggestTierForCategory(category);
+  return isSensitiveCategory(category);
+}
+
+/** sensitivity_tier is a legacy DB column (kept as-is to avoid a migration + reuse existing Storage RLS folders '1'/'3'); everywhere else in the app this is a plain boolean. */
+function sensitivityTierColumn(isSensitive: boolean): 1 | 3 {
+  return isSensitive ? 3 : 1;
 }
 
 export async function createLostReport(user: LostFoundUser, input: CreateLostReportInput) {
-  const tier = resolveTier(input.category, input.sensitivityTier, user);
+  const sensitive = resolveSensitivity(input.category, input.isSensitive, user);
   const { data, error } = await lostFoundAdmin
     .from('lost_report')
     .insert({
@@ -45,7 +50,7 @@ export async function createLostReport(user: LostFoundUser, input: CreateLostRep
       last_seen_location: input.lastSeenLocation,
       lost_date: input.lostDate,
       photo_url: input.photoUrl ?? null,
-      sensitivity_tier: tier,
+      sensitivity_tier: sensitivityTierColumn(sensitive),
       status: 'open',
       visible_to_public: input.visibleToPublic ?? true,
     })
@@ -58,7 +63,7 @@ export async function createLostReport(user: LostFoundUser, input: CreateLostRep
 }
 
 export async function createFoundReport(user: LostFoundUser, input: CreateFoundReportInput) {
-  const tier = resolveTier(input.category, input.sensitivityTier, user);
+  const sensitive = resolveSensitivity(input.category, input.isSensitive, user);
   const { data, error } = await lostFoundAdmin
     .from('found_report')
     .insert({
@@ -68,7 +73,7 @@ export async function createFoundReport(user: LostFoundUser, input: CreateFoundR
       photo_url: input.photoUrl,
       contents_withheld: input.contentsWithheld ?? false,
       pickup_location: 'Central Lost & Found Room',
-      sensitivity_tier: tier,
+      sensitivity_tier: sensitivityTierColumn(sensitive),
       status: 'available',
     })
     .select()
@@ -114,12 +119,12 @@ export interface BrowseQuery {
   view?: 'map' | 'list';
 }
 
-/** FR-2.3/AC-3: Tier-3 photos hidden from everyone except custodian/admin/the report's own owner. */
+/** Sensitive-item photos hidden from everyone except custodian/admin/the report's own owner. */
 function maybeHidePhoto(row: any, requester: LostFoundUser, ownerId: string): string | null {
   if (row.sensitivity_tier < 3) return row.photo_url;
   if (requester.role === 'custodian' || requester.role === 'admin') return row.photo_url;
   if (requester.id === ownerId) return row.photo_url;
-  return TIER3_HIDDEN_PHOTO;
+  return SENSITIVE_HIDDEN_PHOTO;
 }
 
 /** "Show to public" toggle: a lost report with visible_to_public=false is withheld from everyone except the reporter and staff (custodian/admin). */
@@ -129,12 +134,18 @@ function canSeeWithheldLostReport(row: any, requester: LostFoundUser): boolean {
   return requester.id === row.reporter_id;
 }
 
+/** Strips the legacy sensitivity_tier column out of API responses in favor of a plain is_sensitive boolean. */
+function withSensitivityFlag(row: any) {
+  const { sensitivity_tier, ...rest } = row;
+  return { ...rest, is_sensitive: sensitivity_tier === 3 };
+}
+
 function toPublicLost(row: any, requester: LostFoundUser) {
-  return { ...row, type: 'lost', photo_url: maybeHidePhoto(row, requester, row.reporter_id) };
+  return withSensitivityFlag({ ...row, type: 'lost', photo_url: maybeHidePhoto(row, requester, row.reporter_id) });
 }
 
 function toPublicFound(row: any, requester: LostFoundUser) {
-  return { ...row, type: 'found', photo_url: maybeHidePhoto(row, requester, row.finder_id) };
+  return withSensitivityFlag({ ...row, type: 'found', photo_url: maybeHidePhoto(row, requester, row.finder_id) });
 }
 
 export async function browse(query: BrowseQuery, requester: LostFoundUser) {
@@ -181,7 +192,7 @@ export async function browse(query: BrowseQuery, requester: LostFoundUser) {
       category: r.category,
       status: r.status,
       location: r.type === 'lost' ? r.last_seen_location : r.pickup_location,
-      sensitivity_tier: r.sensitivity_tier,
+      is_sensitive: r.is_sensitive,
     }));
   }
   return combined;

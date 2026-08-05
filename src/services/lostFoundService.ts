@@ -89,11 +89,18 @@ export const lostFoundService = {
   },
 };
 
-/** Mirrors SupabaseListingService.uploadImage — same private-bucket-path convention as the original React Native build. */
-export async function uploadLostFoundPhoto(file: File, reportType: 'lost' | 'found', tier: 1 | 2 | 3): Promise<string> {
+/**
+ * Mirrors SupabaseListingService.uploadImage — same private-bucket-path
+ * convention as the original React Native build. The path's leading folder
+ * ('1' or '3') reuses the existing Storage RLS policies unchanged (public-
+ * readable vs custodian/admin-only) — those policies were always
+ * effectively binary despite being framed as tiers, so no Storage migration
+ * is needed for the tier-logic removal.
+ */
+export async function uploadLostFoundPhoto(file: File, reportType: 'lost' | 'found', isSensitive: boolean): Promise<string> {
   const fileExt = file.name.split('.').pop();
   const fileName = `${Math.random().toString(36).slice(2)}_${Date.now()}.${fileExt}`;
-  const path = `${tier}/${reportType}/${fileName}`;
+  const path = `${isSensitive ? 3 : 1}/${reportType}/${fileName}`;
 
   const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
     cacheControl: '3600',

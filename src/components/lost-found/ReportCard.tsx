@@ -13,14 +13,6 @@ const statusTone: Record<string, string> = {
   archived: "bg-gray-100 text-gray-500",
 };
 
-const tierTone: Record<number, string> = {
-  1: "bg-success-light text-success",
-  2: "bg-amber-100 text-amber-700",
-  3: "bg-red-100 text-red-600",
-};
-
-const tierLabel: Record<number, string> = { 1: "Tier 1", 2: "Tier 2", 3: "Tier 3 · Sensitive" };
-
 export function ReportCard({ report, onView }: { report: ReportSummary; onView: (id: string) => void }) {
   const [photo, setPhoto] = useState<string | null>(null);
 
@@ -37,13 +29,18 @@ export function ReportCard({ report, onView }: { report: ReportSummary; onView: 
   const location = report.type === "lost" ? report.last_seen_location : report.pickup_location;
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-card transition-shadow hover:shadow-md">
+    <article
+      className={[
+        "flex flex-col overflow-hidden rounded-xl border shadow-card transition-shadow hover:shadow-md",
+        report.is_sensitive ? "border-red-300 bg-red-50" : "border-gray-200 bg-white",
+      ].join(" ")}
+    >
       <div className="relative h-40 w-full bg-gray-100">
         {photo ? (
           <Image src={photo} alt={report.category} fill sizes="(max-width: 768px) 100vw, 320px" className="object-cover" unoptimized />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-3xl">
-            {report.sensitivity_tier === 3 ? "🔒" : "📷"}
+            {report.is_sensitive ? "🔒" : "📷"}
           </div>
         )}
       </div>
@@ -62,9 +59,9 @@ export function ReportCard({ report, onView }: { report: ReportSummary; onView: 
           <span className={["rounded px-2 py-0.5 text-[11px] font-semibold capitalize", statusTone[report.status] ?? "bg-gray-100 text-gray-500"].join(" ")}>
             {report.status}
           </span>
-          <span className={["rounded px-2 py-0.5 text-[11px] font-semibold", tierTone[report.sensitivity_tier]].join(" ")}>
-            {tierLabel[report.sensitivity_tier]}
-          </span>
+          {report.is_sensitive && (
+            <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-red-100 text-red-600">Sensitive</span>
+          )}
         </div>
 
         <button
