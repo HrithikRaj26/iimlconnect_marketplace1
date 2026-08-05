@@ -40,11 +40,19 @@ interface Comparable {
   description: string;
 }
 
-function scorePair(a: Comparable, b: Comparable): number {
-  const categoryScore = a.category.trim().toLowerCase() === b.category.trim().toLowerCase() ? 1 : 0;
+interface ScoreBreakdown {
+  total: number;
+  categoryMatch: boolean;
+  locationScore: number;
+  descriptionScore: number;
+}
+
+function scorePair(a: Comparable, b: Comparable): ScoreBreakdown {
+  const categoryMatch = a.category.trim().toLowerCase() === b.category.trim().toLowerCase();
   const locationScore = jaccardSimilarity(a.location, b.location);
   const descriptionScore = jaccardSimilarity(a.description, b.description);
-  return categoryScore * CATEGORY_WEIGHT + locationScore * LOCATION_WEIGHT + descriptionScore * DESCRIPTION_WEIGHT;
+  const total = (categoryMatch ? 1 : 0) * CATEGORY_WEIGHT + locationScore * LOCATION_WEIGHT + descriptionScore * DESCRIPTION_WEIGHT;
+  return { total, categoryMatch, locationScore, descriptionScore };
 }
 
 export interface InstantMatchItem {
@@ -57,6 +65,9 @@ export interface InstantMatchItem {
   description: string;
   location: string;
   isSensitive: boolean;
+  categoryMatch: boolean;
+  locationScore: number;
+  descriptionScore: number;
 }
 
 /** Best cross-type match (if any, above MATCH_THRESHOLD) for each of the user's own active reports. */
@@ -72,9 +83,9 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
 
   for (const lost of myLost ?? []) {
     const lostComparable: Comparable = { category: lost.category, location: lost.last_seen_location ?? '', description: lost.description ?? '' };
-    let best: { row: any; score: number } | null = null;
+    let best: { row: any; breakdown: ScoreBreakdown } | null = null;
     for (const found of allFound ?? []) {
-      const score = scorePair(lostComparable, {
+      const breakdown = scorePair(lostComparable, {
         category: found.category,
         // found_location (where it was actually found) is what's comparable to a
         // lost report's last-seen location — pickup_location is just the drop-off
@@ -82,7 +93,7 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
         location: found.found_location ?? found.pickup_location ?? '',
         description: found.description ?? '',
       });
-      if (score >= MATCH_THRESHOLD && (!best || score > best.score)) best = { row: found, score };
+      if (breakdown.total >= MATCH_THRESHOLD && (!best || breakdown.total > best.breakdown.total)) best = { row: found, breakdown };
     }
     if (best) {
       results.push({
@@ -90,11 +101,14 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
         sourceType: 'lost',
         matchedReportId: best.row.id,
         matchedType: 'found',
-        score: best.score,
+        score: best.breakdown.total,
         category: best.row.category,
         description: best.row.description,
         location: best.row.found_location ?? best.row.pickup_location,
         isSensitive: best.row.sensitivity_tier === 3,
+        categoryMatch: best.breakdown.categoryMatch,
+        locationScore: best.breakdown.locationScore,
+        descriptionScore: best.breakdown.descriptionScore,
       });
     }
   }
@@ -105,14 +119,14 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
       location: found.found_location ?? found.pickup_location ?? '',
       description: found.description ?? '',
     };
-    let best: { row: any; score: number } | null = null;
+    let best: { row: any; breakdown: ScoreBreakdown } | null = null;
     for (const lost of allLost ?? []) {
-      const score = scorePair(foundComparable, {
+      const breakdown = scorePair(foundComparable, {
         category: lost.category,
         location: lost.last_seen_location ?? '',
         description: lost.description ?? '',
       });
-      if (score >= MATCH_THRESHOLD && (!best || score > best.score)) best = { row: lost, score };
+      if (breakdown.total >= MATCH_THRESHOLD && (!best || breakdown.total > best.breakdown.total)) best = { row: lost, breakdown };
     }
     if (best) {
       results.push({
@@ -120,11 +134,14 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
         sourceType: 'found',
         matchedReportId: best.row.id,
         matchedType: 'lost',
-        score: best.score,
+        score: best.breakdown.total,
         category: best.row.category,
         description: best.row.description,
         location: best.row.last_seen_location,
         isSensitive: best.row.sensitivity_tier === 3,
+        categoryMatch: best.breakdown.categoryMatch,
+        locationScore: best.breakdown.locationScore,
+        descriptionScore: best.breakdown.descriptionScore,
       });
     }
   }

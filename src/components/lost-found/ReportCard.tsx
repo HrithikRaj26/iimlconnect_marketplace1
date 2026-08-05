@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import React from "react";
-import { ReportSummary } from "@/types/lostFound";
+import { InstantMatch, ReportSummary } from "@/types/lostFound";
 
 const statusTone: Record<string, string> = {
   open: "bg-brand-light text-brand-dark",
@@ -16,10 +16,14 @@ export function ReportCard({
   report,
   onView,
   onEdit,
+  match,
+  onViewMatch,
 }: {
   report: ReportSummary;
   onView: (id: string) => void;
   onEdit?: (id: string) => void;
+  match?: InstantMatch;
+  onViewMatch?: (id: string) => void;
 }) {
   const location = report.type === "lost" ? report.last_seen_location : report.found_location || report.pickup_location;
 
@@ -64,7 +68,32 @@ export function ReportCard({
           {report.is_sensitive && (
             <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-red-100 text-red-600">Sensitive</span>
           )}
+          {match && (
+            <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-800">
+              {Math.round(match.score * 100)}% match
+            </span>
+          )}
         </div>
+
+        {match && (
+          <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+            <p className="text-xs font-semibold text-amber-900">
+              Possible match with a {match.matchedType} report
+            </p>
+            <ul className="mt-1.5 space-y-0.5 text-[11px] text-amber-800">
+              <li>{match.categoryMatch ? "✓" : "✗"} Category {match.categoryMatch ? "matches" : "differs"} ({match.category})</li>
+              <li>{match.locationScore > 0 ? "✓" : "✗"} Location similarity: {Math.round(match.locationScore * 100)}% ({match.location})</li>
+              <li>{match.descriptionScore > 0 ? "✓" : "✗"} Description similarity: {Math.round(match.descriptionScore * 100)}%</li>
+            </ul>
+            <button
+              type="button"
+              onClick={() => onViewMatch?.(match.matchedReportId)}
+              className="mt-2 h-8 w-full rounded-lg bg-amber-500 text-xs font-semibold text-white transition-colors hover:bg-amber-600"
+            >
+              View matching {match.matchedType} item
+            </button>
+          </div>
+        )}
 
         <div className="mt-3 flex gap-2">
           <button

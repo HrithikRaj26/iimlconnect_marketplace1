@@ -86,6 +86,9 @@ export interface InstantMatch {
   description: string;
   location: string;
   isSensitive: boolean;
+  categoryMatch: boolean;
+  locationScore: number;
+  descriptionScore: number;
 }
 
 export interface MatchQueueEntry {
