@@ -42,6 +42,15 @@ export default function VenturesLayout({
         .ventures-container th {
           font-family: var(--font-manrope), sans-serif !important;
         }
+        
+        /* Hide scrollbar utility for horizontal category scroll lists */
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none !important;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+        }
       `}} />
       <AppLayout>
         <div className="ventures-container h-full w-full">
