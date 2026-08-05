@@ -19,6 +19,7 @@ export default function ReputationLeaderboard() {
   const [myBadges, setMyBadges] = useState<UserBadge[]>([]);
   const [loading, setLoading] = useState(true);
   const [flippedBadges, setFlippedBadges] = useState<Record<string, boolean>>({});
+  const [shakingBadges, setShakingBadges] = useState<Record<string, boolean>>({});
 
   // Badge stats for progression
   const [reviewsWritten, setReviewsWritten] = useState(0);
@@ -118,25 +119,44 @@ export default function ReputationLeaderboard() {
               .rotate-y-180 {
                 transform: rotateY(180deg);
               }
+              @keyframes lock-shake {
+                0%, 100% { transform: translateX(0); }
+                15%, 45%, 75% { transform: translateX(-4px) rotate(-1.5deg); }
+                30%, 60%, 90% { transform: translateX(4px) rotate(1.5deg); }
+              }
+              .animate-lock-shake {
+                animation: lock-shake 0.4s ease-in-out;
+              }
             `}</style>
             {badgeDefinitions.map((badge) => {
               const unlocked = badge.check;
               const isFlipped = !!flippedBadges[badge.type];
+              const isShaking = !!shakingBadges[badge.type];
               
               return (
                 <div
                   key={badge.type}
                   onClick={() => {
-                    setFlippedBadges(prev => ({
-                      ...prev,
-                      [badge.type]: !prev[badge.type]
-                    }));
+                    if (unlocked) {
+                      setFlippedBadges(prev => ({
+                        ...prev,
+                        [badge.type]: !prev[badge.type]
+                      }));
+                    } else {
+                      // Trigger lock shake rattle
+                      setShakingBadges(prev => ({ ...prev, [badge.type]: true }));
+                      setTimeout(() => {
+                        setShakingBadges(prev => ({ ...prev, [badge.type]: false }));
+                      }, 400);
+                    }
                   }}
-                  className="h-48 w-full cursor-pointer perspective-1000 select-none group"
+                  className={`h-48 w-full cursor-pointer perspective-1000 select-none group ${
+                    isShaking ? "animate-lock-shake" : ""
+                  }`}
                 >
                   <div
                     className={`relative w-full h-full duration-500 preserve-3d transition-transform ${
-                      isFlipped ? "rotate-y-180" : ""
+                      isFlipped && unlocked ? "rotate-y-180" : ""
                     }`}
                   >
                     {/* FRONT SIDE (Standard Badge Info) */}
