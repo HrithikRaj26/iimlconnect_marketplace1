@@ -13,96 +13,12 @@ const statusTone: Record<string, string> = {
   archived: "bg-gray-100 text-gray-500",
 };
 
-/** Marks words in `text` that also appear (case/punctuation-insensitive) in `otherText` — a visual approximation of the token-overlap score, not the exact scoring algorithm. */
-function highlightOverlap(text: string, otherText: string): React.ReactNode {
-  const normalize = (w: string) => w.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const otherWords = new Set(otherText.split(/\s+/).map(normalize).filter(Boolean));
-  return text.split(/(\s+)/).map((part, i) => {
-    const norm = normalize(part);
-    if (!norm || !otherWords.has(norm)) return <React.Fragment key={i}>{part}</React.Fragment>;
-    return (
-      <mark key={i} className="rounded bg-amber-300/70 px-0.5 text-amber-950">
-        {part}
-      </mark>
-    );
-  });
-}
-
-function WholeValueHighlight({ value, matched }: { value: string; matched: boolean }) {
-  if (!value) return <>—</>;
-  if (!matched) return <>{value}</>;
+function MatchBreakdown({ match }: { match: InstantMatch }) {
   return (
-    <mark className="rounded bg-amber-300/70 px-0.5 text-amber-950">{value}</mark>
-  );
-}
-
-function MatchAttributeRow({
-  label,
-  lostValue,
-  foundValue,
-  percent,
-  mode,
-}: {
-  label: string;
-  lostValue: string;
-  foundValue: string;
-  percent: number;
-  /** "words": highlight the overlapping words between the two values. "whole": highlight each value entirely if percent indicates a full match. */
-  mode: "words" | "whole";
-}) {
-  return (
-    <li>
-      <div className="flex items-center justify-between">
-        <span className="font-semibold text-amber-900">{label}</span>
-        <span className="text-amber-700">{percent}%</span>
-      </div>
-      <p className="text-amber-800">
-        Lost: {mode === "words" ? highlightOverlap(lostValue || "—", foundValue || "") : <WholeValueHighlight value={lostValue} matched={percent === 100} />}
-      </p>
-      <p className="text-amber-800">
-        Found: {mode === "words" ? highlightOverlap(foundValue || "—", lostValue || "") : <WholeValueHighlight value={foundValue} matched={percent === 100} />}
-      </p>
-    </li>
-  );
-}
-
-function MatchBreakdown({ report, match }: { report: ReportSummary; match: InstantMatch }) {
-  const sourceLocation = report.type === "lost" ? report.last_seen_location : report.found_location || report.pickup_location;
-  const isReportLost = report.type === "lost";
-  const lost = {
-    category: isReportLost ? report.category : match.category,
-    location: isReportLost ? sourceLocation ?? "" : match.location,
-    description: isReportLost ? report.description : match.description,
-  };
-  const found = {
-    category: isReportLost ? match.category : report.category,
-    location: isReportLost ? match.location : sourceLocation ?? "",
-    description: isReportLost ? match.description : report.description,
-  };
-
-  return (
-    <ul className="mt-1.5 space-y-2 text-[11px] text-amber-800">
-      <MatchAttributeRow
-        label="Category"
-        lostValue={lost.category}
-        foundValue={found.category}
-        percent={match.categoryMatch ? 100 : 0}
-        mode="whole"
-      />
-      <MatchAttributeRow
-        label="Location"
-        lostValue={lost.location}
-        foundValue={found.location}
-        percent={Math.round(match.locationScore * 100)}
-        mode="words"
-      />
-      <MatchAttributeRow
-        label="Description"
-        lostValue={lost.description}
-        foundValue={found.description}
-        percent={Math.round(match.descriptionScore * 100)}
-        mode="words"
-      />
+    <ul className="mt-1.5 space-y-0.5 text-[11px] text-amber-800">
+      <li>{match.categoryMatch ? "Match" : "No match"} — Category {match.categoryMatch ? "matches" : "differs"} ({match.category})</li>
+      <li>{match.locationScore > 0 ? "Match" : "No match"} — Location similarity: {Math.round(match.locationScore * 100)}% ({match.location})</li>
+      <li>{match.descriptionScore > 0 ? "Match" : "No match"} — Description similarity: {Math.round(match.descriptionScore * 100)}%</li>
     </ul>
   );
 }
@@ -182,7 +98,7 @@ export function ReportCard({
               This {report.type} report may match{" "}
               {matches.length > 1 ? `${matches.length} different ${topMatch.matchedType} reports` : `a ${topMatch.matchedType} report`}
             </p>
-            <MatchBreakdown report={report} match={topMatch} />
+            <MatchBreakdown match={topMatch} />
             {matches.length > 1 ? (
               <button
                 type="button"
@@ -221,7 +137,7 @@ export function ReportCard({
                         {Math.round(m.score * 100)}% match
                       </span>
                     </div>
-                    <MatchBreakdown report={report} match={m} />
+                    <MatchBreakdown match={m} />
                     <button
                       type="button"
                       onClick={() => {
