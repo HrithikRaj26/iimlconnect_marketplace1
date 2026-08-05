@@ -118,7 +118,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col overflow-hidden min-w-0 transition-all duration-300">
-        <TopNav onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+        <TopNav onMenuClick={() => setSidebarOpen(!sidebarOpen)} profile={profile} />
         <main className="flex-1 overflow-y-auto">
           {children}
         </main>

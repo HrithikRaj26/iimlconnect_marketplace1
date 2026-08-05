@@ -5,14 +5,15 @@ interface TopNavProps {
   /** Which nav item to highlight as active. */
   active?: "marketplace" | "listings" | "messages" | "ventures";
   onMenuClick?: () => void;
+  profile?: { name: string; avatar: string } | null;
 }
 
-export function TopNav({ active = "marketplace", onMenuClick }: TopNavProps) {
+export function TopNav({ active = "marketplace", onMenuClick, profile }: TopNavProps) {
   const linkClass = (key: TopNavProps["active"]) =>
     key === active ? "text-brand" : "text-gray-500 hover:text-gray-800";
 
   return (
-    <header className="flex h-16 w-full items-center justify-between border-b border-gray-100 bg-white px-6">
+    <header className="flex h-16 w-full items-center justify-between border-b border-gray-100 bg-white px-6 shrink-0">
       <div className="flex items-center gap-4">
         {onMenuClick && (
           <button onClick={onMenuClick} className="text-gray-500 hover:text-gray-900 focus:outline-none">
@@ -41,20 +42,40 @@ export function TopNav({ active = "marketplace", onMenuClick }: TopNavProps) {
         </Link>
       </div>
 
-      <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
-        <Link href="/marketplace" className={linkClass("marketplace")}>
-          Marketplace
+      <div className="flex items-center gap-4">
+        <nav className="hidden items-center gap-6 text-sm font-medium md:flex mr-2">
+          <Link href="/marketplace" className={linkClass("marketplace")}>
+            Marketplace
+          </Link>
+          <Link href="/ventures" className={linkClass("ventures")}>
+            Venture Hub
+          </Link>
+          <Link href="/listing/create" className={linkClass("listings")}>
+            Sell an Item
+          </Link>
+          <Link href="/messages" className={linkClass("messages")}>
+            Messages
+          </Link>
+        </nav>
+        
+        {/* User Profile Avatar Link in Header */}
+        <Link 
+          href="/profile" 
+          title="Edit Profile"
+          className="flex items-center gap-2 rounded-xl p-1 hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100"
+        >
+          {profile?.avatar ? (
+            <img src={profile.avatar} alt="User Avatar" className="h-8 w-8 rounded-full object-cover border border-gray-200" />
+          ) : (
+            <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+              {profile?.name ? profile.name[0].toUpperCase() : "👤"}
+            </div>
+          )}
+          <span className="hidden sm:inline text-xs font-bold text-gray-700 max-w-[100px] truncate">
+            {profile?.name || "My Profile"}
+          </span>
         </Link>
-        <Link href="/ventures" className={linkClass("ventures")}>
-          Venture Hub
-        </Link>
-        <Link href="/listing/create" className={linkClass("listings")}>
-          Sell an Item
-        </Link>
-        <Link href="/messages" className={linkClass("messages")}>
-          Messages
-        </Link>
-      </nav>
+      </div>
     </header>
   );
 }
