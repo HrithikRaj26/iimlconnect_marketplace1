@@ -107,6 +107,10 @@ export function ReportCard({
               >
                 View all {matches.length} {topMatch.matchedType} matches
               </button>
+            ) : topMatch.isSensitive ? (
+              <div className="mt-2 flex h-8 w-full items-center justify-center rounded-lg bg-gray-200 text-xs font-semibold text-gray-600">
+                Owner Notified
+              </div>
             ) : (
               <button
                 type="button"
@@ -138,16 +142,22 @@ export function ReportCard({
                       </span>
                     </div>
                     <MatchBreakdown match={m} />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setOverlayOpen(false);
-                        onViewMatch?.(m.matchedReportId);
-                      }}
-                      className="mt-2 h-8 w-full rounded-lg bg-amber-500 text-xs font-semibold text-white transition-colors hover:bg-amber-600"
-                    >
-                      View this {m.matchedType} item →
-                    </button>
+                    {m.isSensitive ? (
+                      <div className="mt-2 flex h-8 w-full items-center justify-center rounded-lg bg-gray-200 text-xs font-semibold text-gray-600">
+                        Owner Notified
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setOverlayOpen(false);
+                          onViewMatch?.(m.matchedReportId);
+                        }}
+                        className="mt-2 h-8 w-full rounded-lg bg-amber-500 text-xs font-semibold text-white transition-colors hover:bg-amber-600"
+                      >
+                        View this {m.matchedType} item →
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
