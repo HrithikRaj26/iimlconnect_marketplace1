@@ -27,6 +27,7 @@ export default function VentureDiscovery() {
 
   // Review Form state
   const [rating, setRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState<number | null>(null);
   const [reviewContent, setReviewContent] = useState("");
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState("");
@@ -233,15 +234,42 @@ export default function VentureDiscovery() {
       {/* Grid List */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <style>{`
+            @keyframes shimmer {
+              100% { transform: translateX(100%); }
+            }
+            .animate-shimmer {
+              position: relative;
+              overflow: hidden;
+            }
+            .animate-shimmer::after {
+              position: absolute;
+              top: 0; right: 0; bottom: 0; left: 0;
+              transform: translateX(-100%);
+              background-image: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.4) 20%,
+                rgba(255, 255, 255, 0.7) 60%,
+                rgba(255, 255, 255, 0) 100%
+              );
+              animation: shimmer 2s infinite;
+              content: '';
+            }
+          `}</style>
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="animate-pulse rounded-2xl bg-white p-6 border border-gray-200 space-y-4">
-              <div className="flex justify-between items-center">
-                <div className="h-10 w-10 rounded-full bg-gray-200" />
-                <div className="h-6 w-20 rounded bg-gray-200" />
+            <div key={i} className="rounded-2xl border border-white/80 bg-white/50 backdrop-blur-md p-6 h-64 flex flex-col justify-between animate-pulse">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="h-12 w-12 rounded-xl bg-gray-200 animate-shimmer" />
+                  <div className="h-5 w-16 rounded-full bg-gray-200 animate-shimmer" />
+                </div>
+                <div className="space-y-2">
+                  <div className="h-4 w-3/4 rounded bg-gray-200 animate-shimmer" />
+                  <div className="h-3 w-1/2 rounded bg-gray-200 animate-shimmer" />
+                </div>
               </div>
-              <div className="h-6 w-3/4 rounded bg-gray-200" />
-              <div className="h-12 w-full rounded bg-gray-200" />
-              <div className="h-4 w-1/2 rounded bg-gray-200" />
+              <div className="h-10 w-full rounded-xl bg-gray-200 animate-shimmer" />
             </div>
           ))}
         </div>
@@ -255,11 +283,24 @@ export default function VentureDiscovery() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <style>{`
+            @keyframes pulse-glow {
+              0%, 100% { box-shadow: 0 4px 15px -3px rgba(245, 158, 11, 0.15), 0 4px 6px -2px rgba(245, 158, 11, 0.05); }
+              50% { box-shadow: 0 10px 25px -3px rgba(245, 158, 11, 0.35), 0 8px 10px -2px rgba(245, 158, 11, 0.15); }
+            }
+            .animate-pulse-subtle {
+              animation: pulse-glow 3s infinite ease-in-out;
+            }
+          `}</style>
           {ventures.map((venture) => (
             <div
               key={venture.id}
               onClick={() => handleCardClick(venture.id)}
-              className="group flex flex-col justify-between rounded-2xl bg-white/70 backdrop-blur-md p-6 border border-white/80 shadow-md hover:shadow-xl hover:bg-white/90 hover:border-orange-500/20 hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              className={`group flex flex-col justify-between rounded-2xl bg-white/70 backdrop-blur-md p-6 border transition-all duration-300 cursor-pointer ${
+                venture.is_featured 
+                  ? "border-amber-400/80 shadow-lg shadow-amber-500/10 hover:shadow-xl hover:shadow-amber-500/20 hover:border-amber-500/40 ring-1 ring-amber-400/20 animate-pulse-subtle hover:-translate-y-1" 
+                  : "border-white/80 shadow-md hover:shadow-xl hover:bg-white/90 hover:border-orange-500/20 hover:-translate-y-1"
+              }`}
             >
               <div>
                 {/* Logo and Category */}
@@ -272,6 +313,11 @@ export default function VentureDiscovery() {
                     />
                   </div>
                   <div className="flex items-center gap-1.5">
+                    {venture.is_featured && (
+                      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[9px] font-black text-amber-700 animate-bounce">
+                        ★ Featured
+                      </span>
+                    )}
                     <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-extrabold border ${
                       venture.is_open 
                         ? "bg-green-50 text-green-700 border-green-200" 
@@ -515,8 +561,12 @@ export default function VentureDiscovery() {
                               type="button"
                               key={star}
                               onClick={() => setRating(star)}
-                              className={`text-xl focus:outline-none transition-transform active:scale-125 ${
-                                rating >= star ? "text-amber-500" : "text-gray-300"
+                              onMouseEnter={() => setHoverRating(star)}
+                              onMouseLeave={() => setHoverRating(null)}
+                              className={`text-2xl focus:outline-none transition-all duration-150 hover:scale-125 active:scale-95 ${
+                                (hoverRating !== null ? hoverRating >= star : rating >= star)
+                                  ? "text-amber-500 scale-105 filter drop-shadow-[0_0_2px_rgba(245,158,11,0.4)]"
+                                  : "text-gray-300"
                               }`}
                             >
                               ★
