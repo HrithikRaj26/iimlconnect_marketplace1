@@ -43,7 +43,7 @@ export function ReportCard({
   return (
     <article
       className={[
-        "flex flex-col overflow-hidden rounded-xl border shadow-card transition-shadow hover:shadow-md",
+        "card-wobble flex flex-col overflow-hidden rounded-xl border shadow-card transition-shadow hover:shadow-md",
         report.is_sensitive ? "border-red-300 bg-red-50" : "border-gray-200 bg-white",
       ].join(" ")}
     >
