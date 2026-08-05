@@ -36,6 +36,7 @@ export default function MyVentures() {
   const [website, setWebsite] = useState("");
   const [instagram, setInstagram] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
+  const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -74,15 +75,27 @@ export default function MyVentures() {
   };
 
   const handleSubmit = async () => {
+    setErrorMsg("");
     if (!name.trim() || !tagline.trim() || !description.trim()) {
       setErrorMsg("Please complete all required fields on Step 1.");
       setCurrentStep(1);
       return;
     }
 
-    setSubmitting(true);
-    setErrorMsg("");
+    const cleanWhatsapp = whatsapp.replace(/\s+/g, '');
+    if (!cleanWhatsapp || !/^\+?[1-9]\d{9,14}$/.test(cleanWhatsapp)) {
+      setErrorMsg("Please enter a valid WhatsApp number on Step 3.");
+      setCurrentStep(3);
+      return;
+    }
 
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setErrorMsg("Please enter a valid official Email ID on Step 3.");
+      setCurrentStep(3);
+      return;
+    }
+
+    setSubmitting(true);
     try {
       const newVenture = await ventureService.createVenture({
         name,
@@ -94,7 +107,8 @@ export default function MyVentures() {
         contact_links: {
           website: website.trim() || undefined,
           instagram: instagram.trim() || undefined,
-          whatsapp: whatsapp.trim() || undefined,
+          whatsapp: cleanWhatsapp,
+          email: email.trim().toLowerCase(),
         },
       });
 
@@ -108,6 +122,43 @@ export default function MyVentures() {
     }
   };
 
+  const handleNextStep = () => {
+    setErrorMsg("");
+    if (currentStep === 1) {
+      if (!name.trim()) {
+        setErrorMsg("Venture name is required.");
+        return;
+      }
+      if (!tagline.trim()) {
+        setErrorMsg("Short tagline is required.");
+        return;
+      }
+      if (!description.trim()) {
+        setErrorMsg("Rich description is required.");
+        return;
+      }
+    } else if (currentStep === 3) {
+      const cleanWhatsapp = whatsapp.replace(/\s+/g, '');
+      if (!cleanWhatsapp) {
+        setErrorMsg("WhatsApp contact number is required.");
+        return;
+      }
+      if (!/^\+?[1-9]\d{9,14}$/.test(cleanWhatsapp)) {
+        setErrorMsg("Please enter a valid WhatsApp number with country code (digits only, e.g. 919999999999).");
+        return;
+      }
+      if (!email.trim()) {
+        setErrorMsg("Official Email ID is required.");
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+        setErrorMsg("Please enter a valid email address (e.g. startup@iiml.ac.in).");
+        return;
+      }
+    }
+    setCurrentStep(currentStep + 1);
+  };
+
   const resetForm = () => {
     setName("");
     setTagline("");
@@ -119,6 +170,7 @@ export default function MyVentures() {
     setWebsite("");
     setInstagram("");
     setWhatsapp("");
+    setEmail("");
     setCurrentStep(1);
     setErrorMsg("");
   };
@@ -386,6 +438,20 @@ export default function MyVentures() {
             {currentStep === 3 && (
               <div className="space-y-4 max-w-xl animate-in fade-in duration-150">
                 <TextInput
+                  label="Official Email ID *"
+                  placeholder="startup@iiml.ac.in"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                <TextInput
+                  label="WhatsApp Contact Number (digits with country code, e.g. 919999999999) *"
+                  placeholder="919876543210"
+                  value={whatsapp}
+                  onChange={(e) => setWhatsapp(e.target.value)}
+                  required
+                />
+                <TextInput
                   label="Website URL"
                   placeholder="https://myventure.com"
                   value={website}
@@ -396,12 +462,6 @@ export default function MyVentures() {
                   placeholder="my_insta_handle"
                   value={instagram}
                   onChange={(e) => setInstagram(e.target.value)}
-                />
-                <TextInput
-                  label="WhatsApp Contact Number (digits only)"
-                  placeholder="919999999999"
-                  value={whatsapp}
-                  onChange={(e) => setWhatsapp(e.target.value)}
                 />
               </div>
             )}
@@ -478,7 +538,7 @@ export default function MyVentures() {
             {currentStep < 4 ? (
               <button
                 type="button"
-                onClick={() => setCurrentStep(currentStep + 1)}
+                onClick={handleNextStep}
                 className="rounded-xl bg-gray-900 px-5 py-2.5 text-xs font-black text-white hover:bg-gray-800 transition-colors"
               >
                 Continue →

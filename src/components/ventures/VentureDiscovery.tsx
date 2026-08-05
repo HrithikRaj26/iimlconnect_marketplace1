@@ -422,6 +422,14 @@ export default function VentureDiscovery() {
                             💬 Chat on WhatsApp
                           </a>
                         )}
+                        {activeVenture.contact_links.email && (
+                          <a
+                            href={`mailto:${activeVenture.contact_links.email}?subject=Inquiry%20regarding%20${encodeURIComponent(activeVenture.name)}`}
+                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-orange-600 py-2 text-xs font-bold text-white shadow-sm hover:bg-orange-700 transition-colors"
+                          >
+                            ✉️ Email Venture
+                          </a>
+                        )}
                         {activeVenture.contact_links.instagram && (
                           <a
                             href={`https://instagram.com/${activeVenture.contact_links.instagram}`}

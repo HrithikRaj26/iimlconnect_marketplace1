@@ -16,6 +16,7 @@ export interface IVentureService {
       website?: string;
       instagram?: string;
       whatsapp?: string;
+      email?: string;
     };
   }): Promise<Venture>;
   updateVenture(id: string, data: Partial<VerveEditData>): Promise<Venture>;
@@ -54,6 +55,7 @@ interface VerveEditData {
     website?: string;
     instagram?: string;
     whatsapp?: string;
+    email?: string;
   };
   status: VentureStatus;
 }
@@ -131,6 +133,7 @@ class SupabaseVentureService implements IVentureService {
       website?: string;
       instagram?: string;
       whatsapp?: string;
+      email?: string;
     };
   }): Promise<Venture> {
     const { data: sessionData } = await supabase.auth.getSession();
