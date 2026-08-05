@@ -115,48 +115,48 @@ export default function LostFoundBrowsePage() {
   return (
     <div className="min-h-screen bg-surface">
       <div className="border-b border-gray-100 bg-white">
-        <div className="mx-auto flex max-w-7xl justify-center gap-3 px-6 py-4">
-          <Link href="/lost-found/report/lost">
-            <Button variant="secondary">Report Lost</Button>
-          </Link>
-          <Link href="/lost-found/report/found">
-            <Button>Report Found</Button>
-          </Link>
-        </div>
-      </div>
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:py-0">
+          <div className="flex gap-6">
+            <button
+              type="button"
+              onClick={() => setTab("lost")}
+              className={[
+                "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
+                tab === "lost" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
+              ].join(" ")}
+            >
+              Lost
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab("found")}
+              className={[
+                "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
+                tab === "found" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
+              ].join(" ")}
+            >
+              Found
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab("mine")}
+              className={[
+                "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
+                tab === "mine" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
+              ].join(" ")}
+            >
+              My Reports
+            </button>
+          </div>
 
-      <div className="border-b border-gray-100 bg-white">
-        <div className="mx-auto flex max-w-7xl gap-6 px-6">
-          <button
-            type="button"
-            onClick={() => setTab("lost")}
-            className={[
-              "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
-              tab === "lost" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
-            ].join(" ")}
-          >
-            Lost
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("found")}
-            className={[
-              "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
-              tab === "found" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
-            ].join(" ")}
-          >
-            Found
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("mine")}
-            className={[
-              "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
-              tab === "mine" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
-            ].join(" ")}
-          >
-            My Reports
-          </button>
+          <div className="flex justify-center gap-3 pb-1 sm:justify-end sm:pb-0">
+            <Link href="/lost-found/report/lost">
+              <Button variant="secondary">Report Lost</Button>
+            </Link>
+            <Link href="/lost-found/report/found">
+              <Button>Report Found</Button>
+            </Link>
+          </div>
         </div>
       </div>
 
