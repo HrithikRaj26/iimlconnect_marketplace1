@@ -4,8 +4,10 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
+import { useRouter } from "next/navigation";
 
 export default function ProfileBuilder() {
+  const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [batch, setBatch] = useState("");
@@ -56,7 +58,10 @@ export default function ProfileBuilder() {
 
       if (error) throw error;
       
-      setMessage({ type: "success", text: "Profile updated successfully!" });
+      setMessage({ type: "success", text: "Profile updated successfully! Redirecting..." });
+      setTimeout(() => {
+        router.push("/");
+      }, 1500);
     } catch (err: any) {
       console.error(err);
       setMessage({ type: "error", text: err.message || "Failed to update profile." });
