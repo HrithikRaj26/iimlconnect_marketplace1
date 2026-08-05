@@ -42,6 +42,8 @@ export default function VentureDiscovery() {
   const [revealedWhatsapp, setRevealedWhatsapp] = useState(false);
   const [emailCopied, setEmailCopied] = useState(false);
   const [whatsappCopied, setWhatsappCopied] = useState(false);
+  const [scratchingEmail, setScratchingEmail] = useState(false);
+  const [scratchingWhatsapp, setScratchingWhatsapp] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -85,8 +87,20 @@ export default function VentureDiscovery() {
   const handleCardClick = async (id: string) => {
     setDetailLoading(true);
     setShowDetailModal(true);
-    setRevealedEmail(false);
-    setRevealedWhatsapp(false);
+    
+    // Check localStorage scratch card status
+    try {
+      const emailsRevealed = JSON.parse(localStorage.getItem("revealed_emails") || "[]");
+      const whatsappsRevealed = JSON.parse(localStorage.getItem("revealed_whatsapps") || "[]");
+      setRevealedEmail(emailsRevealed.includes(id));
+      setRevealedWhatsapp(whatsappsRevealed.includes(id));
+    } catch (e) {
+      setRevealedEmail(false);
+      setRevealedWhatsapp(false);
+    }
+    
+    setScratchingEmail(false);
+    setScratchingWhatsapp(false);
     setEmailCopied(false);
     setWhatsappCopied(false);
     try {
@@ -498,25 +512,25 @@ export default function VentureDiscovery() {
                     {/* Social coordinates */}
                     <div className="space-y-3">
                       <h3 className="text-sm font-extrabold text-gray-900 uppercase tracking-wider">Connect Details</h3>
+                      
+                      <style>{`
+                        @keyframes scratch-wipe {
+                          0% { clip-path: inset(0 0 0 0); opacity: 1; }
+                          100% { clip-path: inset(0 0 0 100%); opacity: 0.1; }
+                        }
+                        .animate-scratch-wipe {
+                          animation: scratch-wipe 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                        }
+                      `}</style>
+
                       <div className="flex flex-col gap-3">
                         {/* WhatsApp Scratch Card */}
                         {activeVenture.contact_links.whatsapp && (
                           <div className="flex flex-col gap-1.5">
                             <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">WhatsApp Contact</span>
-                            {!revealedWhatsapp ? (
-                              <button
-                                type="button"
-                                onClick={() => setRevealedWhatsapp(true)}
-                                className="w-full relative overflow-hidden rounded-xl border border-dashed border-green-300 bg-green-50/30 p-3 text-center cursor-pointer hover:bg-green-50 transition-colors flex items-center justify-center gap-2 group animate-in fade-in duration-200"
-                              >
-                                <span className="text-xs font-black text-green-700 flex items-center gap-1.5">
-                                  <span>💬</span>
-                                  <span>Tap to reveal WhatsApp</span>
-                                </span>
-                                <div className="absolute inset-0 bg-white/10 backdrop-blur-xs group-hover:backdrop-blur-none transition-all duration-300" />
-                              </button>
-                            ) : (
-                              <div className="flex flex-col gap-2 p-3 bg-green-50/50 rounded-xl border border-green-100 animate-in zoom-in-95 duration-200">
+                            <div className="relative overflow-hidden rounded-xl border border-green-100 bg-green-50/20 p-3 min-h-[50px] flex flex-col justify-center">
+                              {/* Revealed Details (Underside) */}
+                              <div className="flex flex-col gap-2">
                                 <div className="flex items-center justify-between gap-2">
                                   <span className="text-xs font-bold text-gray-700 select-all">{activeVenture.contact_links.whatsapp}</span>
                                   <button
@@ -541,7 +555,38 @@ export default function VentureDiscovery() {
                                   <span>↗</span>
                                 </a>
                               </div>
-                            )}
+
+                              {/* Scratch Foil Cover (Top-side overlay) */}
+                              {!revealedWhatsapp && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (!scratchingWhatsapp) {
+                                      setScratchingWhatsapp(true);
+                                      setTimeout(() => {
+                                        try {
+                                          const whatsapps = JSON.parse(localStorage.getItem("revealed_whatsapps") || "[]");
+                                          if (!whatsapps.includes(activeVenture.id)) {
+                                            whatsapps.push(activeVenture.id);
+                                            localStorage.setItem("revealed_whatsapps", JSON.stringify(whatsapps));
+                                          }
+                                        } catch (err) {}
+                                        setRevealedWhatsapp(true);
+                                        setScratchingWhatsapp(false);
+                                      }, 600);
+                                    }
+                                  }}
+                                  className={`absolute inset-0 z-10 w-full h-full bg-gradient-to-br from-green-100 to-emerald-200 border border-dashed border-green-300 rounded-xl flex items-center justify-center cursor-pointer transition-all duration-300 hover:brightness-105 active:brightness-95 ${
+                                    scratchingWhatsapp ? "animate-scratch-wipe pointer-events-none" : ""
+                                  }`}
+                                >
+                                  <span className="text-xs font-black text-green-800 flex items-center gap-1.5 animate-pulse">
+                                    <span>💬</span>
+                                    <span>Reveal WhatsApp</span>
+                                  </span>
+                                </button>
+                              )}
+                            </div>
                           </div>
                         )}
 
@@ -549,20 +594,9 @@ export default function VentureDiscovery() {
                         {activeVenture.contact_links.email && (
                           <div className="flex flex-col gap-1.5">
                             <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">Email Contact</span>
-                            {!revealedEmail ? (
-                              <button
-                                type="button"
-                                onClick={() => setRevealedEmail(true)}
-                                className="w-full relative overflow-hidden rounded-xl border border-dashed border-orange-300 bg-orange-50/30 p-3 text-center cursor-pointer hover:bg-orange-50 transition-colors flex items-center justify-center gap-2 group animate-in fade-in duration-200"
-                              >
-                                <span className="text-xs font-black text-orange-700 flex items-center gap-1.5">
-                                  <span>✉️</span>
-                                  <span>Tap to reveal email</span>
-                                </span>
-                                <div className="absolute inset-0 bg-white/10 backdrop-blur-xs group-hover:backdrop-blur-none transition-all duration-300" />
-                              </button>
-                            ) : (
-                              <div className="flex items-center justify-between gap-2 p-3 bg-orange-50/50 rounded-xl border border-orange-100 animate-in zoom-in-95 duration-200">
+                            <div className="relative overflow-hidden rounded-xl border border-orange-100 bg-orange-50/20 p-3 min-h-[50px] flex flex-col justify-center">
+                              {/* Revealed Details (Underside) */}
+                              <div className="flex items-center justify-between gap-2">
                                 <span className="text-xs font-bold text-gray-700 truncate select-all">{activeVenture.contact_links.email}</span>
                                 <button
                                   type="button"
@@ -576,7 +610,38 @@ export default function VentureDiscovery() {
                                   {emailCopied ? "✓ Copied" : "📋 Copy"}
                                 </button>
                               </div>
-                            )}
+
+                              {/* Scratch Foil Cover (Top-side overlay) */}
+                              {!revealedEmail && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (!scratchingEmail) {
+                                      setScratchingEmail(true);
+                                      setTimeout(() => {
+                                        try {
+                                          const emails = JSON.parse(localStorage.getItem("revealed_emails") || "[]");
+                                          if (!emails.includes(activeVenture.id)) {
+                                            emails.push(activeVenture.id);
+                                            localStorage.setItem("revealed_emails", JSON.stringify(emails));
+                                          }
+                                        } catch (err) {}
+                                        setRevealedEmail(true);
+                                        setScratchingEmail(false);
+                                      }, 600);
+                                    }
+                                  }}
+                                  className={`absolute inset-0 z-10 w-full h-full bg-gradient-to-br from-orange-100 to-amber-200 border border-dashed border-orange-300 rounded-xl flex items-center justify-center cursor-pointer transition-all duration-300 hover:brightness-105 active:brightness-95 ${
+                                    scratchingEmail ? "animate-scratch-wipe pointer-events-none" : ""
+                                  }`}
+                                >
+                                  <span className="text-xs font-black text-orange-800 flex items-center gap-1.5 animate-pulse">
+                                    <span>✉️</span>
+                                    <span>Reveal Email</span>
+                                  </span>
+                                </button>
+                              )}
+                            </div>
                           </div>
                         )}
 
