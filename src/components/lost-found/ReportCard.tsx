@@ -13,6 +13,14 @@ const statusTone: Record<string, string> = {
   archived: "bg-gray-100 text-gray-500",
 };
 
+// Sensitive found items are physically deposited at PGP Office, so a lost
+// report's match to one is something the owner can go collect themselves.
+// Sensitive lost items aren't held anywhere — the finder can't hand
+// anything over, the system just notifies the owner instead.
+function sensitiveMatchLabel(match: InstantMatch): string {
+  return match.matchedType === "found" ? "Collect from PGP Office" : "Owner Notified";
+}
+
 function MatchBreakdown({ match }: { match: InstantMatch }) {
   return (
     <ul className="mt-1.5 space-y-0.5 text-[11px] text-amber-800">
@@ -109,7 +117,7 @@ export function ReportCard({
               </button>
             ) : topMatch.isSensitive ? (
               <div className="mt-2 flex h-8 w-full items-center justify-center rounded-lg bg-gray-200 text-xs font-semibold text-gray-600">
-                Owner Notified
+                {sensitiveMatchLabel(topMatch)}
               </div>
             ) : (
               <button
@@ -144,7 +152,7 @@ export function ReportCard({
                     <MatchBreakdown match={m} />
                     {m.isSensitive ? (
                       <div className="mt-2 flex h-8 w-full items-center justify-center rounded-lg bg-gray-200 text-xs font-semibold text-gray-600">
-                        Owner Notified
+                        {sensitiveMatchLabel(m)}
                       </div>
                     ) : (
                       <button
