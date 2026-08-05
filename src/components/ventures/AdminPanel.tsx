@@ -39,6 +39,12 @@ export default function AdminPanel() {
     setSubmittingId(id);
     try {
       await ventureService.updateVentureStatus(id, nextStatus);
+      if (nextStatus === "approved") {
+        const approvedVenture = stats?.pendingQueue.find(v => v.id === id);
+        const name = approvedVenture?.name || "Venture";
+        const emailAddress = approvedVenture?.contact_links?.email || `${approvedVenture?.owner_name.toLowerCase().replace(/\s+/g, '')}@iiml.ac.in`;
+        alert(`Success! "${name}" has been approved.\n\n📧 A congratulatory email notification has been dispatched to: ${emailAddress}`);
+      }
       // Reload stats
       await loadStats();
     } catch (err) {
