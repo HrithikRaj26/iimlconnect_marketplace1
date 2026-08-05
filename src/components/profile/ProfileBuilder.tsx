@@ -12,6 +12,7 @@ export default function ProfileBuilder() {
   const [lastName, setLastName] = useState("");
   const [batch, setBatch] = useState("");
   const [bio, setBio] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -25,6 +26,7 @@ export default function ProfileBuilder() {
           setLastName(metadata.last_name || metadata.full_name?.split(" ").slice(1).join(" ") || "");
           setBatch(metadata.batch || "");
           setBio(metadata.bio || "");
+          setAvatarUrl(metadata.avatar_url || "");
         }
       } catch (e) {
         console.error("Error loading user profile:", e);
@@ -53,14 +55,20 @@ export default function ProfileBuilder() {
           full_name: `${firstName.trim()} ${lastName.trim()}`.trim(),
           batch: batch,
           bio: bio.trim(),
+          avatar_url: avatarUrl,
         },
       });
 
       if (error) throw error;
       
       setMessage({ type: "success", text: "Profile updated successfully! Redirecting..." });
+      
+      // Force page reload after redirect to update navbar avatar state
       setTimeout(() => {
         router.push("/");
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
       }, 1500);
     } catch (err: any) {
       console.error(err);
@@ -91,6 +99,55 @@ export default function ProfileBuilder() {
             </div>
           )}
 
+          {/* Profile Photo selection */}
+          <div className="space-y-3 pb-4 border-b border-gray-100">
+            <label className="block text-sm font-semibold text-gray-700">Choose Profile Picture</label>
+            <div className="flex flex-wrap items-center gap-4">
+              {/* Selected avatar preview */}
+              <div className="h-16 w-16 rounded-full overflow-hidden border bg-gray-50 flex items-center justify-center text-lg font-bold text-gray-400">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Avatar Preview" className="h-full w-full object-cover" />
+                ) : (
+                  <span>{firstName ? firstName[0].toUpperCase() : "?"}</span>
+                )}
+              </div>
+              
+              {/* Preset selectors */}
+              <div className="flex flex-wrap gap-2.5">
+                {[
+                  "https://api.dicebear.com/7.x/adventurer/svg?seed=Felix",
+                  "https://api.dicebear.com/7.x/adventurer/svg?seed=Aneka",
+                  "https://api.dicebear.com/7.x/adventurer/svg?seed=Jack",
+                  "https://api.dicebear.com/7.x/adventurer/svg?seed=Sasha",
+                  "https://api.dicebear.com/7.x/adventurer/svg?seed=Toby",
+                  "https://api.dicebear.com/7.x/adventurer/svg?seed=Cody",
+                ].map((preset, idx) => (
+                  <button
+                    type="button"
+                    key={idx}
+                    onClick={() => setAvatarUrl(preset)}
+                    className={`h-12 w-12 rounded-full overflow-hidden border-2 bg-gray-50 hover:scale-105 active:scale-95 transition-all ${
+                      avatarUrl === preset ? "border-orange-500 ring-2 ring-orange-500/20" : "border-gray-200"
+                    }`}
+                  >
+                    <img src={preset} alt="" className="h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Custom URL Option */}
+            <div className="pt-2">
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-wide mb-1">Or paste a custom hosted image URL:</label>
+              <TextInput
+                type="url"
+                placeholder="https://example.com/my-photo.jpg"
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
@@ -118,7 +175,7 @@ export default function ProfileBuilder() {
             <select
               value={batch}
               onChange={(e) => setBatch(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand outline-none font-medium"
+              className="appearance-none w-full rounded-lg border border-gray-300 bg-white pl-4 pr-10 py-2.5 text-sm text-gray-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand outline-none font-medium bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%25234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.75rem_center] bg-[size:1.1rem_1.1rem] bg-no-repeat"
             >
               <option value="">Select your batch...</option>
               <option value="PGP 1">PGP 1</option>
