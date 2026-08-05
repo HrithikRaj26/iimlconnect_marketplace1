@@ -349,6 +349,36 @@ export async function resolve(
     .update({ status: 'resolved', resolved_at: new Date().toISOString() })
     .eq('id', lostReportId);
 
+  const awardedFinderIds = new Set<string>();
+  const awardFinder = async (finderId: string) => {
+    if (awardedFinderIds.has(finderId)) return;
+    awardedFinderIds.add(finderId);
+    await lostFoundAdmin.from('recognition').insert({ finder_id: finderId, badge_type: 'finder_recognition' });
+    await notifyThankYou(finderId, input.thankYouNote);
+  };
+
+  // Self-service claim path: the finder shouldn't have to separately click
+  // "Transfer Completed" under pressure — the claimant marking their lost
+  // report resolved is itself the confirmation the handoff happened, so
+  // auto-complete any found report(s) this same user has claimed (matched
+  // by category, since claims aren't tied to a specific lost report id)
+  // that haven't already been marked complete.
+  const { data: claimedFound } = await lostFoundAdmin
+    .from('found_report')
+    .select('id, finder_id')
+    .eq('claimant_id', user.id)
+    .eq('category', lost.category)
+    .is('transfer_completed_at', null);
+  for (const found of claimedFound ?? []) {
+    const now = new Date().toISOString();
+    await lostFoundAdmin
+      .from('found_report')
+      .update({ transfer_completed_at: now, status: 'resolved', resolved_at: now })
+      .eq('id', found.id);
+    await awardFinder(found.finder_id);
+  }
+
+  // Custodian-mediated match path (separate machinery, untouched).
   const confirmedMatch = await matching.getConfirmedMatchForLostReport(lostReportId);
   if (confirmedMatch) {
     const { data: foundReport } = await lostFoundAdmin
@@ -356,16 +386,10 @@ export async function resolve(
       .select('finder_id')
       .eq('id', confirmedMatch.found_report_id)
       .single();
-    if (foundReport) {
-      await lostFoundAdmin.from('recognition').insert({
-        finder_id: foundReport.finder_id,
-        badge_type: 'finder_recognition',
-      });
-      await notifyThankYou(foundReport.finder_id, input.thankYouNote);
-    }
+    if (foundReport) await awardFinder(foundReport.finder_id);
   }
 
-  return { status: 'resolved', badgeAwarded: !!confirmedMatch };
+  return { status: 'resolved', badgeAwarded: awardedFinderIds.size > 0 };
 }
 
 export async function override(

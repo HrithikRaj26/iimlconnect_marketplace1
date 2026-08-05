@@ -220,9 +220,14 @@ export default function ReportDetailPage() {
             )}
 
             {report.type === "found" && isFinder && report.claimant_id && !report.transfer_completed_at && (
-              <Button fullWidth loading={busy} onClick={completeTransfer}>
-                Transfer Completed
-              </Button>
+              <div className="space-y-1.5">
+                <Button fullWidth loading={busy} onClick={completeTransfer}>
+                  Transfer Completed
+                </Button>
+                <p className="text-center text-xs text-gray-400">
+                  Optional — this resolves automatically once the owner marks their report resolved.
+                </p>
+              </div>
             )}
 
             {report.type === "lost" && isOwner && report.status !== "resolved" && (
