@@ -158,7 +158,7 @@ export function ReportCard({
           </Modal>
         )}
 
-        <div className="mt-3 flex gap-2">
+        <div className="mt-auto flex gap-2 pt-3">
           <button
             type="button"
             onClick={() => onView(report.id)}
