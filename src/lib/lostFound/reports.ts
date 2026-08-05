@@ -6,6 +6,7 @@ import { notifyThankYou } from './notifications';
 import * as matching from './matching';
 
 const SENSITIVE_HIDDEN_PHOTO = null;
+export const PGP_OFFICE_LOCATION = 'PGP Office';
 
 export interface CreateLostReportInput {
   category: string;
@@ -24,6 +25,8 @@ export interface CreateFoundReportInput {
   photoUrl: string;
   contentsWithheld?: boolean;
   isSensitive?: boolean;
+  /** Ignored (forced to PGP_OFFICE_LOCATION server-side) when the item is sensitive — never trust the client for this. */
+  pickupLocation?: string;
 }
 
 /** Auto-classify by category (SENSITIVE_CATEGORIES); a custodian/admin caller may override it. */
@@ -64,6 +67,10 @@ export async function createLostReport(user: LostFoundUser, input: CreateLostRep
 
 export async function createFoundReport(user: LostFoundUser, input: CreateFoundReportInput) {
   const sensitive = resolveSensitivity(input.category, input.isSensitive, user);
+  // Sensitive items must be deposited at PGP Office — enforced server-side
+  // regardless of what the client sent; the UI only disables the other
+  // choice, it doesn't guarantee it wasn't bypassed.
+  const pickupLocation = sensitive ? PGP_OFFICE_LOCATION : input.pickupLocation?.trim() || PGP_OFFICE_LOCATION;
   const { data, error } = await lostFoundAdmin
     .from('found_report')
     .insert({
@@ -72,7 +79,7 @@ export async function createFoundReport(user: LostFoundUser, input: CreateFoundR
       description: input.description,
       photo_url: input.photoUrl,
       contents_withheld: input.contentsWithheld ?? false,
-      pickup_location: 'Central Lost & Found Room',
+      pickup_location: pickupLocation,
       sensitivity_tier: sensitivityTierColumn(sensitive),
       status: 'available',
     })

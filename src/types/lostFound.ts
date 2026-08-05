@@ -2,6 +2,9 @@ export type ProofType = 'verbal' | 'receipt' | 'serial' | 'imei' | 'device_unloc
 
 export const DOCUMENTARY_PROOF_TYPES: ProofType[] = ['receipt', 'serial', 'imei', 'device_unlock'];
 
+/** Sensitive items must be deposited here — enforced server-side too (src/lib/lostFound/reports.ts), this is just the shared display string. */
+export const PGP_OFFICE_LOCATION = 'PGP Office';
+
 /** All selectable categories (Report Lost / Report Found category picker). */
 export const CATEGORIES = [
   'water bottle',
