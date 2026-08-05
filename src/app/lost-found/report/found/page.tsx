@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { TextArea } from "@/components/ui/TextArea";
 import { TextInput } from "@/components/ui/TextInput";
 import { Button } from "@/components/ui/Button";
-import { Checkbox } from "@/components/ui/Checkbox";
 import { RadioCard } from "@/components/ui/RadioCard";
 import { CategoryPicker } from "@/components/lost-found/CategoryPicker";
 import { PhotoField } from "@/components/lost-found/PhotoField";
@@ -18,7 +17,6 @@ export default function ReportFoundPage() {
   const router = useRouter();
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
-  const [contentsWithheld, setContentsWithheld] = useState(false);
   const [photo, setPhoto] = useState<File | null>(null);
   const [locationChoice, setLocationChoice] = useState<"pgp" | "custom">("pgp");
   const [customLocation, setCustomLocation] = useState("");
@@ -51,7 +49,6 @@ export default function ReportFoundPage() {
         category,
         description,
         photoUrl,
-        contentsWithheld,
         pickupLocation: effectiveLocationChoice === "pgp" ? PGP_OFFICE_LOCATION : customLocation.trim(),
       });
       router.push(`/lost-found/${created.id}`);
@@ -84,12 +81,6 @@ export default function ReportFoundPage() {
           />
 
           <PhotoField file={photo} onChange={setPhoto} label="Photo (required)" />
-
-          <Checkbox
-            checked={contentsWithheld}
-            onChange={setContentsWithheld}
-            label="Withhold contents from public photo"
-          />
 
           <div>
             <label className="mb-1.5 block text-sm font-medium text-gray-800">Pickup location</label>

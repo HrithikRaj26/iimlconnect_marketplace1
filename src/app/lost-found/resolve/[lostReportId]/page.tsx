@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { TextArea } from "@/components/ui/TextArea";
 import { Button } from "@/components/ui/Button";
 import { lostFoundService, ApiError } from "@/services/lostFoundService";
+import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
 
 /** "Resolution" (Section 2.3): mark resolved + optional thank-you + finder badge. */
 export default function ResolvePage() {
@@ -45,6 +46,7 @@ export default function ResolvePage() {
   return (
     <div className="min-h-screen bg-surface">
       <div className="mx-auto max-w-2xl px-6 py-8">
+        <BackToLostFound />
         <h1 className="mb-6 text-xl font-bold text-gray-900">Mark resolved</h1>
         <div className="space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-card">
           <TextArea

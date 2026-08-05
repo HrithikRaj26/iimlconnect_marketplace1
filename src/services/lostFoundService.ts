@@ -110,12 +110,3 @@ export async function uploadLostFoundPhoto(file: File, reportType: 'lost' | 'fou
   if (error) throw new Error('Failed to upload photo: ' + error.message);
   return path;
 }
-
-/** photo_url is a private Storage path, not a public URL — resolve to a signed URL for display. */
-export async function resolveLostFoundPhotoUrl(pathOrUrl: string | null | undefined): Promise<string | null> {
-  if (!pathOrUrl) return null;
-  if (pathOrUrl.startsWith('http')) return pathOrUrl;
-  const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(pathOrUrl, 3600);
-  if (error || !data) return null;
-  return data.signedUrl;
-}

@@ -6,7 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
 import { useLostFoundAuth } from "@/hooks/useLostFoundAuth";
-import { lostFoundService, resolveLostFoundPhotoUrl, ApiError } from "@/services/lostFoundService";
+import { lostFoundService, ApiError } from "@/services/lostFoundService";
+import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
 import { Contact } from "@/types/lostFound";
 
 interface Detail {
@@ -33,7 +34,6 @@ export default function ReportDetailPage() {
   const router = useRouter();
   const { userId, role } = useLostFoundAuth();
   const [report, setReport] = useState<Detail | null>(null);
-  const [photo, setPhoto] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [itemLabel, setItemLabel] = useState("");
@@ -45,7 +45,6 @@ export default function ReportDetailPage() {
     try {
       const data = (await lostFoundService.getById(params.id)) as unknown as Detail;
       setReport(data);
-      setPhoto(await resolveLostFoundPhotoUrl(data.photo_url));
     } catch (e: any) {
       setError(e.message ?? "Could not load report");
     } finally {
@@ -92,10 +91,11 @@ export default function ReportDetailPage() {
   return (
     <div className="min-h-screen bg-surface">
       <div className="mx-auto max-w-2xl px-6 py-8">
+        <BackToLostFound />
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-card">
-          {photo && (
+          {report.photo_url && (
             <div className="relative h-64 w-full bg-gray-100">
-              <Image src={photo} alt={report.category} fill className="object-cover" unoptimized />
+              <Image src={report.photo_url} alt={report.category} fill className="object-contain" unoptimized />
             </div>
           )}
           <div className="space-y-3 p-6">

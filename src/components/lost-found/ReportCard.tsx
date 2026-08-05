@@ -1,9 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { ReportSummary } from "@/types/lostFound";
-import { resolveLostFoundPhotoUrl } from "@/services/lostFoundService";
 
 const statusTone: Record<string, string> = {
   open: "bg-brand-light text-brand-dark",
@@ -14,18 +13,6 @@ const statusTone: Record<string, string> = {
 };
 
 export function ReportCard({ report, onView }: { report: ReportSummary; onView: (id: string) => void }) {
-  const [photo, setPhoto] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    resolveLostFoundPhotoUrl(report.photo_url).then((url) => {
-      if (!cancelled) setPhoto(url);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [report.photo_url]);
-
   const location = report.type === "lost" ? report.last_seen_location : report.pickup_location;
 
   return (
@@ -36,8 +23,15 @@ export function ReportCard({ report, onView }: { report: ReportSummary; onView: 
       ].join(" ")}
     >
       <div className="relative h-40 w-full bg-gray-100">
-        {photo ? (
-          <Image src={photo} alt={report.category} fill sizes="(max-width: 768px) 100vw, 320px" className="object-cover" unoptimized />
+        {report.photo_url ? (
+          <Image
+            src={report.photo_url}
+            alt={report.category}
+            fill
+            sizes="(max-width: 768px) 100vw, 320px"
+            className="object-contain"
+            unoptimized
+          />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-3xl">
             {report.is_sensitive ? "🔒" : "📷"}

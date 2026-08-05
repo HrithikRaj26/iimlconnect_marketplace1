@@ -6,7 +6,29 @@ import { notifyThankYou } from './notifications';
 import * as matching from './matching';
 
 const SENSITIVE_HIDDEN_PHOTO = null;
+const PHOTO_BUCKET = 'lost-found-photos';
 export const PGP_OFFICE_LOCATION = 'PGP Office';
+
+/**
+ * Resolves a Storage path to a signed URL using the service-role client
+ * (bypasses Storage RLS entirely). This used to happen client-side, with
+ * the browser's own (unprivileged) session calling createSignedUrl directly
+ * — which worked for Tier 1/2 photos (their Storage policy allows any
+ * authenticated user) but silently failed for sensitive-item photos, whose
+ * policy only allows custodian/admin with no owner exception. That meant
+ * even the finder who uploaded a sensitive photo couldn't generate a
+ * signed URL for their own upload. Resolving server-side, after our own
+ * visibility check has already run, fixes this and matches how every other
+ * piece of Lost & Found data already flows through the API rather than
+ * direct-to-Supabase.
+ */
+async function resolveSignedPhotoUrl(path: string | null): Promise<string | null> {
+  if (!path) return null;
+  if (path.startsWith('http')) return path; // seed-script placeholder URLs
+  const { data, error } = await lostFoundAdmin.storage.from(PHOTO_BUCKET).createSignedUrl(path, 3600);
+  if (error || !data) return null;
+  return data.signedUrl;
+}
 
 export interface CreateLostReportInput {
   category: string;
@@ -126,12 +148,13 @@ export interface BrowseQuery {
   view?: 'map' | 'list';
 }
 
-/** Sensitive-item photos hidden from everyone except custodian/admin/the report's own owner. */
-function maybeHidePhoto(row: any, requester: LostFoundUser, ownerId: string): string | null {
-  if (row.sensitivity_tier < 3) return row.photo_url;
-  if (requester.role === 'custodian' || requester.role === 'admin') return row.photo_url;
-  if (requester.id === ownerId) return row.photo_url;
-  return SENSITIVE_HIDDEN_PHOTO;
+/** Sensitive-item photos hidden from everyone except custodian/admin/the report's own owner; visible photos are resolved to a signed URL server-side. */
+async function resolveVisiblePhotoUrl(row: any, requester: LostFoundUser, ownerId: string): Promise<string | null> {
+  if (!row.photo_url) return null;
+  if (row.sensitivity_tier >= 3 && requester.role !== 'custodian' && requester.role !== 'admin' && requester.id !== ownerId) {
+    return SENSITIVE_HIDDEN_PHOTO;
+  }
+  return resolveSignedPhotoUrl(row.photo_url);
 }
 
 /** "Show to public" toggle: a lost report with visible_to_public=false is withheld from everyone except the reporter and staff (custodian/admin). */
@@ -147,12 +170,14 @@ function withSensitivityFlag(row: any) {
   return { ...rest, is_sensitive: sensitivity_tier === 3 };
 }
 
-function toPublicLost(row: any, requester: LostFoundUser) {
-  return withSensitivityFlag({ ...row, type: 'lost', photo_url: maybeHidePhoto(row, requester, row.reporter_id) });
+async function toPublicLost(row: any, requester: LostFoundUser) {
+  const photo_url = await resolveVisiblePhotoUrl(row, requester, row.reporter_id);
+  return withSensitivityFlag({ ...row, type: 'lost', photo_url });
 }
 
-function toPublicFound(row: any, requester: LostFoundUser) {
-  return withSensitivityFlag({ ...row, type: 'found', photo_url: maybeHidePhoto(row, requester, row.finder_id) });
+async function toPublicFound(row: any, requester: LostFoundUser) {
+  const photo_url = await resolveVisiblePhotoUrl(row, requester, row.finder_id);
+  return withSensitivityFlag({ ...row, type: 'found', photo_url });
 }
 
 export async function browse(query: BrowseQuery, requester: LostFoundUser) {
@@ -183,10 +208,10 @@ export async function browse(query: BrowseQuery, requester: LostFoundUser) {
   if (lostError) throw lostError;
   if (foundError) throw foundError;
 
-  const lostItems = (lost ?? [])
-    .filter((r) => canSeeWithheldLostReport(r, requester))
-    .map((r) => toPublicLost(r, requester));
-  const foundItems = (found ?? []).map((r) => toPublicFound(r, requester));
+  const lostItems = await Promise.all(
+    (lost ?? []).filter((r) => canSeeWithheldLostReport(r, requester)).map((r) => toPublicLost(r, requester)),
+  );
+  const foundItems = await Promise.all((found ?? []).map((r) => toPublicFound(r, requester)));
 
   const combined = [...lostItems, ...foundItems].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
@@ -206,7 +231,7 @@ export async function browse(query: BrowseQuery, requester: LostFoundUser) {
 }
 
 async function hydrateLostDetail(lost: any, requester: LostFoundUser) {
-  const result = toPublicLost(lost, requester) as any;
+  const result = (await toPublicLost(lost, requester)) as any;
   const confirmedMatch = await matching.getConfirmedMatchForLostReport(lost.id);
   if (confirmedMatch && requester.id === lost.reporter_id) {
     const { data: foundReport } = await lostFoundAdmin
@@ -222,7 +247,7 @@ async function hydrateLostDetail(lost: any, requester: LostFoundUser) {
 }
 
 async function hydrateFoundDetail(found: any, requester: LostFoundUser) {
-  const result = toPublicFound(found, requester) as any;
+  const result = (await toPublicFound(found, requester)) as any;
 
   if (requester.role === 'custodian' || requester.role === 'admin' || requester.id === found.finder_id) {
     result.finderContact = await getContact(found.finder_id);

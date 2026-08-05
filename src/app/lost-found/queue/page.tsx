@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { useLostFoundAuth } from "@/hooks/useLostFoundAuth";
 import { lostFoundService } from "@/services/lostFoundService";
 import { MatchQueueEntry } from "@/types/lostFound";
+import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
 
 /** "Custodian Queue" (Section 2.3). Only state=queued candidates ever appear here (AC-4/AC-5). */
 export default function MatchQueuePage() {
@@ -41,12 +42,18 @@ export default function MatchQueuePage() {
   };
 
   if (!authLoading && role === "user") {
-    return <div className="p-10 text-center text-sm text-gray-500">Custodian/admin access required.</div>;
+    return (
+      <div className="p-10 text-center text-sm text-gray-500">
+        <BackToLostFound />
+        Custodian/admin access required.
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-surface">
       <div className="mx-auto max-w-4xl px-6 py-8">
+        <BackToLostFound />
         <h1 className="mb-6 text-xl font-bold text-gray-900">Custodian confirmation queue</h1>
 
         {!loading && queue.length === 0 && (

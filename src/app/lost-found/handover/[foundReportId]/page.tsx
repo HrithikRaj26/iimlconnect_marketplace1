@@ -6,6 +6,7 @@ import { TextInput } from "@/components/ui/TextInput";
 import { Button } from "@/components/ui/Button";
 import { lostFoundService, ApiError } from "@/services/lostFoundService";
 import { DOCUMENTARY_PROOF_TYPES, ProofType } from "@/types/lostFound";
+import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
 
 const STANDARD_PROOF_OPTIONS: ProofType[] = ["verbal", ...DOCUMENTARY_PROOF_TYPES];
 
@@ -62,6 +63,7 @@ export default function HandoverPage() {
   return (
     <div className="min-h-screen bg-surface">
       <div className="mx-auto max-w-2xl px-6 py-8">
+        <BackToLostFound />
         <h1 className="mb-6 text-xl font-bold text-gray-900">Process handover</h1>
         <div className="space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-card">
           {isSensitive && (
