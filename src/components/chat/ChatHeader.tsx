@@ -73,13 +73,15 @@ export function ChatHeader({ participant, listing, transaction, onMakeOffer }: C
           Deal Closed
         </span>
       ) : (
-        <button
-          type="button"
-          onClick={onMakeOffer}
-          className="h-9 rounded-lg border border-brand px-4 text-sm font-semibold text-brand hover:bg-brand-light"
-        >
-          Make Offer
-        </button>
+        listing.askingPrice > 0 && (
+          <button
+            type="button"
+            onClick={onMakeOffer}
+            className="h-9 rounded-lg border border-brand px-4 text-sm font-semibold text-brand hover:bg-brand-light"
+          >
+            Make Offer
+          </button>
+        )
       )}
     </div>
   );

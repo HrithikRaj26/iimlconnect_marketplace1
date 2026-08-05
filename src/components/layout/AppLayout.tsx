@@ -96,8 +96,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               🔍 Lost and Found
             </Link>
             <Link 
-              href="#" 
-              className={`block px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900`}
+              href="/ventures" 
+              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/ventures") ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`}
             >
               🚀 Venture Hub
             </Link>
