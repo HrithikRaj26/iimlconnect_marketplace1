@@ -60,17 +60,43 @@ export default function LostFoundBrowsePage() {
     }
   }, [category, location, status]);
 
+  const loadMatches = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const data = await lostFoundService.myMatches();
+      setMatches(data);
+    } catch {
+      setMatches([]);
+    }
+  }, [userId]);
+
   useEffect(() => {
     search();
   }, [search]);
 
   useEffect(() => {
-    if (!userId) return;
-    lostFoundService
-      .myMatches()
-      .then(setMatches)
-      .catch(() => setMatches([]));
-  }, [userId]);
+    loadMatches();
+  }, [loadMatches]);
+
+  // Reports and matches are fetched once per mount, so a change made
+  // elsewhere (another tab/account, or a delete on the edit page) can go
+  // stale here. Refetch whenever the tab regains focus/visibility instead
+  // of requiring a manual hard refresh.
+  useEffect(() => {
+    const refresh = () => {
+      search();
+      loadMatches();
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [search, loadMatches]);
 
   const openDetail = (id: string) => router.push(`/lost-found/${id}`);
   const editReport = (id: string) => router.push(`/lost-found/edit/${id}`);
