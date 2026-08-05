@@ -38,7 +38,7 @@ export default function ResolvePage() {
         {result.badgeAwarded && (
           <p className="text-sm text-gray-500">The finder has been awarded a recognition badge.</p>
         )}
-        <Button onClick={() => router.push("/lost-found/my-reports")}>Back to My Reports</Button>
+        <Button onClick={() => router.push("/lost-found")}>Back to My Reports</Button>
       </div>
     );
   }

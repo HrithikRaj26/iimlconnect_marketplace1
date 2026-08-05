@@ -214,6 +214,10 @@ export async function browse(query: BrowseQuery, requester: LostFoundUser) {
   if (query.status) {
     lostQuery = lostQuery.eq('status', query.status);
     foundQuery = foundQuery.eq('status', query.status);
+  } else {
+    // Archived (soft-deleted) reports never show up in an unfiltered browse — including My Reports.
+    lostQuery = lostQuery.neq('status', 'archived');
+    foundQuery = foundQuery.neq('status', 'archived');
   }
 
   const [{ data: lost, error: lostError }, { data: found, error: foundError }] = await Promise.all([
@@ -265,6 +269,17 @@ async function hydrateFoundDetail(found: any, requester: LostFoundUser) {
   const result = (await toPublicFound(found)) as any;
 
   if (requester.role === 'custodian' || requester.role === 'admin' || requester.id === found.finder_id) {
+    result.finderContact = await getContact(found.finder_id);
+    // Claimant identity retained on the item page once transfer completes, for future disputes.
+    if (found.claimant_id) {
+      result.claimantContact = await getContact(found.claimant_id);
+    }
+    return result;
+  }
+
+  // Direct claim flow: once claimed, the claimant sees the finder's contact
+  // to arrange pickup — independent of the custodian-confirmed-match flow below.
+  if (requester.id === found.claimant_id) {
     result.finderContact = await getContact(found.finder_id);
     return result;
   }
@@ -346,4 +361,158 @@ export async function override(
   const candidate = await matching.getLatestCandidateForReport(reportId);
   if (!candidate) return null;
   return matching.decide(candidate.id, decision, admin.id);
+}
+
+export type ClaimResult = 'ok' | 'not_found' | 'sensitive_item' | 'already_claimed' | 'not_available';
+
+/**
+ * Self-service "this is mine" claim on a found report. Sensitive items are
+ * excluded — those still route through the custodian-mediated handover
+ * (documentary proof, PGP Office desk) rather than a bare click-to-claim.
+ */
+export async function claimItem(foundReportId: string, claimant: LostFoundUser): Promise<ClaimResult> {
+  const { data: found, error } = await lostFoundAdmin
+    .from('found_report')
+    .select('id, status, sensitivity_tier, claimant_id')
+    .eq('id', foundReportId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!found) return 'not_found';
+  if (found.sensitivity_tier >= 3) return 'sensitive_item';
+  if (found.claimant_id) return 'already_claimed';
+  if (found.status !== 'available') return 'not_available';
+
+  const { data: updated, error: updateError } = await lostFoundAdmin
+    .from('found_report')
+    .update({ claimant_id: claimant.id, claimed_at: new Date().toISOString() })
+    .eq('id', foundReportId)
+    .is('claimant_id', null) // race-safe: only succeeds if still unclaimed
+    .select('id')
+    .maybeSingle();
+  if (updateError) throw updateError;
+  if (!updated) return 'already_claimed';
+  return 'ok';
+}
+
+export type CompleteTransferResult = 'ok' | 'not_found' | 'forbidden' | 'not_claimed';
+
+/** Finder confirms the physical handoff to the claimant happened; claimant identity stays on the report for future disputes. */
+export async function completeTransfer(foundReportId: string, finder: LostFoundUser): Promise<CompleteTransferResult> {
+  const { data: found, error } = await lostFoundAdmin
+    .from('found_report')
+    .select('id, finder_id, claimant_id, transfer_completed_at')
+    .eq('id', foundReportId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!found) return 'not_found';
+  if (found.finder_id !== finder.id && finder.role !== 'admin') return 'forbidden';
+  if (!found.claimant_id) return 'not_claimed';
+
+  if (!found.transfer_completed_at) {
+    const now = new Date().toISOString();
+    await lostFoundAdmin
+      .from('found_report')
+      .update({ transfer_completed_at: now, status: 'resolved', resolved_at: now })
+      .eq('id', foundReportId);
+    await lostFoundAdmin.from('recognition').insert({
+      finder_id: found.finder_id,
+      badge_type: 'finder_recognition',
+    });
+  }
+  return 'ok';
+}
+
+export type EditableReportInput = Partial<{
+  category: string;
+  description: string;
+  photoUrl: string;
+  lastSeenLocation: string; // lost only
+  lostDate: string; // lost only
+  visibleToPublic: boolean; // lost only
+  pickupLocation: string; // found only
+}>;
+
+export type MutateResult = 'ok' | 'not_found' | 'forbidden';
+
+/** Owner-only edit. Sensitivity/pickup-location rules from create() are re-applied when category or pickupLocation change. */
+export async function updateLostReport(id: string, user: LostFoundUser, input: EditableReportInput): Promise<MutateResult> {
+  const { data: lost, error } = await lostFoundAdmin.from('lost_report').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  if (!lost) return 'not_found';
+  if (lost.reporter_id !== user.id && user.role !== 'admin') return 'forbidden';
+
+  const patch: Record<string, unknown> = {};
+  if (input.category !== undefined) patch.category = input.category;
+  if (input.description !== undefined) patch.description = input.description;
+  if (input.photoUrl !== undefined) patch.photo_url = input.photoUrl;
+  if (input.lastSeenLocation !== undefined) patch.last_seen_location = input.lastSeenLocation;
+  if (input.lostDate !== undefined) patch.lost_date = input.lostDate;
+  if (input.visibleToPublic !== undefined) patch.visible_to_public = input.visibleToPublic;
+  if (input.category !== undefined) {
+    patch.sensitivity_tier = sensitivityTierColumn(resolveSensitivity(input.category, undefined, user));
+  }
+
+  const { error: updateError } = await lostFoundAdmin.from('lost_report').update(patch).eq('id', id);
+  if (updateError) throw updateError;
+  return 'ok';
+}
+
+export async function updateFoundReport(id: string, user: LostFoundUser, input: EditableReportInput): Promise<MutateResult> {
+  const { data: found, error } = await lostFoundAdmin.from('found_report').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  if (!found) return 'not_found';
+  if (found.finder_id !== user.id && user.role !== 'admin') return 'forbidden';
+
+  const category = input.category ?? found.category;
+  const sensitive = resolveSensitivity(category, undefined, user);
+
+  const patch: Record<string, unknown> = {};
+  if (input.category !== undefined) patch.category = input.category;
+  if (input.description !== undefined) patch.description = input.description;
+  if (input.photoUrl !== undefined) patch.photo_url = input.photoUrl;
+  if (input.category !== undefined) patch.sensitivity_tier = sensitivityTierColumn(sensitive);
+  // Sensitive items are pinned to PGP Office regardless of what was requested — same rule as create().
+  if (input.pickupLocation !== undefined || input.category !== undefined) {
+    patch.pickup_location = sensitive ? PGP_OFFICE_LOCATION : (input.pickupLocation?.trim() || found.pickup_location);
+  }
+
+  const { error: updateError } = await lostFoundAdmin.from('found_report').update(patch).eq('id', id);
+  if (updateError) throw updateError;
+  return 'ok';
+}
+
+/** Soft-delete: reports may already be referenced by match_candidate/confirmation/handover rows, so archiving avoids FK violations while removing them from Browse. */
+export async function archiveLostReport(id: string, user: LostFoundUser): Promise<MutateResult> {
+  const { data: lost, error } = await lostFoundAdmin.from('lost_report').select('reporter_id').eq('id', id).maybeSingle();
+  if (error) throw error;
+  if (!lost) return 'not_found';
+  if (lost.reporter_id !== user.id && user.role !== 'admin') return 'forbidden';
+  await lostFoundAdmin.from('lost_report').update({ status: 'archived' }).eq('id', id);
+  return 'ok';
+}
+
+export async function archiveFoundReport(id: string, user: LostFoundUser): Promise<MutateResult> {
+  const { data: found, error } = await lostFoundAdmin.from('found_report').select('finder_id').eq('id', id).maybeSingle();
+  if (error) throw error;
+  if (!found) return 'not_found';
+  if (found.finder_id !== user.id && user.role !== 'admin') return 'forbidden';
+  await lostFoundAdmin.from('found_report').update({ status: 'archived' }).eq('id', id);
+  return 'ok';
+}
+
+/** Type-agnostic wrappers for the single /reports/:id route — same lost-then-found probe pattern as getById(). */
+export async function updateReport(id: string, user: LostFoundUser, input: EditableReportInput): Promise<MutateResult> {
+  const { data: lost } = await lostFoundAdmin.from('lost_report').select('id').eq('id', id).maybeSingle();
+  if (lost) return updateLostReport(id, user, input);
+  const { data: found } = await lostFoundAdmin.from('found_report').select('id').eq('id', id).maybeSingle();
+  if (found) return updateFoundReport(id, user, input);
+  return 'not_found';
+}
+
+export async function archiveReport(id: string, user: LostFoundUser): Promise<MutateResult> {
+  const { data: lost } = await lostFoundAdmin.from('lost_report').select('id').eq('id', id).maybeSingle();
+  if (lost) return archiveLostReport(id, user);
+  const { data: found } = await lostFoundAdmin.from('found_report').select('id').eq('id', id).maybeSingle();
+  if (found) return archiveFoundReport(id, user);
+  return 'not_found';
 }

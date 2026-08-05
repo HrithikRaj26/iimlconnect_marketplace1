@@ -26,6 +26,10 @@ interface Detail {
   visible_to_public?: boolean;
   finderContact?: Contact;
   matchedFinderContact?: Contact;
+  claimant_id?: string | null;
+  claimed_at?: string | null;
+  transfer_completed_at?: string | null;
+  claimantContact?: Contact;
 }
 
 /** "Report Detail" (Section 2.3). */
@@ -61,7 +65,35 @@ export default function ReportDetailPage() {
 
   const isOwner = userId === report.reporter_id;
   const isCustodian = role === "custodian" || role === "admin";
+  const isFinder = userId === report.finder_id;
+  const isClaimant = !!userId && userId === report.claimant_id;
   const contact = report.finderContact ?? report.matchedFinderContact;
+
+  const claim = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await lostFoundService.claim(report.id);
+      await load();
+    } catch (e: any) {
+      setError(e instanceof ApiError ? e.message : "Could not claim item");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const completeTransfer = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await lostFoundService.completeTransfer(report.id);
+      await load();
+    } catch (e: any) {
+      setError(e instanceof ApiError ? e.message : "Could not complete transfer");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const checkin = async () => {
     if (!itemLabel) return;
@@ -129,11 +161,40 @@ export default function ReportDetailPage() {
 
             {contact && (
               <div className="rounded-lg bg-success-light p-4">
-                <p className="mb-1 text-sm font-bold text-gray-900">Finder contact (revealed after confirmed match)</p>
+                <p className="mb-1 text-sm font-bold text-gray-900">
+                  {isClaimant ? "Finder contact — arrange pickup" : "Finder contact (revealed after confirmed match)"}
+                </p>
                 {contact.name && <p className="text-sm text-gray-700">{contact.name}</p>}
                 {contact.phone && <p className="text-sm text-gray-700">{contact.phone}</p>}
                 {contact.email && <p className="text-sm text-gray-700">{contact.email}</p>}
               </div>
+            )}
+
+            {report.claimantContact && (
+              <div className="rounded-lg bg-brand-light p-4">
+                <p className="mb-1 text-sm font-bold text-gray-900">
+                  Claimed by {report.transfer_completed_at ? "(transfer completed)" : "(pending transfer)"}
+                </p>
+                {report.claimantContact.name && <p className="text-sm text-gray-700">{report.claimantContact.name}</p>}
+                {report.claimantContact.phone && <p className="text-sm text-gray-700">{report.claimantContact.phone}</p>}
+                {report.claimantContact.email && <p className="text-sm text-gray-700">{report.claimantContact.email}</p>}
+              </div>
+            )}
+
+            {report.type === "found" &&
+              report.status === "available" &&
+              !report.is_sensitive &&
+              !report.claimant_id &&
+              !isFinder && (
+                <Button fullWidth loading={busy} onClick={claim}>
+                  Claim this Item
+                </Button>
+              )}
+
+            {report.type === "found" && isFinder && report.claimant_id && !report.transfer_completed_at && (
+              <Button fullWidth loading={busy} onClick={completeTransfer}>
+                Transfer Completed
+              </Button>
             )}
 
             {report.type === "lost" && isOwner && report.status !== "resolved" && (

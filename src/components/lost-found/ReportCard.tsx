@@ -12,7 +12,15 @@ const statusTone: Record<string, string> = {
   archived: "bg-gray-100 text-gray-500",
 };
 
-export function ReportCard({ report, onView }: { report: ReportSummary; onView: (id: string) => void }) {
+export function ReportCard({
+  report,
+  onView,
+  onEdit,
+}: {
+  report: ReportSummary;
+  onView: (id: string) => void;
+  onEdit?: (id: string) => void;
+}) {
   const location = report.type === "lost" ? report.last_seen_location : report.pickup_location;
 
   return (
@@ -58,13 +66,24 @@ export function ReportCard({ report, onView }: { report: ReportSummary; onView: 
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => onView(report.id)}
-          className="mt-3 h-9 w-full rounded-lg border border-gray-200 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-        >
-          View Details
-        </button>
+        <div className="mt-3 flex gap-2">
+          <button
+            type="button"
+            onClick={() => onView(report.id)}
+            className="h-9 flex-1 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+          >
+            View Details
+          </button>
+          {onEdit && (
+            <button
+              type="button"
+              onClick={() => onEdit(report.id)}
+              className="h-9 flex-1 rounded-lg border border-brand text-sm font-medium text-brand transition-colors hover:bg-brand-light"
+            >
+              Edit
+            </button>
+          )}
+        </div>
       </div>
     </article>
   );

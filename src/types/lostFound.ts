@@ -67,9 +67,25 @@ export interface FoundReport {
   status: 'available' | 'matched' | 'resolved' | 'archived';
   created_at: string;
   finderContact?: Contact;
+  claimant_id?: string | null;
+  claimed_at?: string | null;
+  transfer_completed_at?: string | null;
+  claimantContact?: Contact;
 }
 
 export type ReportSummary = LostReport | FoundReport;
+
+export interface InstantMatch {
+  sourceReportId: string;
+  sourceType: 'lost' | 'found';
+  matchedReportId: string;
+  matchedType: 'lost' | 'found';
+  score: number;
+  category: string;
+  description: string;
+  location: string;
+  isSensitive: boolean;
+}
 
 export interface MatchQueueEntry {
   id: string;

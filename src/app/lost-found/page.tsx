@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { TextInput } from "@/components/ui/TextInput";
 import { Button } from "@/components/ui/Button";
 import { ReportCard } from "@/components/lost-found/ReportCard";
+import { useLostFoundAuth } from "@/hooks/useLostFoundAuth";
 import { lostFoundService } from "@/services/lostFoundService";
-import { CATEGORIES, ReportSummary } from "@/types/lostFound";
+import { CATEGORIES, InstantMatch, ReportSummary } from "@/types/lostFound";
 
 const STATUS_OPTIONS = ["open", "available", "matched", "resolved"] as const;
 
@@ -36,13 +37,15 @@ function FilterPill({
 
 export default function LostFoundBrowsePage() {
   const router = useRouter();
-  const [tab, setTab] = useState<"lost" | "found">("lost");
+  const { userId } = useLostFoundAuth();
+  const [tab, setTab] = useState<"lost" | "found" | "mine">("lost");
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
   const [status, setStatus] = useState<string | undefined>(undefined);
   const [results, setResults] = useState<ReportSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [matches, setMatches] = useState<InstantMatch[]>([]);
 
   const search = useCallback(async () => {
     setLoading(true);
@@ -61,8 +64,20 @@ export default function LostFoundBrowsePage() {
     search();
   }, [search]);
 
+  useEffect(() => {
+    if (!userId) return;
+    lostFoundService
+      .myMatches()
+      .then(setMatches)
+      .catch(() => setMatches([]));
+  }, [userId]);
+
   const openDetail = (id: string) => router.push(`/lost-found/${id}`);
-  const tabResults = results.filter((r) => r.type === tab);
+  const editReport = (id: string) => router.push(`/lost-found/edit/${id}`);
+  const tabResults =
+    tab === "mine"
+      ? results.filter((r) => (r.type === "lost" ? r.reporter_id === userId : r.finder_id === userId))
+      : results.filter((r) => r.type === tab);
 
   return (
     <div className="min-h-screen bg-surface">
@@ -99,8 +114,41 @@ export default function LostFoundBrowsePage() {
           >
             Found
           </button>
+          <button
+            type="button"
+            onClick={() => setTab("mine")}
+            className={[
+              "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
+              tab === "mine" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
+            ].join(" ")}
+          >
+            My Reports
+          </button>
         </div>
       </div>
+
+      {matches.length > 0 && (
+        <div className="mx-auto max-w-7xl px-6 pt-4">
+          <div className="space-y-2">
+            {matches.map((m) => (
+              <button
+                key={`${m.sourceReportId}-${m.matchedReportId}`}
+                type="button"
+                onClick={() => router.push(`/lost-found/${m.matchedReportId}`)}
+                className="flex w-full items-center justify-between rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-left transition-colors hover:bg-amber-100"
+              >
+                <span className="text-sm font-medium text-amber-800">
+                  Possible match ({Math.round(m.score * 100)}%): your {m.sourceType} <span className="capitalize">{m.category}</span>{" "}
+                  report may match a {m.matchedType} item — &ldquo;{m.description}&rdquo; near {m.location}
+                </span>
+                <span className="ml-3 shrink-0 rounded-full bg-amber-200 px-2 py-0.5 text-xs font-bold text-amber-900">
+                  {Math.round(m.score * 100)}% match
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:flex-row">
         <aside className="w-full shrink-0 lg:w-64">
@@ -151,13 +199,13 @@ export default function LostFoundBrowsePage() {
           {error && <p className="py-4 text-sm font-medium text-red-500">{error}</p>}
           {!loading && tabResults.length === 0 && !error && (
             <p className="py-16 text-center text-sm text-gray-500">
-              No {tab} reports match these filters.
+              {tab === "mine" ? "You haven't filed any reports yet." : `No ${tab} reports match these filters.`}
             </p>
           )}
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {tabResults.map((r) => (
-              <ReportCard key={r.id} report={r} onView={openDetail} />
+              <ReportCard key={r.id} report={r} onView={openDetail} onEdit={tab === "mine" ? editReport : undefined} />
             ))}
           </div>
         </div>

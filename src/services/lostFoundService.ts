@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { LostReport, FoundReport, ReportSummary, MatchQueueEntry } from '@/types/lostFound';
+import { LostReport, FoundReport, ReportSummary, MatchQueueEntry, InstantMatch } from '@/types/lostFound';
 
 const BUCKET = 'lost-found-photos';
 
@@ -88,6 +88,17 @@ export const lostFoundService = {
     const qs = params.toString();
     return request('GET', `/metrics/precision${qs ? `?${qs}` : ''}`);
   },
+
+  claim: (foundReportId: string) => request<{ status: string }>('POST', `/found-reports/${foundReportId}/claim`),
+
+  completeTransfer: (foundReportId: string) =>
+    request<{ status: string }>('POST', `/found-reports/${foundReportId}/complete-transfer`),
+
+  myMatches: () => request<InstantMatch[]>('GET', '/my-matches'),
+
+  updateReport: (id: string, input: Record<string, unknown>) => request<{ status: string }>('PATCH', `/reports/${id}`, input),
+
+  deleteReport: (id: string) => request<{ status: string }>('DELETE', `/reports/${id}`),
 };
 
 /**
