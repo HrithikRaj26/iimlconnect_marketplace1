@@ -219,7 +219,7 @@ export async function browse(query: BrowseQuery, requester: LostFoundUser) {
     lostQuery = lostQuery.eq('status', query.status);
     foundQuery = foundQuery.eq('status', query.status);
   } else {
-    // Archived (soft-deleted) reports never show up in an unfiltered browse — including My Reports.
+    // 'archived' now only means "retention-purged" (retention.ts) — those redacted rows never show up in an unfiltered browse. Self-service deletes are hard deletes, so they're just gone.
     lostQuery = lostQuery.neq('status', 'archived');
     foundQuery = foundQuery.neq('status', 'archived');
   }
@@ -487,22 +487,60 @@ export async function updateFoundReport(id: string, user: LostFoundUser, input: 
   return 'ok';
 }
 
-/** Soft-delete: reports may already be referenced by match_candidate/confirmation/handover rows, so archiving avoids FK violations while removing them from Browse. */
-export async function archiveLostReport(id: string, user: LostFoundUser): Promise<MutateResult> {
-  const { data: lost, error } = await lostFoundAdmin.from('lost_report').select('reporter_id').eq('id', id).maybeSingle();
+/**
+ * Hard delete, for the reporter's own "My Reports" delete action — actually
+ * removes the row, not just a status flip. (Separate from retention.ts's
+ * automated purge job, which intentionally redacts+flags 'archived' instead
+ * of deleting, to preserve an audit trail for reports that already went
+ * through a confirmed match/handover; this is a direct, user-initiated
+ * delete of a report they filed, so it removes it outright.) Cleans up any
+ * match_candidate/confirmation/desk_checkin/handover rows that reference it
+ * first so the FK constraints on those tables don't block the delete, then
+ * removes the Storage photo if there is one.
+ */
+export async function deleteLostReport(id: string, user: LostFoundUser): Promise<MutateResult> {
+  const { data: lost, error } = await lostFoundAdmin.from('lost_report').select('reporter_id, photo_url').eq('id', id).maybeSingle();
   if (error) throw error;
   if (!lost) return 'not_found';
   if (lost.reporter_id !== user.id && user.role !== 'admin') return 'forbidden';
-  await lostFoundAdmin.from('lost_report').update({ status: 'archived' }).eq('id', id);
+
+  const { data: candidates } = await lostFoundAdmin.from('match_candidate').select('id').eq('lost_report_id', id);
+  const candidateIds = (candidates ?? []).map((c: any) => c.id);
+  if (candidateIds.length) {
+    await lostFoundAdmin.from('confirmation').delete().in('match_candidate_id', candidateIds);
+    await lostFoundAdmin.from('match_candidate').delete().in('id', candidateIds);
+  }
+
+  if (lost.photo_url && !lost.photo_url.startsWith('http')) {
+    await lostFoundAdmin.storage.from(PHOTO_BUCKET).remove([lost.photo_url]);
+  }
+
+  const { error: deleteError } = await lostFoundAdmin.from('lost_report').delete().eq('id', id);
+  if (deleteError) throw deleteError;
   return 'ok';
 }
 
-export async function archiveFoundReport(id: string, user: LostFoundUser): Promise<MutateResult> {
-  const { data: found, error } = await lostFoundAdmin.from('found_report').select('finder_id').eq('id', id).maybeSingle();
+export async function deleteFoundReport(id: string, user: LostFoundUser): Promise<MutateResult> {
+  const { data: found, error } = await lostFoundAdmin.from('found_report').select('finder_id, photo_url').eq('id', id).maybeSingle();
   if (error) throw error;
   if (!found) return 'not_found';
   if (found.finder_id !== user.id && user.role !== 'admin') return 'forbidden';
-  await lostFoundAdmin.from('found_report').update({ status: 'archived' }).eq('id', id);
+
+  const { data: candidates } = await lostFoundAdmin.from('match_candidate').select('id').eq('found_report_id', id);
+  const candidateIds = (candidates ?? []).map((c: any) => c.id);
+  if (candidateIds.length) {
+    await lostFoundAdmin.from('confirmation').delete().in('match_candidate_id', candidateIds);
+    await lostFoundAdmin.from('match_candidate').delete().in('id', candidateIds);
+  }
+  await lostFoundAdmin.from('desk_checkin').delete().eq('found_report_id', id);
+  await lostFoundAdmin.from('handover').delete().eq('found_report_id', id);
+
+  if (found.photo_url && !found.photo_url.startsWith('http')) {
+    await lostFoundAdmin.storage.from(PHOTO_BUCKET).remove([found.photo_url]);
+  }
+
+  const { error: deleteError } = await lostFoundAdmin.from('found_report').delete().eq('id', id);
+  if (deleteError) throw deleteError;
   return 'ok';
 }
 
@@ -515,10 +553,10 @@ export async function updateReport(id: string, user: LostFoundUser, input: Edita
   return 'not_found';
 }
 
-export async function archiveReport(id: string, user: LostFoundUser): Promise<MutateResult> {
+export async function deleteReport(id: string, user: LostFoundUser): Promise<MutateResult> {
   const { data: lost } = await lostFoundAdmin.from('lost_report').select('id').eq('id', id).maybeSingle();
-  if (lost) return archiveLostReport(id, user);
+  if (lost) return deleteLostReport(id, user);
   const { data: found } = await lostFoundAdmin.from('found_report').select('id').eq('id', id).maybeSingle();
-  if (found) return archiveFoundReport(id, user);
+  if (found) return deleteFoundReport(id, user);
   return 'not_found';
 }

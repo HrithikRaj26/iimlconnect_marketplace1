@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '@/lib/lostFoundAuth';
-import { archiveReport, getById, updateReport } from '@/lib/lostFound/reports';
+import { deleteReport, getById, updateReport } from '@/lib/lostFound/reports';
 
 /** GET /api/lost-found/reports/:id — user; phone revealed only on confirmed match (AC-6). */
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
@@ -24,12 +24,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   return NextResponse.json({ status: 'ok' });
 }
 
-/** DELETE /api/lost-found/reports/:id — owner (or admin) only; soft-delete (status='archived'). */
+/** DELETE /api/lost-found/reports/:id — owner (or admin) only; hard delete, including dependent rows and the Storage photo. */
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const auth = await requireUser(req);
   if ('error' in auth) return auth.error;
 
-  const result = await archiveReport(params.id, auth.user);
+  const result = await deleteReport(params.id, auth.user);
   if (result === 'not_found') return NextResponse.json({ message: 'Report not found' }, { status: 404 });
   if (result === 'forbidden') return NextResponse.json({ message: 'Only the reporter can delete this report' }, { status: 403 });
   return NextResponse.json({ status: 'ok' });
