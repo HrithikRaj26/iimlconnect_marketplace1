@@ -187,3 +187,75 @@ export interface FieldErrors {
   description?: string;
   pickupLocationType?: string;
 }
+
+// ── Venture Hub & Community Types (Epic-04) ──────────────────────────────────
+
+export type VentureCategory = "Tech" | "F&B" | "Fashion" | "Consulting/Freelance" | "Creative/Art" | "Services";
+
+export type VentureStatus = "draft" | "pending_approval" | "approved" | "rejected";
+
+export interface Venture {
+  id: string;
+  owner_id: string;
+  name: string;
+  tagline: string;
+  description: string;
+  category: VentureCategory;
+  logo_url?: string;
+  offerings: string[];
+  contact_links: {
+    website?: string;
+    instagram?: string;
+    whatsapp?: string;
+    [key: string]: string | undefined;
+  };
+  status: VentureStatus;
+  is_featured: boolean;
+  average_rating: number;
+  reviews_count: number;
+  owner_name: string;
+  owner_batch: string;
+  created_at: string;
+}
+
+export interface VentureReview {
+  id: string;
+  venture_id: string;
+  reviewer_id: string;
+  rating: number;
+  content: string;
+  reviewer_name: string;
+  reviewer_batch: string;
+  created_at: string;
+}
+
+export type VenturePostType = "event" | "promotion" | "update";
+
+export interface VenturePost {
+  id: string;
+  venture_id: string;
+  author_id: string;
+  type: VenturePostType;
+  title: string;
+  content: string;
+  event_date?: string;
+  event_location?: string;
+  likes: number;
+  shares: number;
+  created_at: string;
+  venture?: {
+    name: string;
+    logo_url: string | null;
+    category: string;
+  };
+  isLiked?: boolean;
+}
+
+export interface UserBadge {
+  id: string;
+  user_id: string;
+  badge_type: "top_reviewer" | "serial_entrepreneur" | "active_supporter";
+  reason: string;
+  granted_at: string;
+}
+

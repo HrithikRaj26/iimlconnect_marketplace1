@@ -72,7 +72,10 @@ export default function WelcomeDashboard({ session }: { session: any }) {
           </div>
         </a>
 
-        <div className="group relative flex flex-col items-start justify-between rounded-2xl bg-white p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer">
+        <div 
+          onClick={() => router.push("/ventures")}
+          className="group relative flex flex-col items-start justify-between rounded-2xl bg-white p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+        >
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-50 text-orange-600 mb-4">
             <span className="text-2xl">🚀</span>
           </div>
