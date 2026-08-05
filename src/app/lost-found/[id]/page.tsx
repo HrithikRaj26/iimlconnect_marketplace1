@@ -154,11 +154,11 @@ export default function ReportDetailPage() {
 
             <p className="text-sm text-gray-700">{report.description}</p>
             {report.type === "lost" ? (
-              <p className="text-sm text-gray-500">📍 Last seen: {report.last_seen_location}</p>
+              <p className="text-sm text-gray-500">Last seen: {report.last_seen_location}</p>
             ) : (
               <>
-                <p className="text-sm text-gray-500">📍 Found near: {report.found_location}</p>
-                <p className="text-sm text-gray-500">🏢 Pickup: {report.pickup_location}</p>
+                <p className="text-sm text-gray-500">Found near: {report.found_location}</p>
+                <p className="text-sm text-gray-500">Pickup: {report.pickup_location}</p>
               </>
             )}
             {report.type === "found" && report.contents_withheld && (

@@ -73,7 +73,7 @@ export default function MatchQueuePage() {
                   <p className="text-[10px] font-bold text-gray-400">LOST</p>
                   <p className="mt-0.5 text-sm font-semibold capitalize text-gray-900">{item.lost_report.category}</p>
                   <p className="mt-1 line-clamp-3 text-xs text-gray-600">{item.lost_report.description}</p>
-                  <p className="mt-1 text-[11px] text-gray-400">📍 {item.lost_report.last_seen_location}</p>
+                  <p className="mt-1 text-[11px] text-gray-400">Last seen: {item.lost_report.last_seen_location}</p>
                 </button>
                 <button
                   type="button"
@@ -83,7 +83,7 @@ export default function MatchQueuePage() {
                   <p className="text-[10px] font-bold text-gray-400">FOUND</p>
                   <p className="mt-0.5 text-sm font-semibold capitalize text-gray-900">{item.found_report.category}</p>
                   <p className="mt-1 line-clamp-3 text-xs text-gray-600">{item.found_report.description}</p>
-                  <p className="mt-1 text-[11px] text-gray-400">📍 {item.found_report.pickup_location}</p>
+                  <p className="mt-1 text-[11px] text-gray-400">Pickup: {item.found_report.pickup_location}</p>
                 </button>
               </div>
               <div className="mt-3 flex gap-2">

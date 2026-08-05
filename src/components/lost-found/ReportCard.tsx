@@ -16,9 +16,9 @@ const statusTone: Record<string, string> = {
 function MatchBreakdown({ match }: { match: InstantMatch }) {
   return (
     <ul className="mt-1.5 space-y-0.5 text-[11px] text-amber-800">
-      <li>{match.categoryMatch ? "✓" : "✗"} Category {match.categoryMatch ? "matches" : "differs"} ({match.category})</li>
-      <li>{match.locationScore > 0 ? "✓" : "✗"} Location similarity: {Math.round(match.locationScore * 100)}% ({match.location})</li>
-      <li>{match.descriptionScore > 0 ? "✓" : "✗"} Description similarity: {Math.round(match.descriptionScore * 100)}%</li>
+      <li>{match.categoryMatch ? "Match" : "No match"} — Category {match.categoryMatch ? "matches" : "differs"} ({match.category})</li>
+      <li>{match.locationScore > 0 ? "Match" : "No match"} — Location similarity: {Math.round(match.locationScore * 100)}% ({match.location})</li>
+      <li>{match.descriptionScore > 0 ? "Match" : "No match"} — Description similarity: {Math.round(match.descriptionScore * 100)}%</li>
     </ul>
   );
 }
@@ -62,8 +62,8 @@ export function ReportCard({
             unoptimized
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-3xl">
-            {report.is_sensitive ? "🔒" : "📷"}
+          <div className="flex h-full w-full items-center justify-center text-xs font-semibold uppercase tracking-wide text-gray-400">
+            {report.is_sensitive ? "Photo restricted" : "No photo"}
           </div>
         )}
       </div>
@@ -76,7 +76,7 @@ export function ReportCard({
         </div>
 
         <h3 className="text-sm font-semibold capitalize text-gray-900">{report.category}</h3>
-        <p className="mt-1 truncate text-xs text-gray-500">📍 {location}</p>
+        <p className="mt-1 truncate text-xs text-gray-500">Location: {location}</p>
 
         <div className="mt-3 flex items-center gap-2">
           <span className={["rounded px-2 py-0.5 text-[11px] font-semibold capitalize", statusTone[report.status] ?? "bg-gray-100 text-gray-500"].join(" ")}>

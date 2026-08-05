@@ -34,7 +34,7 @@ export default function ResolvePage() {
   if (result) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-surface p-8 text-center">
-        <h1 className="text-xl font-bold text-gray-900">Marked resolved 🎉</h1>
+        <h1 className="text-xl font-bold text-gray-900">Marked resolved</h1>
         {result.badgeAwarded && (
           <p className="text-sm text-gray-500">The finder has been awarded a recognition badge.</p>
         )}

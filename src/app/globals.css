@@ -24,13 +24,7 @@
   animation: card-wobble 0.6s ease-in-out;
 }
 
-/* Garamond (body) + Futura-style (headings) — scoped to Lost & Found only, applied via lost-found/layout.tsx. */
+/* Futura-style, everywhere in this module — scoped to Lost & Found only, applied via lost-found/layout.tsx. */
 .lost-found-fonts {
-  font-family: var(--font-garamond), Georgia, serif;
-}
-
-.lost-found-fonts h1,
-.lost-found-fonts h2,
-.lost-found-fonts h3 {
   font-family: var(--font-futura), "Century Gothic", sans-serif;
 }
