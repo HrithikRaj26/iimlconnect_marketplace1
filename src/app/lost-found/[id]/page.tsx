@@ -168,7 +168,11 @@ export default function ReportDetailPage() {
             {contact && (
               <div className="rounded-lg bg-success-light p-4">
                 <p className="mb-1 text-sm font-bold text-gray-900">
-                  {isClaimant ? "Finder contact — arrange pickup" : "Finder contact (revealed after confirmed match)"}
+                  {isCustodian
+                    ? "Finder contact"
+                    : isClaimant
+                      ? "Finder contact — arrange pickup"
+                      : "Finder contact (revealed after confirmed match)"}
                 </p>
                 {contact.name && <p className="text-sm text-gray-700">{contact.name}</p>}
                 {contact.phone && <p className="text-sm text-gray-700">{contact.phone}</p>}

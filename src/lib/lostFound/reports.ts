@@ -271,13 +271,24 @@ async function hydrateLostDetail(lost: any, requester: LostFoundUser) {
 
 async function hydrateFoundDetail(found: any, requester: LostFoundUser) {
   const result = (await toPublicFound(found)) as any;
+  const isStaff = requester.role === 'custodian' || requester.role === 'admin';
+  const isFinder = requester.id === found.finder_id;
 
-  if (requester.role === 'custodian' || requester.role === 'admin' || requester.id === found.finder_id) {
+  // Claimant identity retained on the item page once claimed, for future
+  // disputes — the finder needs this regardless of whether they also see
+  // finderContact below (that's their own info, not relevant to themselves).
+  if ((isStaff || isFinder) && found.claimant_id) {
+    result.claimantContact = await getContact(found.claimant_id);
+  }
+
+  if (isStaff) {
     result.finderContact = await getContact(found.finder_id);
-    // Claimant identity retained on the item page once transfer completes, for future disputes.
-    if (found.claimant_id) {
-      result.claimantContact = await getContact(found.claimant_id);
-    }
+    return result;
+  }
+
+  if (isFinder) {
+    // Viewing their own report — they already know their own contact info,
+    // so there's nothing to "reveal" here.
     return result;
   }
 
