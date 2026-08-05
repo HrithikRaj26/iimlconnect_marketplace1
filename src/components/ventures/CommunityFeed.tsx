@@ -321,7 +321,7 @@ export default function CommunityFeed() {
                   <select
                     value={selectedVentureId}
                     onChange={(e) => setSelectedVentureId(e.target.value)}
-                    className="block w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-bold text-gray-800 outline-none"
+                    className="appearance-none block w-full rounded-xl border border-gray-200 pl-3 pr-10 py-2.5 text-sm font-bold text-gray-800 outline-none focus:border-orange-500 bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%25234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.75rem_center] bg-[size:1.1rem_1.1rem] bg-no-repeat"
                   >
                     {myVentures.map((v) => (
                       <option key={v.id} value={v.id}>
