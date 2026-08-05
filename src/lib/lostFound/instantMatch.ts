@@ -93,8 +93,8 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
   const [{ data: myLost }, { data: myFound }, { data: allLost }, { data: allFound }] = await Promise.all([
     lostFoundAdmin.from('lost_report').select('*').eq('reporter_id', user.id).eq('status', 'open'),
     lostFoundAdmin.from('found_report').select('*').eq('finder_id', user.id).eq('status', 'available'),
-    lostFoundAdmin.from('found_report').select('*').eq('status', 'available'),
     lostFoundAdmin.from('lost_report').select('*').eq('status', 'open'),
+    lostFoundAdmin.from('found_report').select('*').eq('status', 'available'),
   ]);
 
   const results: InstantMatchItem[] = [];
@@ -158,12 +158,19 @@ export async function computeInstantMatches(user: LostFoundUser): Promise<Instan
     }
   }
 
-  // Belt-and-suspenders: sourceType/matchedType must always be opposite —
-  // a lost report can only ever match found reports and vice versa. This
-  // can't actually happen given how `results` is built above (each loop
-  // only ever draws matchedReportId from the opposite table), but this
-  // guards against a future regression silently shipping same-type matches.
+  // Belt-and-suspenders: sourceType/matchedType must always be opposite, and
+  // a report can never match itself. Neither can actually happen given how
+  // `results` is built above, but a same-type-label check alone previously
+  // missed a real bug (the allLost/allFound queries above were swapped, so
+  // the *labels* stayed 'lost'/'found' correctly even while matchedReportId
+  // was quietly drawn from the wrong table — including, sometimes, the
+  // source's own row). Checking the id explicitly catches that class of bug
+  // even when the type labels look fine.
   const safe = results.filter((r) => {
+    if (r.sourceReportId === r.matchedReportId) {
+      console.error(`instantMatch: dropped self-match ${r.sourceReportId}`);
+      return false;
+    }
     if (r.sourceType === r.matchedType) {
       console.error(`instantMatch: dropped same-type match ${r.sourceReportId} -> ${r.matchedReportId} (${r.sourceType})`);
       return false;
