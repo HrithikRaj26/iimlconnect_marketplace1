@@ -39,6 +39,7 @@ export default function MyVentures() {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [registeredVentureName, setRegisteredVentureName] = useState("");
 
@@ -78,6 +79,11 @@ export default function MyVentures() {
 
   const handleSubmit = async () => {
     setErrorMsg("");
+    if (!acceptTerms) {
+      setErrorMsg("You must accept the SLA terms and conditions before submitting your venture.");
+      return;
+    }
+    setSubmitting(true);
     if (!name.trim() || !tagline.trim() || !description.trim()) {
       setErrorMsg("Please complete all required fields on Step 1.");
       setCurrentStep(1);
@@ -112,6 +118,7 @@ export default function MyVentures() {
           whatsapp: cleanWhatsapp,
           email: email.trim().toLowerCase(),
         },
+        terms_accepted: acceptTerms,
       });
 
       setMyVentures([newVenture, ...myVentures]);
@@ -179,6 +186,7 @@ export default function MyVentures() {
     setInstagram("");
     setWhatsapp("");
     setEmail("");
+    setAcceptTerms(false);
     setCurrentStep(1);
     setErrorMsg("");
   };
@@ -193,6 +201,8 @@ export default function MyVentures() {
         return <span className="rounded bg-green-50 px-2 py-0.5 text-xs font-bold text-green-600 border border-green-100">Live</span>;
       case "rejected":
         return <span className="rounded bg-red-50 px-2 py-0.5 text-xs font-bold text-red-600 border border-red-100">Action Required</span>;
+      case "suspended":
+        return <span className="rounded bg-red-600 px-2 py-0.5 text-xs font-bold text-white border border-red-700">Suspended</span>;
       default:
         return null;
     }
@@ -293,6 +303,11 @@ export default function MyVentures() {
                       </div>
                     )}
                   </div>
+
+                  {/* Billing Details Panel (SLA Section) */}
+                  {(v.status === "approved" || v.status === "suspended") && (
+                    <BillingSection venture={v} onPaySuccess={loadMyData} />
+                  )}
                 </div>
               ))}
             </div>
@@ -522,6 +537,21 @@ export default function MyVentures() {
                     </div>
                   </div>
                 )}
+
+                {/* SLA Terms & Conditions Checkbox */}
+                <div className="bg-orange-50/40 border border-orange-100/60 rounded-2xl p-5 space-y-3">
+                  <label className="flex items-start gap-3 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={acceptTerms}
+                      onChange={(e) => setAcceptTerms(e.target.checked)}
+                      className="mt-0.5 h-4.5 w-4.5 rounded border-gray-300 text-orange-600 focus:ring-orange-500 cursor-pointer"
+                    />
+                    <div className="text-xs font-semibold text-gray-700 leading-relaxed">
+                      I accept the <span className="font-extrabold text-orange-700">IIML Connect Venture SLA</span>. I agree to the platform commission terms (bi-weekly billing cycles starting 14 days after approval). I understand that failing to settle non-zero dues within 7 days past the billing deadline will result in indefinite suspension of my venture from the portal.
+                    </div>
+                  </label>
+                </div>
               </div>
             )}
           </div>
@@ -627,6 +657,191 @@ export default function MyVentures() {
             >
               Awesome! 🚀
             </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface BillingSectionProps {
+  venture: Venture;
+  onPaySuccess: () => void;
+}
+
+function BillingSection({ venture, onPaySuccess }: BillingSectionProps) {
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [utr, setUtr] = useState("");
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState("");
+  const [paySuccess, setPaySuccess] = useState(false);
+
+  const start = new Date(venture.approved_at || venture.created_at);
+  const now = new Date();
+  const diffTime = Math.max(0, now.getTime() - start.getTime());
+  const diffDays = diffTime / (1000 * 60 * 60 * 24);
+  const cyclesPassed = Math.floor(diffDays / 14);
+  const nextBillingDate = new Date(start.getTime() + (cyclesPassed + 1) * 14 * 24 * 60 * 60 * 1000);
+  const suspensionDeadline = new Date(nextBillingDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+  const hasDue = parseFloat(venture.current_due.toString()) > 0;
+  const isSuspended = venture.status === "suspended";
+
+  const handlePay = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!utr || utr.trim().length < 8) {
+      setPayError("Please enter a valid Transaction Reference ID (at least 8 characters).");
+      return;
+    }
+
+    setPaying(true);
+    setPayError("");
+    try {
+      await ventureService.payVentureDue(venture.id);
+      setPaySuccess(true);
+      setTimeout(() => {
+        setShowPaymentModal(false);
+        setPaySuccess(false);
+        setUtr("");
+        onPaySuccess();
+      }, 2000);
+    } catch (err: any) {
+      setPayError(err.message || "Failed to process mock payment.");
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  return (
+    <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50/50 p-4 rounded-xl border border-gray-150 text-xs">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-gray-500">Billing Cycle:</span>
+            <span className="font-semibold text-gray-800 bg-gray-100 rounded px-1.5 py-0.5">Bi-Weekly</span>
+          </div>
+          <div className="text-[11px] font-semibold text-gray-400">
+            Next Cycle Date: {nextBillingDate.toLocaleDateString(undefined, { dateStyle: 'medium' })}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Platform Due</div>
+            <div className={`text-base font-black ${hasDue ? "text-red-600" : "text-green-600"}`}>
+              ₹{parseFloat(venture.current_due.toString()).toFixed(2)}
+            </div>
+          </div>
+          
+          {hasDue && (
+            <button
+              onClick={() => setShowPaymentModal(true)}
+              className="rounded-lg bg-gray-900 hover:bg-gray-800 text-white px-3.5 py-2 font-black transition-colors"
+            >
+              Pay Due
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Warning/Alert States */}
+      {isSuspended ? (
+        <div className="bg-red-50 text-red-700 border border-red-100 rounded-xl p-3 text-[11px] font-bold flex items-center gap-2">
+          <span>⚠️</span>
+          <span>SLA VIOLATION: This venture is suspended due to unpaid platform balance. Pay the due to instantly lift suspension.</span>
+        </div>
+      ) : hasDue ? (
+        <div className="bg-amber-50 text-amber-700 border border-amber-100 rounded-xl p-3 text-[11px] font-bold flex items-center gap-2">
+          <span>⏰</span>
+          <span>Grace Period Active: Settle balance before {suspensionDeadline.toLocaleDateString(undefined, { dateStyle: 'medium' })} to avoid automatic suspension.</span>
+        </div>
+      ) : (
+        <div className="bg-green-50 text-green-700 border border-green-100 rounded-xl p-3 text-[11px] font-bold flex items-center gap-2">
+          <span>✓</span>
+          <span>Account active and fully compliant with SLA terms. No dues pending.</span>
+        </div>
+      )}
+
+      {/* Payment Gateway Modal */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-gray-100 relative space-y-6 animate-in zoom-in-95 duration-300">
+            <button
+              onClick={() => setShowPaymentModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-extrabold text-sm"
+            >
+              ✕
+            </button>
+
+            <div className="text-center space-y-1">
+              <h3 className="text-lg font-black text-gray-900">SLA Balance Payment</h3>
+              <p className="text-xs font-semibold text-gray-400">Scan & Pay via UPI</p>
+            </div>
+
+            {paySuccess ? (
+              <div className="text-center py-8 space-y-3">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-50 text-green-500 border border-green-100 shadow-sm animate-bounce">
+                  ✓
+                </div>
+                <h4 className="text-sm font-extrabold text-gray-800">Payment Verified!</h4>
+                <p className="text-xs text-gray-500">Your venture status has been restored.</p>
+              </div>
+            ) : (
+              <form onSubmit={handlePay} className="space-y-4">
+                {/* Styled CSS QR Code Box */}
+                <div className="mx-auto h-36 w-36 bg-gray-50 border rounded-2xl flex flex-col items-center justify-center p-2.5 relative group cursor-pointer shadow-inner">
+                  <div className="grid grid-cols-6 gap-0.5 w-full h-full opacity-80 group-hover:opacity-100 transition-opacity">
+                    {[...Array(36)].map((_, idx) => {
+                      const isPattern = (idx % 5 === 0) || (idx < 6) || (idx > 30) || (idx % 6 === 0);
+                      return (
+                        <div
+                          key={idx}
+                          className={`rounded-xs ${isPattern ? "bg-gray-800" : "bg-transparent"}`}
+                        />
+                      );
+                    })}
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="bg-white px-2 py-1 rounded-md text-[9px] font-black border text-orange-600 shadow-sm">
+                      UPI QR
+                    </span>
+                  </div>
+                </div>
+
+                <div className="text-center space-y-1 text-xs">
+                  <p className="font-bold text-gray-800">Payable: ₹{parseFloat(venture.current_due.toString()).toFixed(2)}</p>
+                  <p className="text-[10px] text-gray-400">UPI ID: iimlconnect@upi</p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
+                    Transaction reference ID (UTR)
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter 12-digit UTR/Ref ID"
+                    value={utr}
+                    onChange={(e) => setUtr(e.target.value)}
+                    className="w-full text-xs rounded-xl border border-gray-200 px-3 py-2.5 font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  />
+                </div>
+
+                {payError && (
+                  <p className="text-[10px] font-bold text-red-600 bg-red-50 p-2 rounded-lg border border-red-100">
+                    ⚠️ {payError}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={paying}
+                  className="w-full rounded-xl bg-orange-600 hover:bg-orange-700 text-white py-2.5 text-xs font-black shadow-md transition-colors disabled:opacity-50"
+                >
+                  {paying ? "Verifying..." : "Confirm Payment 🚀"}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       )}

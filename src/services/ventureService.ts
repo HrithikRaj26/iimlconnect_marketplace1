@@ -18,6 +18,7 @@ export interface IVentureService {
       whatsapp?: string;
       email?: string;
     };
+    terms_accepted?: boolean;
   }): Promise<Venture>;
   updateVenture(id: string, data: Partial<VerveEditData>): Promise<Venture>;
   deleteVenture(id: string): Promise<void>;
@@ -41,6 +42,7 @@ export interface IVentureService {
     pendingQueue: Venture[];
   }>;
   updateVentureStatus(id: string, status: "approved" | "rejected"): Promise<void>;
+  payVentureDue(id: string): Promise<void>;
   toggleVentureOpenStatus(id: string, isOpen: boolean): Promise<Venture>;
 }
 
@@ -135,6 +137,7 @@ class SupabaseVentureService implements IVentureService {
       whatsapp?: string;
       email?: string;
     };
+    terms_accepted?: boolean;
   }): Promise<Venture> {
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) throw new Error("Authentication required.");
@@ -166,6 +169,8 @@ class SupabaseVentureService implements IVentureService {
       owner_name: ownerName,
       owner_batch: ownerBatch,
       is_open: false,
+      terms_accepted: data.terms_accepted || false,
+      current_due: 0.00,
     };
 
     const { data: newVenture, error } = await supabase
@@ -507,9 +512,14 @@ class SupabaseVentureService implements IVentureService {
   }
 
   async updateVentureStatus(id: string, status: "approved" | "rejected"): Promise<void> {
+    const updateObj: any = { status };
+    if (status === "approved") {
+      updateObj.approved_at = new Date().toISOString();
+    }
+    
     const { data: updated, error } = await supabase
       .from("ventures")
-      .update({ status })
+      .update(updateObj)
       .eq("id", id)
       .select()
       .single();
@@ -539,6 +549,14 @@ class SupabaseVentureService implements IVentureService {
         console.error("Failed to send approval email via API route:", err);
       }
     }
+  }
+
+  async payVentureDue(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("ventures")
+      .update({ current_due: 0.00, status: "approved" })
+      .eq("id", id);
+    if (error) throw new Error(error.message);
   }
 
   // ── Deterministic Badge Award System ────────────────────────────────────────
