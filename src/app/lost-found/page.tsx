@@ -10,7 +10,31 @@ import { useLostFoundAuth } from "@/hooks/useLostFoundAuth";
 import { lostFoundService } from "@/services/lostFoundService";
 import { CATEGORIES, InstantMatch, ReportSummary } from "@/types/lostFound";
 
-const STATUS_OPTIONS = ["open", "available", "matched", "resolved"] as const;
+// "available" is redundant with "open" (both just mean "still active") and
+// is dropped entirely. "matched" only makes sense as a My Reports filter —
+// it's meaningless on the public Lost/Found tabs, which show everyone's
+// reports rather than reports you have a stake in.
+const BROWSE_STATUS_OPTIONS = ["open", "resolved"] as const;
+const MINE_STATUS_OPTIONS = ["open", "resolved", "matched"] as const;
+
+/**
+ * The DB 'matched' status is only ever set by the custodian-confirmed-match
+ * flow (matching.ts's decide()) — the self-service claim flow (claimItem/
+ * resolve in reports.ts) never touches it, going straight from open/
+ * available to resolved. Since almost all real usage is self-service, a
+ * literal `status === 'matched'` filter would show nothing. This instead
+ * derives "matched" from the same signal the self-service flow itself uses:
+ * a found report with a claimant that isn't resolved yet, and for the
+ * paired lost report, a same-category found report claimed by this user.
+ */
+function isEffectivelyMatched(report: ReportSummary, allResults: ReportSummary[], userId: string | undefined): boolean {
+  if (report.status === "matched") return true;
+  if (report.status === "resolved" || report.status === "archived") return false;
+  if (report.type === "found") return !!report.claimant_id;
+  return allResults.some(
+    (r) => r.type === "found" && r.claimant_id === userId && r.category === report.category && r.status !== "resolved" && r.status !== "archived",
+  );
+}
 
 function FilterPill({
   active,
@@ -51,7 +75,9 @@ export default function LostFoundBrowsePage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await lostFoundService.browse({ category, location, status });
+      // "matched" is derived client-side (see isEffectivelyMatched), not a
+      // real query param — sending it to the API would return nothing.
+      const data = await lostFoundService.browse({ category, location, status: status === "matched" ? undefined : status });
       setResults(data);
     } catch (e: any) {
       setError(e.message ?? "Could not load reports");
@@ -100,10 +126,16 @@ export default function LostFoundBrowsePage() {
 
   const openDetail = (id: string) => router.push(`/lost-found/${id}`);
   const editReport = (id: string) => router.push(`/lost-found/edit/${id}`);
-  const tabResults =
+  const switchTab = (next: "lost" | "found" | "mine") => {
+    setTab(next);
+    setStatus(undefined); // status pills differ per tab, so a stale selection could silently filter to nothing
+  };
+  const statusOptions = tab === "mine" ? MINE_STATUS_OPTIONS : BROWSE_STATUS_OPTIONS;
+  const tabResults = (
     tab === "mine"
       ? results.filter((r) => (r.type === "lost" ? r.reporter_id === userId : r.finder_id === userId))
-      : results.filter((r) => r.type === tab);
+      : results.filter((r) => r.type === tab)
+  ).filter((r) => (status === "matched" ? isEffectivelyMatched(r, results, userId) : true));
   const matchesByReportId = new Map<string, InstantMatch[]>();
   for (const m of matches) {
     const list = matchesByReportId.get(m.sourceReportId) ?? [];
@@ -119,7 +151,7 @@ export default function LostFoundBrowsePage() {
           <div className="flex gap-6">
             <button
               type="button"
-              onClick={() => setTab("lost")}
+              onClick={() => switchTab("lost")}
               className={[
                 "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
                 tab === "lost" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
@@ -129,7 +161,7 @@ export default function LostFoundBrowsePage() {
             </button>
             <button
               type="button"
-              onClick={() => setTab("found")}
+              onClick={() => switchTab("found")}
               className={[
                 "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
                 tab === "found" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
@@ -139,7 +171,7 @@ export default function LostFoundBrowsePage() {
             </button>
             <button
               type="button"
-              onClick={() => setTab("mine")}
+              onClick={() => switchTab("mine")}
               className={[
                 "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
                 tab === "mine" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
@@ -194,7 +226,7 @@ export default function LostFoundBrowsePage() {
                 <FilterPill active={!status} onClick={() => setStatus(undefined)}>
                   All
                 </FilterPill>
-                {STATUS_OPTIONS.map((s) => (
+                {statusOptions.map((s) => (
                   <FilterPill key={s} active={status === s} onClick={() => setStatus(s)}>
                     {s}
                   </FilterPill>
