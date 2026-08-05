@@ -143,11 +143,14 @@ export default function LostFoundBrowsePage() {
     if (status === "open") return r.status === "open" || r.status === "available";
     return r.status === status;
   };
-  const tabResults = (
-    tab === "mine"
-      ? results.filter((r) => (r.type === "lost" ? r.reporter_id === userId : r.finder_id === userId))
-      : results.filter((r) => r.type === tab)
-  ).filter(matchesStatus);
+  // A report you authored (filed the lost report / found the item) vs. a
+  // report you merely claimed (someone else's found item you said is
+  // yours) — the claimant never authored it, so it can't be edited, but it
+  // still belongs in "My Reports" as a stake you have in it, and it's
+  // exactly the case the "Matched" filter exists to surface.
+  const isOwnReport = (r: ReportSummary) => (r.type === "lost" ? r.reporter_id === userId : r.finder_id === userId);
+  const isMineTabMember = (r: ReportSummary) => isOwnReport(r) || (r.type === "found" && r.claimant_id === userId);
+  const tabResults = (tab === "mine" ? results.filter(isMineTabMember) : results.filter((r) => r.type === tab)).filter(matchesStatus);
   const matchesByReportId = new Map<string, InstantMatch[]>();
   for (const m of matches) {
     const list = matchesByReportId.get(m.sourceReportId) ?? [];
@@ -273,7 +276,7 @@ export default function LostFoundBrowsePage() {
                   <ReportCard
                     report={r}
                     onView={openDetail}
-                    onEdit={tab === "mine" ? editReport : undefined}
+                    onEdit={tab === "mine" && isOwnReport(r) ? editReport : undefined}
                     matches={tab === "mine" ? matchesByReportId.get(r.id) : undefined}
                     onViewMatch={openDetail}
                   />
