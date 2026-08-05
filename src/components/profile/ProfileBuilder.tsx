@@ -14,6 +14,7 @@ export default function ProfileBuilder() {
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
@@ -35,6 +36,48 @@ export default function ProfileBuilder() {
 
     fetchUserProfile();
   }, []);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate size (max 3MB)
+    if (file.size > 3 * 1024 * 1024) {
+      setMessage({ type: "error", text: "Image size should be less than 3MB." });
+      return;
+    }
+
+    setUploading(true);
+    setMessage(null);
+
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `avatar_${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from("marketplace-images")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from("marketplace-images")
+        .getPublicUrl(filePath);
+
+      setAvatarUrl(publicUrl);
+      setMessage({ type: "success", text: "Photo uploaded successfully! Click Save Profile to apply changes." });
+    } catch (err: any) {
+      console.error("Error uploading file:", err);
+      setMessage({ type: "error", text: err.message || "Failed to upload photo." });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,7 +145,7 @@ export default function ProfileBuilder() {
           {/* Profile Photo selection */}
           <div className="space-y-3 pb-4 border-b border-gray-100">
             <label className="block text-sm font-semibold text-gray-700">Choose Profile Picture</label>
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-6">
               {/* Selected avatar preview */}
               <div className="h-16 w-16 rounded-full overflow-hidden border bg-gray-50 flex items-center justify-center text-lg font-bold text-gray-400">
                 {avatarUrl ? (
@@ -111,7 +154,36 @@ export default function ProfileBuilder() {
                   <span>{firstName ? firstName[0].toUpperCase() : "?"}</span>
                 )}
               </div>
+
+              {/* Upload button wrapper */}
+              <div className="flex flex-col gap-2">
+                <input
+                  type="file"
+                  id="avatar-file-input"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => document.getElementById("avatar-file-input")?.click()}
+                  disabled={uploading}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 focus:outline-none disabled:opacity-50 transition-colors shadow-sm"
+                >
+                  {uploading ? (
+                    <>
+                      <span className="h-3 w-3 animate-spin rounded-full border-2 border-gray-500 border-t-transparent" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>📷 Upload Custom Photo</>
+                  )}
+                </button>
+              </div>
               
+              {/* Preset selectors divider */}
+              <div className="h-8 w-px bg-gray-200 hidden sm:block" />
+
               {/* Preset selectors */}
               <div className="flex flex-wrap gap-2.5">
                 {[
