@@ -177,6 +177,16 @@ export default function LostFoundBrowsePage() {
   const switchTab = (next: "lost" | "found" | "mine") => {
     setTab(next);
     setStatus(undefined); // status pills differ per tab, so a stale selection could silently filter to nothing
+    // Each tab only shows its own date filter (Lost Date / Found Date /
+    // Report Created Date), so clear all three on switch — otherwise a
+    // filter set on one tab would keep silently narrowing another tab's
+    // results with no visible control to explain why.
+    setLostDateFrom("");
+    setLostDateTo("");
+    setFoundDateFrom("");
+    setFoundDateTo("");
+    setCreatedDateFrom("");
+    setCreatedDateTo("");
   };
   const statusOptions = tab === "mine" ? MINE_STATUS_OPTIONS : BROWSE_STATUS_OPTIONS;
   // "Open" covers both a lost report's 'open' status and a found report's
@@ -308,15 +318,21 @@ export default function LostFoundBrowsePage() {
               </div>
             </div>
 
-            <DateRangeField label="Lost Date" from={lostDateFrom} to={lostDateTo} onFromChange={setLostDateFrom} onToChange={setLostDateTo} />
-            <DateRangeField label="Found Date" from={foundDateFrom} to={foundDateTo} onFromChange={setFoundDateFrom} onToChange={setFoundDateTo} />
-            <DateRangeField
-              label="Report Created Date"
-              from={createdDateFrom}
-              to={createdDateTo}
-              onFromChange={setCreatedDateFrom}
-              onToChange={setCreatedDateTo}
-            />
+            {tab === "lost" && (
+              <DateRangeField label="Lost Date" from={lostDateFrom} to={lostDateTo} onFromChange={setLostDateFrom} onToChange={setLostDateTo} />
+            )}
+            {tab === "found" && (
+              <DateRangeField label="Found Date" from={foundDateFrom} to={foundDateTo} onFromChange={setFoundDateFrom} onToChange={setFoundDateTo} />
+            )}
+            {tab === "mine" && (
+              <DateRangeField
+                label="Report Created Date"
+                from={createdDateFrom}
+                to={createdDateTo}
+                onFromChange={setCreatedDateFrom}
+                onToChange={setCreatedDateTo}
+              />
+            )}
           </div>
         </aside>
 
