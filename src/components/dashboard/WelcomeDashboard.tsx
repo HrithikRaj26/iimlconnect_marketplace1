@@ -53,24 +53,20 @@ export default function WelcomeDashboard({ session }: { session: any }) {
 
 
 
-        <a
-          href="https://mobile-liart-alpha.vercel.app/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block"
+        <div 
+          onClick={() => router.push("/lost-found")}
+          className="group relative flex flex-col items-start justify-between rounded-2xl bg-white p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
         >
-          <div className="group relative flex flex-col items-start justify-between rounded-2xl bg-white p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer h-full">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-50 text-purple-600 mb-4">
-              <span className="text-2xl">🔍</span>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-600">Lost and Found</h3>
-              <p className="mt-2 text-sm text-gray-500">
-                Report and recover lost items on campus.
-              </p>
-            </div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-50 text-purple-600 mb-4">
+            <span className="text-2xl">🔍</span>
           </div>
-        </a>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-600">Lost and Found</h3>
+            <p className="mt-2 text-sm text-gray-500">
+              Report and recover lost items on campus.
+            </p>
+          </div>
+        </div>
 
         <div 
           onClick={() => router.push("/ventures")}
