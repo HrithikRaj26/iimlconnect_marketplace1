@@ -36,6 +36,45 @@ function isEffectivelyMatched(report: ReportSummary, allResults: ReportSummary[]
   );
 }
 
+function DateRangeField({
+  label,
+  from,
+  to,
+  onFromChange,
+  onToChange,
+}: {
+  label: string;
+  from: string;
+  to: string;
+  onFromChange: (v: string) => void;
+  onToChange: (v: string) => void;
+}) {
+  const inputClass =
+    "h-10 w-full min-w-0 rounded-lg border border-gray-300 bg-white px-2 text-xs text-gray-900 outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20";
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-medium text-gray-800">{label}</label>
+      <div className="flex items-center gap-2">
+        <input type="date" value={from} onChange={(e) => onFromChange(e.target.value)} className={inputClass} aria-label={`${label} from`} />
+        <span className="shrink-0 text-xs text-gray-400">to</span>
+        <input type="date" value={to} onChange={(e) => onToChange(e.target.value)} className={inputClass} aria-label={`${label} to`} />
+      </div>
+    </div>
+  );
+}
+
+// ISO date/timestamp strings sort lexically the same as chronologically, so
+// slicing to the date-only prefix and comparing as strings avoids a Date
+// parse for every report on every render.
+function inDateRange(value: string | null | undefined, from: string, to: string): boolean {
+  if (!from && !to) return true;
+  if (!value) return true; // nothing to compare against — don't exclude reports that just lack the field
+  const d = value.slice(0, 10);
+  if (from && d < from) return false;
+  if (to && d > to) return false;
+  return true;
+}
+
 function FilterPill({
   active,
   onClick,
@@ -66,6 +105,12 @@ export default function LostFoundBrowsePage() {
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
   const [status, setStatus] = useState<string | undefined>(undefined);
+  const [lostDateFrom, setLostDateFrom] = useState("");
+  const [lostDateTo, setLostDateTo] = useState("");
+  const [foundDateFrom, setFoundDateFrom] = useState("");
+  const [foundDateTo, setFoundDateTo] = useState("");
+  const [createdDateFrom, setCreatedDateFrom] = useState("");
+  const [createdDateTo, setCreatedDateTo] = useState("");
   const [results, setResults] = useState<ReportSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -143,6 +188,18 @@ export default function LostFoundBrowsePage() {
     if (status === "open") return r.status === "open" || r.status === "available";
     return r.status === status;
   };
+  // Found reports have no field for "the day it was found" distinct from
+  // when the report was filed, so "Found Date" filters on created_at for
+  // found reports — the same field "Report Created Date" also uses, just
+  // scoped to one type. Each date filter only constrains the report type
+  // it actually applies to; reports of the other type pass through
+  // unaffected by it.
+  const matchesDates = (r: ReportSummary): boolean => {
+    if (r.type === "lost" && !inDateRange(r.lost_date, lostDateFrom, lostDateTo)) return false;
+    if (r.type === "found" && !inDateRange(r.created_at, foundDateFrom, foundDateTo)) return false;
+    if (!inDateRange(r.created_at, createdDateFrom, createdDateTo)) return false;
+    return true;
+  };
   // A report you authored (filed the lost report / found the item) vs. a
   // report you merely claimed (someone else's found item you said is
   // yours) — the claimant never authored it, so it can't be edited, but it
@@ -150,7 +207,9 @@ export default function LostFoundBrowsePage() {
   // exactly the case the "Matched" filter exists to surface.
   const isOwnReport = (r: ReportSummary) => (r.type === "lost" ? r.reporter_id === userId : r.finder_id === userId);
   const isMineTabMember = (r: ReportSummary) => isOwnReport(r) || (r.type === "found" && r.claimant_id === userId);
-  const tabResults = (tab === "mine" ? results.filter(isMineTabMember) : results.filter((r) => r.type === tab)).filter(matchesStatus);
+  const tabResults = (tab === "mine" ? results.filter(isMineTabMember) : results.filter((r) => r.type === tab))
+    .filter(matchesStatus)
+    .filter(matchesDates);
   const matchesByReportId = new Map<string, InstantMatch[]>();
   for (const m of matches) {
     const list = matchesByReportId.get(m.sourceReportId) ?? [];
@@ -248,6 +307,16 @@ export default function LostFoundBrowsePage() {
                 ))}
               </div>
             </div>
+
+            <DateRangeField label="Lost Date" from={lostDateFrom} to={lostDateTo} onFromChange={setLostDateFrom} onToChange={setLostDateTo} />
+            <DateRangeField label="Found Date" from={foundDateFrom} to={foundDateTo} onFromChange={setFoundDateFrom} onToChange={setFoundDateTo} />
+            <DateRangeField
+              label="Report Created Date"
+              from={createdDateFrom}
+              to={createdDateTo}
+              onFromChange={setCreatedDateFrom}
+              onToChange={setCreatedDateTo}
+            />
           </div>
         </aside>
 
