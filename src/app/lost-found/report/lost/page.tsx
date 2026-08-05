@@ -7,6 +7,7 @@ import { TextArea } from "@/components/ui/TextArea";
 import { Button } from "@/components/ui/Button";
 import { CategoryPicker } from "@/components/lost-found/CategoryPicker";
 import { PhotoField } from "@/components/lost-found/PhotoField";
+import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
 import { lostFoundService, uploadLostFoundPhoto } from "@/services/lostFoundService";
 import { suggestTierForCategory } from "@/types/lostFound";
 
@@ -56,6 +57,7 @@ export default function ReportLostPage() {
   return (
     <div className="min-h-screen bg-surface">
       <div className="mx-auto max-w-2xl px-6 py-8">
+        <BackToLostFound />
         <h1 className="mb-6 text-xl font-bold text-gray-900">Report a lost item</h1>
 
         <div className="space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-card">
