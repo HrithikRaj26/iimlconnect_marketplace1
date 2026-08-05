@@ -213,6 +213,12 @@ export default function ReportDetailPage() {
                 </Button>
               )}
 
+            {report.type === "found" && report.status === "available" && report.is_sensitive && (
+              <p className="rounded-lg bg-red-50 p-3 text-sm font-medium text-red-600">
+                This item was deposited at PGP office by the finder. Please collect it from PGP office.
+              </p>
+            )}
+
             {report.type === "found" && isFinder && report.claimant_id && !report.transfer_completed_at && (
               <Button fullWidth loading={busy} onClick={completeTransfer}>
                 Transfer Completed
