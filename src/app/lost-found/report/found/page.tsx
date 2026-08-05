@@ -12,17 +12,24 @@ import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
 import { lostFoundService, uploadLostFoundPhoto } from "@/services/lostFoundService";
 import { isSensitiveCategory, PGP_OFFICE_LOCATION } from "@/types/lostFound";
 
-/** "Report Found" (Section 2.3). Photo is required (AC-2). */
+/** Reads a prefill query param without useSearchParams(), so this page doesn't need a Suspense boundary to stay statically prerenderable. */
+function prefillParam(key: string): string {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get(key) ?? "";
+}
+
+/** "Report Found" (Section 2.3). Photo is required (AC-2). Category/description/location can arrive prefilled from a lost report's "I Found This Item" button. */
 export default function ReportFoundPage() {
   const router = useRouter();
-  const [category, setCategory] = useState("");
-  const [description, setDescription] = useState("");
-  const [foundLocation, setFoundLocation] = useState("");
+  const [category, setCategory] = useState(() => prefillParam("category"));
+  const [description, setDescription] = useState(() => prefillParam("description"));
+  const [foundLocation, setFoundLocation] = useState(() => prefillParam("location"));
   const [photo, setPhoto] = useState<File | null>(null);
   const [locationChoice, setLocationChoice] = useState<"pgp" | "custom">("pgp");
   const [customLocation, setCustomLocation] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [wasPrefilled] = useState(() => !!prefillParam("category"));
 
   const sensitive = isSensitiveCategory(category);
   // Sensitive items are always PGP Office, regardless of what was picked
@@ -66,6 +73,12 @@ export default function ReportFoundPage() {
       <div className="mx-auto max-w-2xl px-6 py-8">
         <BackToLostFound />
         <h1 className="mb-6 text-xl font-bold text-gray-900">Report a found item</h1>
+
+        {wasPrefilled && (
+          <p className="mb-4 rounded-lg bg-brand-light p-3 text-sm text-brand-dark">
+            Pre-filled from a lost report — double-check the details match what you actually found before submitting.
+          </p>
+        )}
 
         <div className="space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-card">
           <div>

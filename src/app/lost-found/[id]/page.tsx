@@ -209,6 +209,23 @@ export default function ReportDetailPage() {
               </Button>
             )}
 
+            {report.type === "lost" && !isOwner && report.status === "open" && (
+              <Button
+                fullWidth
+                variant="secondary"
+                onClick={() => {
+                  const params = new URLSearchParams({
+                    category: report.category,
+                    description: report.description,
+                    location: report.last_seen_location ?? "",
+                  });
+                  router.push(`/lost-found/report/found?${params.toString()}`);
+                }}
+              >
+                I Found This Item — File a Found Report
+              </Button>
+            )}
+
             {report.type === "found" && isCustodian && report.status === "matched" && (
               <Button fullWidth onClick={() => router.push(`/lost-found/handover/${report.id}?sensitive=${report.is_sensitive}`)}>
                 Process handover
