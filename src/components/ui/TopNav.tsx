@@ -1,5 +1,6 @@
 import Link from "next/link";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 interface TopNavProps {
   /** Which nav item to highlight as active. */
@@ -8,7 +9,53 @@ interface TopNavProps {
   profile?: { name: string; avatar: string } | null;
 }
 
-export function TopNav({ active = "marketplace", onMenuClick, profile }: TopNavProps) {
+export function TopNav({ active = "marketplace", onMenuClick, profile: propProfile }: TopNavProps) {
+  const [profile, setProfile] = useState<{ name: string; avatar: string } | null>(propProfile || null);
+
+  useEffect(() => {
+    if (propProfile) {
+      setProfile(propProfile);
+      return;
+    }
+
+    const fetchProfile = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const metadata = session.user.user_metadata || {};
+          const fullName = metadata.full_name || metadata.name || '';
+          let fName = metadata.given_name || metadata.first_name || '';
+          if (!fName && fullName) {
+            fName = fullName.split(' ')[0];
+          }
+          const avatar = metadata.avatar_url || metadata.picture || '';
+          setProfile({ name: fullName || fName || "Student", avatar });
+        }
+      } catch (e) {
+        console.error("Error loading top nav profile:", e);
+      }
+    };
+
+    fetchProfile();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const metadata = session.user.user_metadata || {};
+        const fullName = metadata.full_name || metadata.name || '';
+        let fName = metadata.given_name || metadata.first_name || '';
+        if (!fName && fullName) {
+          fName = fullName.split(' ')[0];
+        }
+        const avatar = metadata.avatar_url || metadata.picture || '';
+        setProfile({ name: fullName || fName || "Student", avatar });
+      } else {
+        setProfile(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [propProfile]);
+
   const linkClass = (key: TopNavProps["active"]) =>
     key === active ? "text-brand" : "text-gray-500 hover:text-gray-800";
 
