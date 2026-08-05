@@ -148,12 +148,27 @@ export interface BrowseQuery {
   view?: 'map' | 'list';
 }
 
-/** Sensitive-item photos hidden from everyone except custodian/admin/the report's own owner; visible photos are resolved to a signed URL server-side. */
-async function resolveVisiblePhotoUrl(row: any, requester: LostFoundUser, ownerId: string): Promise<string | null> {
+/**
+ * Lost-report photos: hidden for sensitive items unless the viewer is
+ * custodian/admin/the reporter — the owner's own photo of their own lost
+ * item, kept conservative by default.
+ *
+ * Found-report photos: always resolved, sensitive or not. A found item is
+ * already safely deposited (PGP Office for sensitive ones) — showing its
+ * photo publicly is what lets the true owner recognize and claim it, which
+ * is the actual point of the report; sensitivity here instead controls the
+ * handover process (documentary proof, PGP-Office-only drop-off), not photo
+ * visibility.
+ */
+async function resolveLostPhotoUrl(row: any, requester: LostFoundUser, ownerId: string): Promise<string | null> {
   if (!row.photo_url) return null;
   if (row.sensitivity_tier >= 3 && requester.role !== 'custodian' && requester.role !== 'admin' && requester.id !== ownerId) {
     return SENSITIVE_HIDDEN_PHOTO;
   }
+  return resolveSignedPhotoUrl(row.photo_url);
+}
+
+async function resolveFoundPhotoUrl(row: any): Promise<string | null> {
   return resolveSignedPhotoUrl(row.photo_url);
 }
 
@@ -171,12 +186,12 @@ function withSensitivityFlag(row: any) {
 }
 
 async function toPublicLost(row: any, requester: LostFoundUser) {
-  const photo_url = await resolveVisiblePhotoUrl(row, requester, row.reporter_id);
+  const photo_url = await resolveLostPhotoUrl(row, requester, row.reporter_id);
   return withSensitivityFlag({ ...row, type: 'lost', photo_url });
 }
 
-async function toPublicFound(row: any, requester: LostFoundUser) {
-  const photo_url = await resolveVisiblePhotoUrl(row, requester, row.finder_id);
+async function toPublicFound(row: any) {
+  const photo_url = await resolveFoundPhotoUrl(row);
   return withSensitivityFlag({ ...row, type: 'found', photo_url });
 }
 
@@ -211,7 +226,7 @@ export async function browse(query: BrowseQuery, requester: LostFoundUser) {
   const lostItems = await Promise.all(
     (lost ?? []).filter((r) => canSeeWithheldLostReport(r, requester)).map((r) => toPublicLost(r, requester)),
   );
-  const foundItems = await Promise.all((found ?? []).map((r) => toPublicFound(r, requester)));
+  const foundItems = await Promise.all((found ?? []).map((r) => toPublicFound(r)));
 
   const combined = [...lostItems, ...foundItems].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
@@ -247,7 +262,7 @@ async function hydrateLostDetail(lost: any, requester: LostFoundUser) {
 }
 
 async function hydrateFoundDetail(found: any, requester: LostFoundUser) {
-  const result = (await toPublicFound(found, requester)) as any;
+  const result = (await toPublicFound(found)) as any;
 
   if (requester.role === 'custodian' || requester.role === 'admin' || requester.id === found.finder_id) {
     result.finderContact = await getContact(found.finder_id);

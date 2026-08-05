@@ -34,17 +34,12 @@ function FilterPill({
   );
 }
 
-/**
- * "Map" view groups results by location text instead of pins — the schema
- * stores location as text (no lat/lng), same simplification as the
- * original React Native build.
- */
 export default function LostFoundBrowsePage() {
   const router = useRouter();
+  const [tab, setTab] = useState<"lost" | "found">("lost");
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
   const [status, setStatus] = useState<string | undefined>(undefined);
-  const [view, setView] = useState<"list" | "map">("list");
   const [results, setResults] = useState<ReportSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,29 +62,43 @@ export default function LostFoundBrowsePage() {
   }, [search]);
 
   const openDetail = (id: string) => router.push(`/lost-found/${id}`);
-
-  const groups =
-    view === "map"
-      ? results.reduce<Record<string, ReportSummary[]>>((acc, r) => {
-          const key = r.type === "lost" ? r.last_seen_location : r.pickup_location;
-          acc[key] = [...(acc[key] ?? []), r];
-          return acc;
-        }, {})
-      : null;
+  const tabResults = results.filter((r) => r.type === tab);
 
   return (
     <div className="min-h-screen bg-surface">
       <div className="border-b border-gray-100 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-lg font-bold text-gray-900">Lost &amp; Found</h1>
-          <div className="flex gap-2">
-            <Link href="/lost-found/report/lost">
-              <Button variant="secondary">Report Lost</Button>
-            </Link>
-            <Link href="/lost-found/report/found">
-              <Button>Report Found</Button>
-            </Link>
-          </div>
+        <div className="mx-auto flex max-w-7xl justify-center gap-3 px-6 py-4">
+          <Link href="/lost-found/report/lost">
+            <Button variant="secondary">Report Lost</Button>
+          </Link>
+          <Link href="/lost-found/report/found">
+            <Button>Report Found</Button>
+          </Link>
+        </div>
+      </div>
+
+      <div className="border-b border-gray-100 bg-white">
+        <div className="mx-auto flex max-w-7xl gap-6 px-6">
+          <button
+            type="button"
+            onClick={() => setTab("lost")}
+            className={[
+              "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
+              tab === "lost" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
+            ].join(" ")}
+          >
+            Lost
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("found")}
+            className={[
+              "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
+              tab === "found" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
+            ].join(" ")}
+          >
+            Found
+          </button>
         </div>
       </div>
 
@@ -134,48 +143,23 @@ export default function LostFoundBrowsePage() {
                 ))}
               </div>
             </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-800">View</label>
-              <div className="flex flex-wrap gap-2">
-                <FilterPill active={view === "list"} onClick={() => setView("list")}>
-                  List
-                </FilterPill>
-                <FilterPill active={view === "map"} onClick={() => setView("map")}>
-                  Map
-                </FilterPill>
-              </div>
-            </div>
           </div>
         </aside>
 
         <div className="min-w-0 flex-1">
-          {loading && results.length === 0 && <p className="py-16 text-center text-sm text-gray-500">Loading…</p>}
+          {loading && tabResults.length === 0 && <p className="py-16 text-center text-sm text-gray-500">Loading…</p>}
           {error && <p className="py-4 text-sm font-medium text-red-500">{error}</p>}
-          {!loading && results.length === 0 && !error && (
-            <p className="py-16 text-center text-sm text-gray-500">No reports match these filters.</p>
+          {!loading && tabResults.length === 0 && !error && (
+            <p className="py-16 text-center text-sm text-gray-500">
+              No {tab} reports match these filters.
+            </p>
           )}
 
-          {view === "list" ? (
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              {results.map((r) => (
-                <ReportCard key={r.id} report={r} onView={openDetail} />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-8">
-              {Object.entries(groups ?? {}).map(([loc, items]) => (
-                <div key={loc}>
-                  <h2 className="mb-3 text-sm font-bold text-gray-700">📍 {loc}</h2>
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                    {items.map((r) => (
-                      <ReportCard key={r.id} report={r} onView={openDetail} />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {tabResults.map((r) => (
+              <ReportCard key={r.id} report={r} onView={openDetail} />
+            ))}
+          </div>
         </div>
       </main>
     </div>
