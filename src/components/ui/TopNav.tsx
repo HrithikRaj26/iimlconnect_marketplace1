@@ -176,13 +176,33 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
           </span>
         </Link>
         
-        <button
-          onClick={toggle}
-          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-          className="flex items-center justify-center h-10 w-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors"
-        >
-          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
+        {/* Theme toggle: two-button pill */}
+        <div className="flex items-center rounded-full border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-0.5 gap-0.5">
+          <button
+            onClick={() => theme !== 'light' && toggle()}
+            title="Light Mode"
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${
+              theme === 'light'
+                ? 'bg-white dark:bg-gray-900 text-amber-600 shadow-sm'
+                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+            }`}
+          >
+            <Sun size={13} />
+            <span className="hidden sm:inline">Light</span>
+          </button>
+          <button
+            onClick={() => theme !== 'dark' && toggle()}
+            title="Dark Mode"
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${
+              theme === 'dark'
+                ? 'bg-gray-900 text-blue-400 shadow-sm'
+                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+            }`}
+          >
+            <Moon size={13} />
+            <span className="hidden sm:inline">Dark</span>
+          </button>
+        </div>
 
         <button
           onClick={handleLogout}
