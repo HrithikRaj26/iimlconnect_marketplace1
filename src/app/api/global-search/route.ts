@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { lostFoundAdmin } from '@/lib/lostFoundSupabaseAdmin';
+import Fuse from 'fuse.js';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -17,10 +18,9 @@ export async function GET(req: NextRequest) {
       try {
         return await supabase
           .from('listings')
-          .select('id, title, price, image_url')
-          .or(`title.ilike."${searchTerm}",description.ilike."${searchTerm}"`)
+          .select('id, title, price, image_url, description')
           .order('created_at', { ascending: false })
-          .limit(4);
+          .limit(100);
       } catch (e) {
         return { data: [], error: e };
       }
@@ -30,11 +30,10 @@ export async function GET(req: NextRequest) {
       try {
         return await supabase
           .from('ventures')
-          .select('id, name, tagline, logo_url')
-          .or(`name.ilike."${searchTerm}",tagline.ilike."${searchTerm}",description.ilike."${searchTerm}"`)
+          .select('id, name, tagline, description, logo_url')
           .eq('status', 'approved')
           .order('created_at', { ascending: false })
-          .limit(4);
+          .limit(100);
       } catch (e) {
         return { data: [], error: e };
       }
@@ -44,10 +43,9 @@ export async function GET(req: NextRequest) {
       try {
         return await lostFoundAdmin
           .from('lost_report')
-          .select('id, category, last_seen_location, status')
-          .or(`category.ilike."${searchTerm}",description.ilike."${searchTerm}"`)
+          .select('id, category, description, last_seen_location, status')
           .order('created_at', { ascending: false })
-          .limit(3);
+          .limit(100);
       } catch (e) {
         return { data: [], error: e };
       }
@@ -57,10 +55,9 @@ export async function GET(req: NextRequest) {
       try {
         return await lostFoundAdmin
           .from('found_report')
-          .select('id, category, pickup_location, status')
-          .or(`category.ilike."${searchTerm}",description.ilike."${searchTerm}"`)
+          .select('id, category, description, pickup_location, status')
           .order('created_at', { ascending: false })
-          .limit(3);
+          .limit(100);
       } catch (e) {
         return { data: [], error: e };
       }
@@ -73,8 +70,24 @@ export async function GET(req: NextRequest) {
       getFound()
     ]);
 
+    // Apply Fuse.js Fuzzy Searching
+    const fuseOptions = {
+      includeScore: true,
+      threshold: 0.4,
+    };
+
+    const fuseMarketplace = new Fuse(listingsRes.data || [], { ...fuseOptions, keys: ['title', 'description'] });
+    const fuseVentures = new Fuse(venturesRes.data || [], { ...fuseOptions, keys: ['name', 'tagline', 'description'] });
+    const fuseLost = new Fuse(lostRes.data || [], { ...fuseOptions, keys: ['category', 'description'] });
+    const fuseFound = new Fuse(foundRes.data || [], { ...fuseOptions, keys: ['category', 'description'] });
+
+    const matchedMarketplace = fuseMarketplace.search(query).slice(0, 4).map(res => res.item);
+    const matchedVentures = fuseVentures.search(query).slice(0, 4).map(res => res.item);
+    const matchedLost = fuseLost.search(query).slice(0, 3).map(res => res.item);
+    const matchedFound = fuseFound.search(query).slice(0, 3).map(res => res.item);
+
     // Format results for the frontend
-    const marketplace = (listingsRes.data || []).map((item: any) => ({
+    const marketplace = matchedMarketplace.map((item: any) => ({
       id: item.id,
       title: item.title,
       subtitle: `₹${item.price}`,
@@ -83,7 +96,7 @@ export async function GET(req: NextRequest) {
       url: `/marketplace/${item.id}`
     }));
 
-    const ventures = (venturesRes.data || []).map((item: any) => ({
+    const ventures = matchedVentures.map((item: any) => ({
       id: item.id,
       title: item.name,
       subtitle: item.tagline,
@@ -92,7 +105,7 @@ export async function GET(req: NextRequest) {
       url: `/ventures/${item.id}`
     }));
 
-    const lostItems = (lostRes.data || []).map((item: any) => ({
+    const lostItems = matchedLost.map((item: any) => ({
       id: item.id,
       title: item.category,
       subtitle: `Lost at: ${item.last_seen_location} • Status: ${item.status}`,
@@ -100,7 +113,7 @@ export async function GET(req: NextRequest) {
       url: `/lost-found/item/${item.id}`
     }));
 
-    const foundItems = (foundRes.data || []).map((item: any) => ({
+    const foundItems = matchedFound.map((item: any) => ({
       id: item.id,
       title: item.category,
       subtitle: `Found at: ${item.pickup_location} • Status: ${item.status}`,

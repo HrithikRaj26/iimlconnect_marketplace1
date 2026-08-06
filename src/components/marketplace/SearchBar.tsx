@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import { Mic } from "lucide-react";
+import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 
 interface SearchBarProps {
   value: string;
@@ -9,6 +11,8 @@ interface SearchBarProps {
 }
 
 export function SearchBar({ value, onChange, placeholder }: SearchBarProps) {
+  const { isListening, startListening } = useVoiceSearch(onChange);
+
   return (
     <div className="relative flex w-full items-center">
       <span className="pointer-events-none absolute left-4 text-gray-400">
@@ -27,20 +31,32 @@ export function SearchBar({ value, onChange, placeholder }: SearchBarProps) {
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder ?? "Search books, furniture, electronics"}
         aria-label="Search listings"
-        className="h-12 w-full rounded-full border border-gray-200 bg-white pl-12 pr-11 text-sm text-gray-900 outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20"
+        className="h-12 w-full rounded-full border border-gray-200 bg-white pl-12 pr-20 text-sm text-gray-900 outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20"
       />
-      {value && (
+      
+      <div className="absolute right-3 flex items-center gap-1">
         <button
           type="button"
-          onClick={() => onChange("")}
-          aria-label="Clear search"
-          className="absolute right-4 flex h-6 w-6 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          onClick={startListening}
+          className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${isListening ? 'bg-red-100 text-red-500 animate-pulse' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
+          title="Voice Search"
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-          </svg>
+          <Mic size={18} strokeWidth={2} />
         </button>
-      )}
+
+        {value && (
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            aria-label="Clear search"
+            className="flex h-6 w-6 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+              <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+            </svg>
+          </button>
+        )}
+      </div>
     </div>
   );
 }

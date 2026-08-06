@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { Venture, VentureReview, VenturePost, UserBadge, VentureCategory, VentureStatus } from "@/types";
+import Fuse from "fuse.js";
 
 export interface IVentureService {
   getVentures(filters: { query?: string; category?: string; sort?: "popular" | "newest" }): Promise<Venture[]>;
@@ -74,14 +75,18 @@ class SupabaseVentureService implements IVentureService {
       query = query.eq("category", filters.category);
     }
 
-    if (filters.query) {
-      query = query.or(`name.ilike.%${filters.query}%,tagline.ilike.%${filters.query}%,description.ilike.%${filters.query}%`);
-    }
-
     const { data, error } = await query;
     if (error) throw new Error(error.message);
 
-    const ventures = data as Venture[];
+    let ventures = data as Venture[];
+
+    if (filters.query?.trim()) {
+      const fuse = new Fuse(ventures, {
+        keys: ['name', 'tagline', 'description'],
+        threshold: 0.4,
+      });
+      ventures = fuse.search(filters.query.trim()).map(r => r.item);
+    }
 
     if (filters.sort === "popular") {
       // sort by score: average_rating * log(reviews_count + 1) or simply average_rating desc, reviews_count desc

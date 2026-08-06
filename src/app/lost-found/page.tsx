@@ -9,6 +9,9 @@ import { ReportCard } from "@/components/lost-found/ReportCard";
 import { useLostFoundAuth } from "@/hooks/useLostFoundAuth";
 import { lostFoundService } from "@/services/lostFoundService";
 import { CATEGORIES, InstantMatch, ReportSummary } from "@/types/lostFound";
+import Fuse from "fuse.js";
+import { Mic } from "lucide-react";
+import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 
 // "available" is redundant with "open" (both just mean "still active") and
 // is dropped entirely. "matched" only makes sense as a My Reports filter —
@@ -108,6 +111,8 @@ export default function LostFoundBrowsePage() {
     : "mine";
   const [tab, setTab] = useState<"lost" | "found" | "mine">(initialTab);
   
+  const [searchQuery, setSearchQuery] = useState("");
+  const { isListening, startListening } = useVoiceSearch(setSearchQuery);
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
   const [status, setStatus] = useState<string | undefined>(undefined);
@@ -223,9 +228,19 @@ export default function LostFoundBrowsePage() {
   // exactly the case the "Matched" filter exists to surface.
   const isOwnReport = (r: ReportSummary) => (r.type === "lost" ? r.reporter_id === userId : r.finder_id === userId);
   const isMineTabMember = (r: ReportSummary) => isOwnReport(r) || (r.type === "found" && r.claimant_id === userId);
-  const tabResults = (tab === "mine" ? results.filter(isMineTabMember) : results.filter((r) => r.type === tab))
+  
+  let tabResults = (tab === "mine" ? results.filter(isMineTabMember) : results.filter((r) => r.type === tab))
     .filter(matchesStatus)
     .filter(matchesDates);
+
+  if (searchQuery.trim()) {
+    const fuse = new Fuse(tabResults, {
+      keys: ['category', 'description', 'last_seen_location', 'pickup_location', 'status'],
+      threshold: 0.4,
+    });
+    tabResults = fuse.search(searchQuery.trim()).map(r => r.item);
+  }
+
   const matchesByReportId = new Map<string, InstantMatch[]>();
   for (const m of matches) {
     const list = matchesByReportId.get(m.sourceReportId) ?? [];
@@ -286,6 +301,23 @@ export default function LostFoundBrowsePage() {
         <aside className="w-full shrink-0 lg:w-64">
           <div className="space-y-5 rounded-xl border border-gray-200 bg-white p-5 shadow-card">
             <h2 className="text-base font-semibold text-gray-900">Filters</h2>
+
+            <TextInput
+              label="Search (Keywords)"
+              placeholder="E.g. spiderman wallet..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              actionButton={
+                <button
+                  type="button"
+                  onClick={startListening}
+                  className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors ${isListening ? 'bg-red-100 text-red-500 animate-pulse' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
+                  title="Voice Search"
+                >
+                  <Mic size={16} strokeWidth={2} />
+                </button>
+              }
+            />
 
             <div>
               <label className="mb-1.5 block text-sm font-medium text-gray-800">Category</label>

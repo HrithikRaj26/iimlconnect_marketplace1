@@ -6,6 +6,7 @@ interface TextInputProps
   error?: string;
   helperText?: string;
   prefix?: React.ReactNode;
+  actionButton?: React.ReactNode;
   required?: boolean;
 }
 
@@ -14,6 +15,7 @@ export function TextInput({
   error,
   helperText,
   prefix,
+  actionButton,
   required,
   id,
   className = "",
@@ -40,12 +42,18 @@ export function TextInput({
             "h-11 w-full rounded-lg border bg-white text-sm text-gray-900 outline-none transition-colors",
             "placeholder:text-gray-400",
             "focus:border-brand focus:ring-2 focus:ring-brand/20",
-            prefix ? "pl-8 pr-3" : "px-3",
+            prefix ? "pl-8" : "pl-3",
+            actionButton ? "pr-10" : "pr-3",
             error ? "border-red-400" : "border-gray-300",
             className,
           ].join(" ")}
           {...rest}
         />
+        {actionButton && (
+          <div className="absolute right-2 flex items-center justify-center">
+            {actionButton}
+          </div>
+        )}
       </div>
       {error ? (
         <p id={`${inputId}-error`} role="alert" className="mt-1.5 text-xs font-medium text-red-500">

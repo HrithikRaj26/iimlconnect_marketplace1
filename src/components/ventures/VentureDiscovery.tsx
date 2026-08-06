@@ -8,6 +8,8 @@ import { Venture, VentureCategory, VentureReview } from "@/types";
 import { Button } from "@/components/ui/Button";
 import { TextArea } from "@/components/ui/TextArea";
 import { supabase } from "@/lib/supabase";
+import { Mic } from "lucide-react";
+import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 
 const CATEGORIES: (VentureCategory | "All")[] = ["All", "Tech", "F&B", "Fashion", "Consulting/Freelance", "Creative/Art", "Services"];
 
@@ -17,6 +19,7 @@ export default function VentureDiscovery() {
   const [featured, setFeatured] = useState<Venture[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const { isListening, startListening } = useVoiceSearch((text) => setSearchQuery(text));
   const [selectedCategory, setSelectedCategory] = useState<VentureCategory | "All">("All");
   const [sortBy, setSortBy] = useState<"newest" | "popular">("newest");
 
@@ -217,8 +220,16 @@ export default function VentureDiscovery() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search startups, offerings, key terms..."
-            className="block w-full rounded-xl border border-gray-200 bg-gray-50/50 py-2.5 pl-10 pr-4 text-sm font-semibold outline-none focus:border-orange-500 focus:bg-white transition-all text-gray-800"
+            className="block w-full rounded-xl border border-gray-200 bg-gray-50/50 py-2.5 pl-10 pr-12 text-sm font-semibold outline-none focus:border-orange-500 focus:bg-white transition-all text-gray-800"
           />
+          <button
+            type="button"
+            onClick={startListening}
+            className={`absolute inset-y-0 right-2 my-auto flex h-8 w-8 items-center justify-center rounded-full transition-colors ${isListening ? 'bg-red-100 text-red-500 animate-pulse' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-200'}`}
+            title="Voice Search"
+          >
+            <Mic size={18} strokeWidth={2} />
+          </button>
         </div>
 
         {/* Sort */}

@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, Mic } from "lucide-react";
 import { Button } from "@/components/ui/moving-border";
+import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 
 const greetings = {
   morning: [
@@ -34,6 +35,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
     lostFound: any[];
   } | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const { isListening, startListening } = useVoiceSearch((text) => setQuery(text));
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -125,15 +127,24 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Ask anything, search across all modules..."
-              className="flex-1 bg-transparent border-none focus:outline-none focus:ring-0 text-gray-800 text-lg px-2 placeholder-gray-400"
+              className="flex-1 bg-transparent border-none focus:outline-none focus:ring-0 text-gray-800 text-sm md:text-lg px-2 placeholder-gray-400"
               onFocus={() => { if (query.trim().length >= 2) setShowDropdown(true); }}
               onBlur={() => { setTimeout(() => setShowDropdown(false), 200); }}
             />
             
             <button
+              type="button"
+              onClick={startListening}
+              className={`p-2 rounded-full transition-colors mr-1 md:mr-2 ${isListening ? 'bg-red-100 text-red-500 animate-pulse' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
+              title="Voice Search"
+            >
+              <Mic size={22} strokeWidth={2} />
+            </button>
+
+            <button
               type="submit"
               disabled={!query.trim()}
-              className="ml-2 bg-gray-900 text-white px-4 py-2 md:px-6 md:py-2.5 rounded-full font-medium transition-colors hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed hidden md:block"
+              className="ml-1 bg-gray-900 text-white px-4 py-2 md:px-6 md:py-2.5 rounded-full font-medium transition-colors hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed hidden md:block"
             >
               Search
             </button>
