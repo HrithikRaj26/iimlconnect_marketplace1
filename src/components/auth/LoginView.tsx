@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, Lock, Sparkles, LogIn, ArrowLeft } from "lucide-react";
@@ -273,18 +274,66 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
         </motion.div>
       </div>
 
-      {/* Aligned Sticky/Fixed Footer */}
-      <footer className="w-full border-t border-gray-150 dark:border-gray-900 bg-white/60 dark:bg-gray-950/60 py-6 backdrop-blur-md transition-colors duration-300 mt-auto">
-        <div className="mx-auto max-w-7xl px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-          <div className="flex items-center gap-1.5">
-            <Sparkles size={14} className="text-blue-500" />
-            <span>IIM Lucknow © {new Date().getFullYear()}</span>
+      {/* Same footer used in AppLayout */}
+      <footer className="w-full bg-white border-t border-gray-150 px-6 py-10 bg-gradient-to-b from-transparent to-gray-50/40">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Brand and Info */}
+          <div className="space-y-3 col-span-1 md:col-span-2">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/15">
+                <Sparkles size={16} className="animate-pulse" />
+              </span>
+              <div className="leading-tight">
+                <p className="text-sm font-bold text-gray-900">
+                  IIML <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Connect</span>
+                </p>
+              </div>
+            </div>
+            <p className="text-xs font-semibold text-gray-500 leading-relaxed max-w-sm">
+              The unified hub for IIM Lucknow. Rent or buy listings, submit startup pitches, coordinate late-night items, and connect with peer student founders securely.
+            </p>
           </div>
-          <div className="flex flex-wrap justify-center gap-6">
-            <span>Verified Campus Network</span>
-            <span>Real-time Chat P2P Channels</span>
-            <span>Google SSL Encryption</span>
+
+          {/* Quick Links */}
+          <div className="space-y-3">
+            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Platform Map</h4>
+            <ul className="space-y-2 text-xs font-bold text-gray-600">
+              <li>
+                <Link href="/" className="hover:text-orange-600 transition-colors">🏠 Dashboard</Link>
+              </li>
+              <li>
+                <Link href="/marketplace" className="hover:text-orange-600 transition-colors">🛒 Marketplace</Link>
+              </li>
+              <li>
+                <Link href="/lost-found" className="hover:text-orange-600 transition-colors">🔍 Lost &amp; Found</Link>
+              </li>
+            </ul>
           </div>
+
+          {/* Support & Tech Column */}
+          <div className="space-y-3">
+            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Support &amp; SLA</h4>
+            <ul className="space-y-2 text-xs font-bold text-gray-600">
+              <li>
+                <a href="mailto:support@iiml.ac.in" className="hover:text-orange-600 transition-colors">✉️ Helpdesk Email</a>
+              </li>
+              <li>
+                <span className="text-gray-500">📄 Version 1.4.2</span>
+              </li>
+              <li>
+                <span className="text-gray-450 text-[10px]">L-Campus Connect</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto border-t border-gray-100 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="text-[10px] font-semibold text-gray-400">
+            &copy; {new Date().getFullYear()} IIM Lucknow Connect. All rights reserved.
+          </p>
+          <p className="text-[10px] font-bold text-gray-400">
+            Built with ❤️ by Student Founders for the IIML Ecosystem
+          </p>
         </div>
       </footer>
     </div>
