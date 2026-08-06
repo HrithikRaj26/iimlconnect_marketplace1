@@ -10,7 +10,8 @@ import {
   CheckCircle, 
   Rocket, 
   ShieldAlert,
-  ChevronDown
+  ChevronDown,
+  Box
 } from "lucide-react";
 
 export default function WelcomeDashboard({ session }: { session: any }) {
@@ -92,6 +93,12 @@ export default function WelcomeDashboard({ session }: { session: any }) {
             Lost & Found <ChevronDown size={12} className="ml-1" />
           </div>
           <div className="flex flex-row items-start justify-center flex-wrap gap-4">
+            <ActionButton 
+              icon={Box} 
+              label="Browse Items" 
+              onClick={() => router.push("/lost-found")}
+              colorClass="text-purple-600"
+            />
             <ActionButton 
               icon={Search} 
               label="Report Lost" 
