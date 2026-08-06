@@ -192,7 +192,7 @@ export interface FieldErrors {
 
 export type VentureCategory = "Tech" | "F&B" | "Fashion" | "Consulting/Freelance" | "Creative/Art" | "Services";
 
-export type VentureStatus = "draft" | "pending_approval" | "approved" | "rejected";
+export type VentureStatus = "draft" | "pending_approval" | "approved" | "rejected" | "suspended";
 
 export interface Venture {
   id: string;
@@ -217,6 +217,23 @@ export interface Venture {
   owner_name: string;
   owner_batch: string;
   created_at: string;
+  terms_accepted: boolean;
+  approved_at?: string;
+  current_due: number;
+  pending_updates?: {
+    name: string;
+    tagline: string;
+    description: string;
+    category: VentureCategory;
+    logo_url?: string;
+    offerings: string[];
+    contact_links: {
+      website?: string;
+      instagram?: string;
+      whatsapp?: string;
+      email?: string;
+    };
+  } | null;
 }
 
 export interface VentureReview {

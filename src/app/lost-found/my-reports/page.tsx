@@ -6,6 +6,7 @@ import { ReportCard } from "@/components/lost-found/ReportCard";
 import { useLostFoundAuth } from "@/hooks/useLostFoundAuth";
 import { lostFoundService } from "@/services/lostFoundService";
 import { ReportSummary } from "@/types/lostFound";
+import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
 
 /**
  * "My Reports". The browse endpoint has no `mine=` filter (matches the
@@ -36,6 +37,7 @@ export default function MyReportsPage() {
   return (
     <div className="min-h-screen bg-surface">
       <div className="mx-auto max-w-7xl px-6 py-8">
+        <BackToLostFound />
         <h1 className="mb-6 text-xl font-bold text-gray-900">My reports</h1>
 
         {!loading && reports.length === 0 && (

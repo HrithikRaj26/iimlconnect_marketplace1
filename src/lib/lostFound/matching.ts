@@ -81,7 +81,21 @@ export async function listQueue() {
     .eq('state', 'queued')
     .order('score', { ascending: false });
   if (error) throw error;
-  return data;
+
+  // Legacy sensitivity_tier column → plain is_sensitive boolean for the API response.
+  return (data ?? []).map((row: any) => ({
+    ...row,
+    lost_report: row.lost_report && {
+      ...row.lost_report,
+      is_sensitive: row.lost_report.sensitivity_tier === 3,
+      sensitivity_tier: undefined,
+    },
+    found_report: row.found_report && {
+      ...row.found_report,
+      is_sensitive: row.found_report.sensitivity_tier === 3,
+      sensitivity_tier: undefined,
+    },
+  }));
 }
 
 /**

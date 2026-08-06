@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { TextArea } from "@/components/ui/TextArea";
 import { Button } from "@/components/ui/Button";
 import { lostFoundService, ApiError } from "@/services/lostFoundService";
+import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
 
 /** "Resolution" (Section 2.3): mark resolved + optional thank-you + finder badge. */
 export default function ResolvePage() {
@@ -33,11 +34,11 @@ export default function ResolvePage() {
   if (result) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-surface p-8 text-center">
-        <h1 className="text-xl font-bold text-gray-900">Marked resolved 🎉</h1>
+        <h1 className="text-xl font-bold text-gray-900">Marked resolved</h1>
         {result.badgeAwarded && (
           <p className="text-sm text-gray-500">The finder has been awarded a recognition badge.</p>
         )}
-        <Button onClick={() => router.push("/lost-found/my-reports")}>Back to My Reports</Button>
+        <Button onClick={() => router.push("/lost-found")}>Back to My Reports</Button>
       </div>
     );
   }
@@ -45,6 +46,7 @@ export default function ResolvePage() {
   return (
     <div className="min-h-screen bg-surface">
       <div className="mx-auto max-w-2xl px-6 py-8">
+        <BackToLostFound />
         <h1 className="mb-6 text-xl font-bold text-gray-900">Mark resolved</h1>
         <div className="space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-card">
           <TextArea

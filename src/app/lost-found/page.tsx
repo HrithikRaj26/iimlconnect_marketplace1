@@ -6,10 +6,74 @@ import { useRouter } from "next/navigation";
 import { TextInput } from "@/components/ui/TextInput";
 import { Button } from "@/components/ui/Button";
 import { ReportCard } from "@/components/lost-found/ReportCard";
+import { useLostFoundAuth } from "@/hooks/useLostFoundAuth";
 import { lostFoundService } from "@/services/lostFoundService";
-import { ReportSummary } from "@/types/lostFound";
+import { CATEGORIES, InstantMatch, ReportSummary } from "@/types/lostFound";
 
-const STATUS_OPTIONS = ["open", "available", "matched", "resolved"] as const;
+// "available" is redundant with "open" (both just mean "still active") and
+// is dropped entirely. "matched" only makes sense as a My Reports filter —
+// it's meaningless on the public Lost/Found tabs, which show everyone's
+// reports rather than reports you have a stake in.
+const BROWSE_STATUS_OPTIONS = ["open", "resolved"] as const;
+const MINE_STATUS_OPTIONS = ["open", "resolved", "matched"] as const;
+
+/**
+ * The DB 'matched' status is only ever set by the custodian-confirmed-match
+ * flow (matching.ts's decide()) — the self-service claim flow (claimItem/
+ * resolve in reports.ts) never touches it, going straight from open/
+ * available to resolved. Since almost all real usage is self-service, a
+ * literal `status === 'matched'` filter would show nothing. This instead
+ * derives "matched" from the same signal the self-service flow itself uses:
+ * a found report with a claimant that isn't resolved yet, and for the
+ * paired lost report, a same-category found report claimed by this user.
+ */
+function isEffectivelyMatched(report: ReportSummary, allResults: ReportSummary[], userId: string | undefined): boolean {
+  if (report.status === "matched") return true;
+  if (report.status === "resolved" || report.status === "archived") return false;
+  if (report.type === "found") return !!report.claimant_id;
+  return allResults.some(
+    (r) => r.type === "found" && r.claimant_id === userId && r.category === report.category && r.status !== "resolved" && r.status !== "archived",
+  );
+}
+
+function DateRangeField({
+  label,
+  from,
+  to,
+  onFromChange,
+  onToChange,
+}: {
+  label: string;
+  from: string;
+  to: string;
+  onFromChange: (v: string) => void;
+  onToChange: (v: string) => void;
+}) {
+  const inputClass =
+    "h-10 w-full min-w-0 rounded-lg border border-gray-300 bg-white px-2 text-xs text-gray-900 outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20";
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-medium text-gray-800">{label}</label>
+      <div className="flex items-center gap-2">
+        <input type="date" value={from} onChange={(e) => onFromChange(e.target.value)} className={inputClass} aria-label={`${label} from`} />
+        <span className="shrink-0 text-xs text-gray-400">to</span>
+        <input type="date" value={to} onChange={(e) => onToChange(e.target.value)} className={inputClass} aria-label={`${label} to`} />
+      </div>
+    </div>
+  );
+}
+
+// ISO date/timestamp strings sort lexically the same as chronologically, so
+// slicing to the date-only prefix and comparing as strings avoids a Date
+// parse for every report on every render.
+function inDateRange(value: string | null | undefined, from: string, to: string): boolean {
+  if (!from && !to) return true;
+  if (!value) return true; // nothing to compare against — don't exclude reports that just lack the field
+  const d = value.slice(0, 10);
+  if (from && d < from) return false;
+  if (to && d > to) return false;
+  return true;
+}
 
 function FilterPill({
   active,
@@ -34,58 +98,174 @@ function FilterPill({
   );
 }
 
-/**
- * "Map" view groups results by location text instead of pins — the schema
- * stores location as text (no lat/lng), same simplification as the
- * original React Native build.
- */
 export default function LostFoundBrowsePage() {
   const router = useRouter();
+  const { userId } = useLostFoundAuth();
+  const [tab, setTab] = useState<"lost" | "found" | "mine">("mine");
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
   const [status, setStatus] = useState<string | undefined>(undefined);
-  const [view, setView] = useState<"list" | "map">("list");
+  const [lostDateFrom, setLostDateFrom] = useState("");
+  const [lostDateTo, setLostDateTo] = useState("");
+  const [foundDateFrom, setFoundDateFrom] = useState("");
+  const [foundDateTo, setFoundDateTo] = useState("");
+  const [createdDateFrom, setCreatedDateFrom] = useState("");
+  const [createdDateTo, setCreatedDateTo] = useState("");
   const [results, setResults] = useState<ReportSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [matches, setMatches] = useState<InstantMatch[]>([]);
 
   const search = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await lostFoundService.browse({ category, location, status });
+      // Status filtering happens entirely client-side (see matchesStatus)
+      // rather than as a query param — lost reports use 'open' and found
+      // reports use 'available' for the same "still active" state, and the
+      // server-side .eq('status', ...) filter can't express "either of
+      // these", so passing it through would silently drop one whole type.
+      const data = await lostFoundService.browse({ category, location });
       setResults(data);
     } catch (e: any) {
       setError(e.message ?? "Could not load reports");
     } finally {
       setLoading(false);
     }
-  }, [category, location, status]);
+  }, [category, location]);
+
+  const loadMatches = useCallback(async () => {
+    if (!userId) return;
+    try {
+      const data = await lostFoundService.myMatches();
+      setMatches(data);
+    } catch {
+      setMatches([]);
+    }
+  }, [userId]);
 
   useEffect(() => {
     search();
   }, [search]);
 
-  const openDetail = (id: string) => router.push(`/lost-found/${id}`);
+  useEffect(() => {
+    loadMatches();
+  }, [loadMatches]);
 
-  const groups =
-    view === "map"
-      ? results.reduce<Record<string, ReportSummary[]>>((acc, r) => {
-          const key = r.type === "lost" ? r.last_seen_location : r.pickup_location;
-          acc[key] = [...(acc[key] ?? []), r];
-          return acc;
-        }, {})
-      : null;
+  // Reports and matches are fetched once per mount, so a change made
+  // elsewhere (another tab/account, or a delete on the edit page) can go
+  // stale here. Refetch whenever the tab regains focus/visibility instead
+  // of requiring a manual hard refresh.
+  useEffect(() => {
+    const refresh = () => {
+      search();
+      loadMatches();
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [search, loadMatches]);
+
+  const openDetail = (id: string) => router.push(`/lost-found/${id}`);
+  const editReport = (id: string) => router.push(`/lost-found/edit/${id}`);
+  const switchTab = (next: "lost" | "found" | "mine") => {
+    setTab(next);
+    setStatus(undefined); // status pills differ per tab, so a stale selection could silently filter to nothing
+    // Each tab only shows its own date filter (Lost Date / Found Date /
+    // Report Created Date), so clear all three on switch — otherwise a
+    // filter set on one tab would keep silently narrowing another tab's
+    // results with no visible control to explain why.
+    setLostDateFrom("");
+    setLostDateTo("");
+    setFoundDateFrom("");
+    setFoundDateTo("");
+    setCreatedDateFrom("");
+    setCreatedDateTo("");
+  };
+  const statusOptions = tab === "mine" ? MINE_STATUS_OPTIONS : BROWSE_STATUS_OPTIONS;
+  // "Open" covers both a lost report's 'open' status and a found report's
+  // 'available' status — they mean the same thing ("still active, not yet
+  // resolved") on the two different tables, just spelled differently.
+  const matchesStatus = (r: ReportSummary): boolean => {
+    if (!status) return true;
+    if (status === "matched") return isEffectivelyMatched(r, results, userId);
+    if (status === "open") return r.status === "open" || r.status === "available";
+    return r.status === status;
+  };
+  // Found reports have no field for "the day it was found" distinct from
+  // when the report was filed, so "Found Date" filters on created_at for
+  // found reports — the same field "Report Created Date" also uses, just
+  // scoped to one type. Each date filter only constrains the report type
+  // it actually applies to; reports of the other type pass through
+  // unaffected by it.
+  const matchesDates = (r: ReportSummary): boolean => {
+    if (r.type === "lost" && !inDateRange(r.lost_date, lostDateFrom, lostDateTo)) return false;
+    if (r.type === "found" && !inDateRange(r.created_at, foundDateFrom, foundDateTo)) return false;
+    if (!inDateRange(r.created_at, createdDateFrom, createdDateTo)) return false;
+    return true;
+  };
+  // A report you authored (filed the lost report / found the item) vs. a
+  // report you merely claimed (someone else's found item you said is
+  // yours) — the claimant never authored it, so it can't be edited, but it
+  // still belongs in "My Reports" as a stake you have in it, and it's
+  // exactly the case the "Matched" filter exists to surface.
+  const isOwnReport = (r: ReportSummary) => (r.type === "lost" ? r.reporter_id === userId : r.finder_id === userId);
+  const isMineTabMember = (r: ReportSummary) => isOwnReport(r) || (r.type === "found" && r.claimant_id === userId);
+  const tabResults = (tab === "mine" ? results.filter(isMineTabMember) : results.filter((r) => r.type === tab))
+    .filter(matchesStatus)
+    .filter(matchesDates);
+  const matchesByReportId = new Map<string, InstantMatch[]>();
+  for (const m of matches) {
+    const list = matchesByReportId.get(m.sourceReportId) ?? [];
+    list.push(m);
+    matchesByReportId.set(m.sourceReportId, list);
+  }
+  for (const list of matchesByReportId.values()) list.sort((a, b) => b.score - a.score);
 
   return (
     <div className="min-h-screen bg-surface">
       <div className="border-b border-gray-100 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex flex-1 flex-col gap-3 sm:flex-row">
-            <TextInput placeholder="Search category…" value={category} onChange={(e) => setCategory(e.target.value)} className="sm:max-w-xs" />
-            <TextInput placeholder="Location contains…" value={location} onChange={(e) => setLocation(e.target.value)} className="sm:max-w-xs" />
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:py-0">
+          <div className="flex gap-6">
+            <button
+              type="button"
+              onClick={() => switchTab("lost")}
+              className={[
+                "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
+                tab === "lost" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
+              ].join(" ")}
+            >
+              Lost
+            </button>
+            <button
+              type="button"
+              onClick={() => switchTab("found")}
+              className={[
+                "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
+                tab === "found" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
+              ].join(" ")}
+            >
+              Found
+            </button>
+            <button
+              type="button"
+              onClick={() => switchTab("mine")}
+              className={[
+                "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
+                tab === "mine" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
+              ].join(" ")}
+            >
+              My Reports
+            </button>
           </div>
-          <div className="flex gap-2">
+
+          <div className="flex justify-center gap-3 pb-1 sm:justify-end sm:pb-0">
             <Link href="/lost-found/report/lost">
               <Button variant="secondary">Report Lost</Button>
             </Link>
@@ -96,52 +276,100 @@ export default function LostFoundBrowsePage() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-7xl px-6 py-6">
-        <div className="mb-5 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-gray-500">Status:</span>
-          <FilterPill active={!status} onClick={() => setStatus(undefined)}>
-            All
-          </FilterPill>
-          {STATUS_OPTIONS.map((s) => (
-            <FilterPill key={s} active={status === s} onClick={() => setStatus(s)}>
-              {s}
-            </FilterPill>
-          ))}
-          <span className="ml-4 text-xs font-semibold text-gray-500">View:</span>
-          <FilterPill active={view === "list"} onClick={() => setView("list")}>
-            List
-          </FilterPill>
-          <FilterPill active={view === "map"} onClick={() => setView("map")}>
-            Map
-          </FilterPill>
-        </div>
+      <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:flex-row">
+        <aside className="w-full shrink-0 lg:w-64">
+          <div className="space-y-5 rounded-xl border border-gray-200 bg-white p-5 shadow-card">
+            <h2 className="text-base font-semibold text-gray-900">Filters</h2>
 
-        {loading && results.length === 0 && <p className="py-16 text-center text-sm text-gray-500">Loading…</p>}
-        {error && <p className="py-4 text-sm font-medium text-red-500">{error}</p>}
-        {!loading && results.length === 0 && !error && (
-          <p className="py-16 text-center text-sm text-gray-500">No reports match these filters.</p>
-        )}
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-800">Category</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900 capitalize outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20"
+              >
+                <option value="">All categories</option>
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c} className="capitalize">
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        {view === "list" ? (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {results.map((r) => (
-              <ReportCard key={r.id} report={r} onView={openDetail} />
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-8">
-            {Object.entries(groups ?? {}).map(([loc, items]) => (
-              <div key={loc}>
-                <h2 className="mb-3 text-sm font-bold text-gray-700">📍 {loc}</h2>
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                  {items.map((r) => (
-                    <ReportCard key={r.id} report={r} onView={openDetail} />
-                  ))}
-                </div>
+            <TextInput
+              label="Location"
+              placeholder="Contains…"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+            />
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-gray-800">Status</label>
+              <div className="flex flex-wrap gap-2">
+                <FilterPill active={!status} onClick={() => setStatus(undefined)}>
+                  All
+                </FilterPill>
+                {statusOptions.map((s) => (
+                  <FilterPill key={s} active={status === s} onClick={() => setStatus(s)}>
+                    {s}
+                  </FilterPill>
+                ))}
               </div>
-            ))}
+            </div>
+
+            {tab === "lost" && (
+              <DateRangeField label="Lost Date" from={lostDateFrom} to={lostDateTo} onFromChange={setLostDateFrom} onToChange={setLostDateTo} />
+            )}
+            {tab === "found" && (
+              <DateRangeField label="Found Date" from={foundDateFrom} to={foundDateTo} onFromChange={setFoundDateFrom} onToChange={setFoundDateTo} />
+            )}
+            {tab === "mine" && (
+              <DateRangeField
+                label="Report Created Date"
+                from={createdDateFrom}
+                to={createdDateTo}
+                onFromChange={setCreatedDateFrom}
+                onToChange={setCreatedDateTo}
+              />
+            )}
           </div>
-        )}
+        </aside>
+
+        <div className="min-w-0 flex-1">
+          {loading && tabResults.length === 0 && <p className="py-16 text-center text-sm text-gray-500">Loading…</p>}
+          {error && <p className="py-4 text-sm font-medium text-red-500">{error}</p>}
+          {!loading && tabResults.length === 0 && !error && (
+            <p className="py-16 text-center text-sm text-gray-500">
+              {tab === "mine" ? "You haven't filed any reports yet." : `No ${tab} reports match these filters.`}
+            </p>
+          )}
+
+          <div className="rounded-xl bg-brand-light/50 p-4">
+            {/*
+              A uniform CSS grid sizes every row to its tallest cell, so a
+              card with a match banner (much taller than a plain card) left
+              a large blank gap under every shorter card sharing its row.
+              CSS multi-column layout packs each card right under the one
+              above it in the same column instead, so height differences
+              between cards no longer leave gaps — the standard no-JS
+              masonry trick.
+            */}
+            <div className="columns-1 gap-5 sm:columns-2 xl:columns-3">
+              {tabResults.map((r) => (
+                <div key={r.id} className="mb-5 break-inside-avoid">
+                  <ReportCard
+                    report={r}
+                    onView={openDetail}
+                    onEdit={tab === "mine" && isOwnReport(r) ? editReport : undefined}
+                    matches={tab === "mine" ? matchesByReportId.get(r.id) : undefined}
+                    onViewMatch={openDetail}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );

@@ -42,6 +42,7 @@ const setupVenturesDB = async () => {
         reviews_count integer NOT NULL DEFAULT 0,
         owner_name text NOT NULL,
         owner_batch text NOT NULL,
+        pending_updates jsonb DEFAULT NULL,
         created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
       );
 
@@ -102,7 +103,7 @@ const setupVenturesDB = async () => {
       DO $$ BEGIN
         CREATE POLICY "Ventures are viewable by everyone if approved or if owner/admin"
           ON public.ventures FOR SELECT
-          USING ( status = 'approved' OR auth.uid() = owner_id OR auth.jwt() ->> 'email' = 'pgp41298@iiml.ac.in' );
+          USING ( status = 'approved' OR auth.uid() = owner_id OR auth.jwt() ->> 'email' IN ('pgp41298@iiml.ac.in', 'pgp41103@iiml.ac.in') );
       EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
       DO $$ BEGIN
@@ -114,13 +115,13 @@ const setupVenturesDB = async () => {
       DO $$ BEGIN
         CREATE POLICY "Owners or admin can update ventures"
           ON public.ventures FOR UPDATE
-          USING ( auth.uid() = owner_id OR auth.jwt() ->> 'email' = 'pgp41298@iiml.ac.in' );
+          USING ( auth.uid() = owner_id OR auth.jwt() ->> 'email' IN ('pgp41298@iiml.ac.in', 'pgp41103@iiml.ac.in') );
       EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
       DO $$ BEGIN
         CREATE POLICY "Owners or admin can delete ventures"
           ON public.ventures FOR DELETE
-          USING ( auth.uid() = owner_id OR auth.jwt() ->> 'email' = 'pgp41298@iiml.ac.in' );
+          USING ( auth.uid() = owner_id OR auth.jwt() ->> 'email' IN ('pgp41298@iiml.ac.in', 'pgp41103@iiml.ac.in') );
       EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
       -- 8. Policies for public.reviews
@@ -145,7 +146,7 @@ const setupVenturesDB = async () => {
       DO $$ BEGIN
         CREATE POLICY "Reviewers or admin can delete reviews"
           ON public.reviews FOR DELETE
-          USING ( auth.uid() = reviewer_id OR auth.jwt() ->> 'email' = 'pgp41298@iiml.ac.in' );
+          USING ( auth.uid() = reviewer_id OR auth.jwt() ->> 'email' IN ('pgp41298@iiml.ac.in', 'pgp41103@iiml.ac.in') );
       EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
       -- 9. Policies for public.posts
@@ -164,13 +165,13 @@ const setupVenturesDB = async () => {
       DO $$ BEGIN
         CREATE POLICY "Authors or admin can update posts"
           ON public.posts FOR UPDATE
-          USING ( auth.uid() = author_id OR auth.jwt() ->> 'email' = 'pgp41298@iiml.ac.in' );
+          USING ( auth.uid() = author_id OR auth.jwt() ->> 'email' IN ('pgp41298@iiml.ac.in', 'pgp41103@iiml.ac.in') );
       EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
       DO $$ BEGIN
         CREATE POLICY "Authors or admin can delete posts"
           ON public.posts FOR DELETE
-          USING ( auth.uid() = author_id OR auth.jwt() ->> 'email' = 'pgp41298@iiml.ac.in' );
+          USING ( auth.uid() = author_id OR auth.jwt() ->> 'email' IN ('pgp41298@iiml.ac.in', 'pgp41103@iiml.ac.in') );
       EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
       -- 10. Policies for public.post_likes

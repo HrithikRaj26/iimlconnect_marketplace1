@@ -1,13 +1,13 @@
 import { lostFoundAdmin } from '../lostFoundSupabaseAdmin';
 import { LostFoundUser } from '../lostFoundAuth';
-import { isValidProofTypeForTier } from './tiers';
+import { isValidProofTypeForSensitiveItem } from './tiers';
 import { notifyHandoverUpdate } from './notifications';
 
 export type HandoverResult =
   | { kind: 'ok'; handover: any }
   | { kind: 'missing_proof' }
   | { kind: 'not_found' }
-  | { kind: 'invalid_proof_for_tier' };
+  | { kind: 'invalid_proof_for_sensitive_item' };
 
 /**
  * Ported from apps/api's HandoverService. AC-8/AC-9: 422-equivalent on
@@ -32,8 +32,8 @@ export async function createHandover(
   if (foundError) throw foundError;
   if (!found) return { kind: 'not_found' };
 
-  if (!isValidProofTypeForTier(input.proofType, found.sensitivity_tier)) {
-    return { kind: 'invalid_proof_for_tier' };
+  if (!isValidProofTypeForSensitiveItem(input.proofType, found.sensitivity_tier === 3)) {
+    return { kind: 'invalid_proof_for_sensitive_item' };
   }
 
   const { data: handover, error: handoverError } = await lostFoundAdmin

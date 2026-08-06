@@ -27,13 +27,23 @@ export default function VentureDiscovery() {
 
   // Review Form state
   const [rating, setRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState<number | null>(null);
   const [reviewContent, setReviewContent] = useState("");
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewError, setReviewError] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [showFirstReviewSuccess, setShowFirstReviewSuccess] = useState(false);
 
   // Featured Carousel Index
   const [carouselIndex, setCarouselIndex] = useState(0);
+
+  // Scratch card states
+  const [revealedEmail, setRevealedEmail] = useState(false);
+  const [revealedWhatsapp, setRevealedWhatsapp] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
+  const [whatsappCopied, setWhatsappCopied] = useState(false);
+  const [scratchingEmail, setScratchingEmail] = useState(false);
+  const [scratchingWhatsapp, setScratchingWhatsapp] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -77,6 +87,22 @@ export default function VentureDiscovery() {
   const handleCardClick = async (id: string) => {
     setDetailLoading(true);
     setShowDetailModal(true);
+    
+    // Check localStorage scratch card status
+    try {
+      const emailsRevealed = JSON.parse(localStorage.getItem("revealed_emails") || "[]");
+      const whatsappsRevealed = JSON.parse(localStorage.getItem("revealed_whatsapps") || "[]");
+      setRevealedEmail(emailsRevealed.includes(id));
+      setRevealedWhatsapp(whatsappsRevealed.includes(id));
+    } catch (e) {
+      setRevealedEmail(false);
+      setRevealedWhatsapp(false);
+    }
+    
+    setScratchingEmail(false);
+    setScratchingWhatsapp(false);
+    setEmailCopied(false);
+    setWhatsappCopied(false);
     try {
       const data = await ventureService.getVentureById(id);
       setActiveVenture(data);
@@ -112,6 +138,18 @@ export default function VentureDiscovery() {
       
       setReviewContent("");
       setRating(5);
+
+      // Check if this was the user's first review
+      if (currentUserId) {
+        const { count } = await supabase
+          .from("reviews")
+          .select("*", { count: "exact", head: true })
+          .eq("reviewer_id", currentUserId);
+        
+        if (count === 1) {
+          setShowFirstReviewSuccess(true);
+        }
+      }
     } catch (err: any) {
       setReviewError(err.message || "Failed to submit review.");
     } finally {
@@ -189,7 +227,7 @@ export default function VentureDiscovery() {
           <select
             value={sortBy}
             onChange={(e: any) => setSortBy(e.target.value)}
-            className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-bold text-gray-800 focus:border-orange-500 focus:outline-none"
+            className="appearance-none rounded-xl border border-gray-200 bg-white pl-3 pr-8 py-2 text-xs font-extrabold text-gray-800 focus:border-orange-500 focus:outline-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%25234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.1rem_1.1rem] bg-no-repeat"
           >
             <option value="newest">Newest First</option>
             <option value="popular">Highest Rated</option>
@@ -220,15 +258,42 @@ export default function VentureDiscovery() {
       {/* Grid List */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <style>{`
+            @keyframes shimmer {
+              100% { transform: translateX(100%); }
+            }
+            .animate-shimmer {
+              position: relative;
+              overflow: hidden;
+            }
+            .animate-shimmer::after {
+              position: absolute;
+              top: 0; right: 0; bottom: 0; left: 0;
+              transform: translateX(-100%);
+              background-image: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.4) 20%,
+                rgba(255, 255, 255, 0.7) 60%,
+                rgba(255, 255, 255, 0) 100%
+              );
+              animation: shimmer 2s infinite;
+              content: '';
+            }
+          `}</style>
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="animate-pulse rounded-2xl bg-white p-6 border border-gray-200 space-y-4">
-              <div className="flex justify-between items-center">
-                <div className="h-10 w-10 rounded-full bg-gray-200" />
-                <div className="h-6 w-20 rounded bg-gray-200" />
+            <div key={i} className="rounded-2xl border border-white/80 bg-white/50 backdrop-blur-md p-6 h-64 flex flex-col justify-between animate-pulse">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="h-12 w-12 rounded-xl bg-gray-200 animate-shimmer" />
+                  <div className="h-5 w-16 rounded-full bg-gray-200 animate-shimmer" />
+                </div>
+                <div className="space-y-2">
+                  <div className="h-4 w-3/4 rounded bg-gray-200 animate-shimmer" />
+                  <div className="h-3 w-1/2 rounded bg-gray-200 animate-shimmer" />
+                </div>
               </div>
-              <div className="h-6 w-3/4 rounded bg-gray-200" />
-              <div className="h-12 w-full rounded bg-gray-200" />
-              <div className="h-4 w-1/2 rounded bg-gray-200" />
+              <div className="h-10 w-full rounded-xl bg-gray-200 animate-shimmer" />
             </div>
           ))}
         </div>
@@ -242,23 +307,41 @@ export default function VentureDiscovery() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <style>{`
+            @keyframes pulse-glow {
+              0%, 100% { box-shadow: 0 4px 15px -3px rgba(245, 158, 11, 0.15), 0 4px 6px -2px rgba(245, 158, 11, 0.05); }
+              50% { box-shadow: 0 10px 25px -3px rgba(245, 158, 11, 0.35), 0 8px 10px -2px rgba(245, 158, 11, 0.15); }
+            }
+            .animate-pulse-subtle {
+              animation: pulse-glow 3s infinite ease-in-out;
+            }
+          `}</style>
           {ventures.map((venture) => (
             <div
               key={venture.id}
               onClick={() => handleCardClick(venture.id)}
-              className="group flex flex-col justify-between rounded-2xl bg-white p-6 border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all cursor-pointer"
+              className={`group flex flex-col justify-between rounded-3xl bg-white/60 hover:bg-white/95 backdrop-blur-md p-6 border transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-orange-500/5 hover:-translate-y-1.5 ${
+                venture.is_featured 
+                  ? "border-amber-400/80 shadow-md shadow-amber-500/5 hover:border-amber-500 ring-2 ring-amber-400/10 animate-pulse-subtle" 
+                  : "border-gray-100 shadow-sm hover:border-orange-500/20"
+              }`}
             >
               <div>
                 {/* Logo and Category */}
                 <div className="flex items-center justify-between">
-                  <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-gray-50 border border-gray-100">
+                  <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-gray-50 border border-gray-150 shrink-0">
                     <img
                       src={venture.logo_url || "https://images.unsplash.com/photo-1606857521015-7f9fcf423740?w=150&h=150&fit=crop"}
                       alt={venture.name}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                   </div>
                   <div className="flex items-center gap-1.5">
+                    {venture.is_featured && (
+                      <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[9px] font-black text-amber-700 animate-bounce">
+                        ★ Featured
+                      </span>
+                    )}
                     <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-extrabold border ${
                       venture.is_open 
                         ? "bg-green-50 text-green-700 border-green-200" 
@@ -285,8 +368,11 @@ export default function VentureDiscovery() {
                 </p>
 
                 {/* Rating */}
-                <div className="mt-4 flex items-center gap-1">
-                  <span className="text-sm font-black text-gray-900">★ {venture.average_rating}</span>
+                <div className="mt-4 flex items-center gap-2">
+                  <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg text-xs font-black text-amber-700">
+                    <span>★</span>
+                    <span>{venture.average_rating}</span>
+                  </div>
                   <span className="text-xs font-semibold text-gray-400">({venture.reviews_count} reviews)</span>
                 </div>
 
@@ -307,9 +393,28 @@ export default function VentureDiscovery() {
                 )}
               </div>
 
-              <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4 text-xs font-bold text-gray-400">
-                <span>View Details</span>
-                <span className="text-lg group-hover:translate-x-1 transition-transform">→</span>
+              {/* Card Footer CTA actions */}
+              <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between gap-3 text-xs font-extrabold">
+                {venture.contact_links?.website ? (
+                  <a
+                    href={venture.contact_links.website}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex-1 text-center py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 text-white font-extrabold shadow-sm hover:brightness-105 active:scale-98 transition-all flex items-center justify-center gap-1.5 shadow-orange-600/10 group-hover:shadow-md group-hover:shadow-orange-600/20"
+                  >
+                    <span>Visit Website</span>
+                    <span className="text-sm">↗</span>
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    className="flex-1 text-center py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-150 text-gray-700 font-extrabold active:scale-98 transition-all flex items-center justify-center gap-1.5 group-hover:border-orange-500/20"
+                  >
+                    <span>View Details</span>
+                    <span className="text-sm group-hover:translate-x-1 transition-transform">→</span>
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -318,8 +423,8 @@ export default function VentureDiscovery() {
 
       {/* Details Modal / Drawer */}
       {showDetailModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="relative flex h-[90vh] w-full max-w-4xl flex-col rounded-2xl bg-white shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div className="relative flex h-[90vh] w-full max-w-4xl flex-col rounded-2xl bg-white shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
               <span className="text-sm font-bold text-gray-400">Startup Profile</span>
@@ -407,27 +512,148 @@ export default function VentureDiscovery() {
                         </ul>
                       </div>
                     )}
-
                     {/* Social coordinates */}
                     <div className="space-y-3">
                       <h3 className="text-sm font-extrabold text-gray-900 uppercase tracking-wider">Connect Details</h3>
-                      <div className="flex flex-col gap-2">
+                      
+                      <style>{`
+                        @keyframes scratch-wipe {
+                          0% { clip-path: inset(0 0 0 0); opacity: 1; }
+                          100% { clip-path: inset(0 0 0 100%); opacity: 0.1; }
+                        }
+                        .animate-scratch-wipe {
+                          animation: scratch-wipe 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                        }
+                      `}</style>
+
+                      <div className="flex flex-col gap-3">
+                        {/* WhatsApp Scratch Card */}
                         {activeVenture.contact_links.whatsapp && (
-                          <a
-                            href={`https://wa.me/${activeVenture.contact_links.whatsapp.replace(/\D/g, '')}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 py-2 text-xs font-bold text-white shadow-sm hover:bg-green-600 transition-colors"
-                          >
-                            💬 Chat on WhatsApp
-                          </a>
+                          <div className="flex flex-col gap-1.5">
+                            <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">WhatsApp Contact</span>
+                            <div className="relative overflow-hidden rounded-xl border border-green-100 bg-green-50/20 p-3 min-h-[50px] flex flex-col justify-center">
+                              {/* Revealed Details (Underside) */}
+                              <div className="flex flex-col gap-2">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="text-xs font-bold text-gray-700 select-all">{activeVenture.contact_links.whatsapp}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(activeVenture.contact_links.whatsapp || "");
+                                      setWhatsappCopied(true);
+                                      setTimeout(() => setWhatsappCopied(false), 2000);
+                                    }}
+                                    className="shrink-0 bg-green-600 hover:bg-green-700 text-white rounded-lg px-2.5 py-1 text-[10px] font-black tracking-wider uppercase transition-colors"
+                                  >
+                                    {whatsappCopied ? "✓ Copied" : "📋 Copy"}
+                                  </button>
+                                </div>
+                                <a
+                                  href={`https://wa.me/${activeVenture.contact_links.whatsapp.replace(/\D/g, '')}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="w-full text-center bg-green-500 hover:bg-green-600 text-white rounded-lg py-1.5 text-[10px] font-black tracking-wider uppercase transition-colors flex items-center justify-center gap-1 shadow-sm"
+                                >
+                                  <span>Open WhatsApp</span>
+                                  <span>↗</span>
+                                </a>
+                              </div>
+
+                              {/* Scratch Foil Cover (Top-side overlay) */}
+                              {!revealedWhatsapp && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (!scratchingWhatsapp) {
+                                      setScratchingWhatsapp(true);
+                                      setTimeout(() => {
+                                        try {
+                                          const whatsapps = JSON.parse(localStorage.getItem("revealed_whatsapps") || "[]");
+                                          if (!whatsapps.includes(activeVenture.id)) {
+                                            whatsapps.push(activeVenture.id);
+                                            localStorage.setItem("revealed_whatsapps", JSON.stringify(whatsapps));
+                                          }
+                                        } catch (err) {}
+                                        setRevealedWhatsapp(true);
+                                        setScratchingWhatsapp(false);
+                                      }, 600);
+                                    }
+                                  }}
+                                  className={`absolute inset-0 z-10 w-full h-full bg-gradient-to-br from-green-100 to-emerald-200 border border-dashed border-green-300 rounded-xl flex items-center justify-center cursor-pointer transition-all duration-300 hover:brightness-105 active:brightness-95 ${
+                                    scratchingWhatsapp ? "animate-scratch-wipe pointer-events-none" : ""
+                                  }`}
+                                >
+                                  <span className="text-xs font-black text-green-800 flex items-center gap-1.5 animate-pulse">
+                                    <span>💬</span>
+                                    <span>Reveal WhatsApp</span>
+                                  </span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
                         )}
+
+                        {/* Email Scratch Card */}
+                        {activeVenture.contact_links.email && (
+                          <div className="flex flex-col gap-1.5">
+                            <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">Email Contact</span>
+                            <div className="relative overflow-hidden rounded-xl border border-orange-100 bg-orange-50/20 p-3 min-h-[50px] flex flex-col justify-center">
+                              {/* Revealed Details (Underside) */}
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-xs font-bold text-gray-700 truncate select-all">{activeVenture.contact_links.email}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(activeVenture.contact_links.email || "");
+                                    setEmailCopied(true);
+                                    setTimeout(() => setEmailCopied(false), 2000);
+                                  }}
+                                  className="shrink-0 bg-orange-600 hover:bg-orange-700 text-white rounded-lg px-2.5 py-1 text-[10px] font-black tracking-wider uppercase transition-colors"
+                                >
+                                  {emailCopied ? "✓ Copied" : "📋 Copy"}
+                                </button>
+                              </div>
+
+                              {/* Scratch Foil Cover (Top-side overlay) */}
+                              {!revealedEmail && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (!scratchingEmail) {
+                                      setScratchingEmail(true);
+                                      setTimeout(() => {
+                                        try {
+                                          const emails = JSON.parse(localStorage.getItem("revealed_emails") || "[]");
+                                          if (!emails.includes(activeVenture.id)) {
+                                            emails.push(activeVenture.id);
+                                            localStorage.setItem("revealed_emails", JSON.stringify(emails));
+                                          }
+                                        } catch (err) {}
+                                        setRevealedEmail(true);
+                                        setScratchingEmail(false);
+                                      }, 600);
+                                    }
+                                  }}
+                                  className={`absolute inset-0 z-10 w-full h-full bg-gradient-to-br from-orange-100 to-amber-200 border border-dashed border-orange-300 rounded-xl flex items-center justify-center cursor-pointer transition-all duration-300 hover:brightness-105 active:brightness-95 ${
+                                    scratchingEmail ? "animate-scratch-wipe pointer-events-none" : ""
+                                  }`}
+                                >
+                                  <span className="text-xs font-black text-orange-800 flex items-center gap-1.5 animate-pulse">
+                                    <span>✉️</span>
+                                    <span>Reveal Email</span>
+                                  </span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
                         {activeVenture.contact_links.instagram && (
                           <a
                             href={`https://instagram.com/${activeVenture.contact_links.instagram}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 py-2 text-xs font-bold text-white shadow-sm hover:opacity-90 transition-opacity"
+                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 py-2 text-xs font-bold text-white shadow-sm hover:opacity-90 transition-opacity mt-1"
                           >
                             📸 Instagram Profile
                           </a>
@@ -475,8 +701,12 @@ export default function VentureDiscovery() {
                               type="button"
                               key={star}
                               onClick={() => setRating(star)}
-                              className={`text-xl focus:outline-none transition-transform active:scale-125 ${
-                                rating >= star ? "text-amber-500" : "text-gray-300"
+                              onMouseEnter={() => setHoverRating(star)}
+                              onMouseLeave={() => setHoverRating(null)}
+                              className={`text-2xl focus:outline-none transition-all duration-150 hover:scale-125 active:scale-95 ${
+                                (hoverRating !== null ? hoverRating >= star : rating >= star)
+                                  ? "text-amber-500 scale-105 filter drop-shadow-[0_0_2px_rgba(245,158,11,0.4)]"
+                                  : "text-gray-300"
                               }`}
                             >
                               ★
@@ -540,6 +770,76 @@ export default function VentureDiscovery() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* First Review Milestone Confetti Success Modal */}
+      {showFirstReviewSuccess && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <style>{`
+            @keyframes confetti-fall {
+              0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+              100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+            }
+            .confetti-particle {
+              position: absolute;
+              top: -20px;
+              animation: confetti-fall 3s linear infinite;
+            }
+          `}</style>
+          
+          {/* Confetti container */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
+            {[...Array(35)].map((_, i) => {
+              const colors = ["#f97316", "#3b82f6", "#10b981", "#eab308", "#ec4899", "#8b5cf6"];
+              const color = colors[i % colors.length];
+              const left = `${Math.random() * 100}%`;
+              const delay = `${Math.random() * 2.5}s`;
+              const duration = `${2 + Math.random() * 2}s`;
+              const size = `${6 + Math.random() * 8}px`;
+              const shape = i % 2 === 0 ? "rounded-full" : "rounded-sm";
+              return (
+                <div
+                  key={i}
+                  className={`confetti-particle ${shape}`}
+                  style={{
+                    left,
+                    backgroundColor: color,
+                    width: size,
+                    height: size,
+                    animationDelay: delay,
+                    animationDuration: duration,
+                  }}
+                />
+              );
+            })}
+          </div>
+
+          {/* Success Dialog */}
+          <div className="relative bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-gray-100 z-20 text-center space-y-6 animate-in zoom-in-95 duration-300">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-amber-500 border border-amber-100 shadow-sm animate-bounce">
+              <span className="text-3xl">⭐️</span>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-xl font-black text-gray-900">🎉 Milestone Unlocked!</h3>
+              <p className="text-xs font-semibold text-orange-600 uppercase tracking-widest">First Review Submitted</p>
+              <p className="text-sm font-medium text-gray-500 leading-relaxed pt-2">
+                Congratulations! You have successfully submitted your **first venture review** on the IIM Lucknow Venture Hub.
+              </p>
+              <p className="text-xs text-gray-400 leading-relaxed bg-gray-50 p-3 rounded-xl border">
+                Your ratings and feedback help student startups improve their offerings, build credibility, and gain traction on campus. Keep supporting student founders!
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowFirstReviewSuccess(false)}
+              className="w-full rounded-xl bg-orange-600 px-5 py-3 text-xs font-black text-white hover:bg-orange-700 shadow-md transition-colors"
+            >
+              Awesome! 🚀
+            </button>
           </div>
         </div>
       )}

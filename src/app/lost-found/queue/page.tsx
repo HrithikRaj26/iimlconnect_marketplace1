@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { useLostFoundAuth } from "@/hooks/useLostFoundAuth";
 import { lostFoundService } from "@/services/lostFoundService";
 import { MatchQueueEntry } from "@/types/lostFound";
+import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
 
 /** "Custodian Queue" (Section 2.3). Only state=queued candidates ever appear here (AC-4/AC-5). */
 export default function MatchQueuePage() {
@@ -41,12 +42,18 @@ export default function MatchQueuePage() {
   };
 
   if (!authLoading && role === "user") {
-    return <div className="p-10 text-center text-sm text-gray-500">Custodian/admin access required.</div>;
+    return (
+      <div className="p-10 text-center text-sm text-gray-500">
+        <BackToLostFound />
+        Custodian/admin access required.
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-surface">
       <div className="mx-auto max-w-4xl px-6 py-8">
+        <BackToLostFound />
         <h1 className="mb-6 text-xl font-bold text-gray-900">Custodian confirmation queue</h1>
 
         {!loading && queue.length === 0 && (
@@ -66,7 +73,7 @@ export default function MatchQueuePage() {
                   <p className="text-[10px] font-bold text-gray-400">LOST</p>
                   <p className="mt-0.5 text-sm font-semibold capitalize text-gray-900">{item.lost_report.category}</p>
                   <p className="mt-1 line-clamp-3 text-xs text-gray-600">{item.lost_report.description}</p>
-                  <p className="mt-1 text-[11px] text-gray-400">📍 {item.lost_report.last_seen_location}</p>
+                  <p className="mt-1 text-[11px] text-gray-400">Last seen: {item.lost_report.last_seen_location}</p>
                 </button>
                 <button
                   type="button"
@@ -76,7 +83,7 @@ export default function MatchQueuePage() {
                   <p className="text-[10px] font-bold text-gray-400">FOUND</p>
                   <p className="mt-0.5 text-sm font-semibold capitalize text-gray-900">{item.found_report.category}</p>
                   <p className="mt-1 line-clamp-3 text-xs text-gray-600">{item.found_report.description}</p>
-                  <p className="mt-1 text-[11px] text-gray-400">📍 {item.found_report.pickup_location}</p>
+                  <p className="mt-1 text-[11px] text-gray-400">Pickup: {item.found_report.pickup_location}</p>
                 </button>
               </div>
               <div className="mt-3 flex gap-2">

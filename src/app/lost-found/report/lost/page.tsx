@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { TextInput } from "@/components/ui/TextInput";
 import { TextArea } from "@/components/ui/TextArea";
 import { Button } from "@/components/ui/Button";
+import { Checkbox } from "@/components/ui/Checkbox";
 import { CategoryPicker } from "@/components/lost-found/CategoryPicker";
 import { PhotoField } from "@/components/lost-found/PhotoField";
+import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
 import { lostFoundService, uploadLostFoundPhoto } from "@/services/lostFoundService";
-import { suggestTierForCategory } from "@/types/lostFound";
+import { isSensitiveCategory } from "@/types/lostFound";
 
 /**
  * "Report Lost" (Section 2.3 of the original PRD). Photo optional (AC-1) —
@@ -23,6 +25,7 @@ export default function ReportLostPage() {
   const [lastSeenLocation, setLastSeenLocation] = useState("");
   const [lostDate, setLostDate] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
+  const [showToPublic, setShowToPublic] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -36,7 +39,7 @@ export default function ReportLostPage() {
     try {
       let photoUrl: string | undefined;
       if (photo) {
-        photoUrl = await uploadLostFoundPhoto(photo, "lost", suggestTierForCategory(category));
+        photoUrl = await uploadLostFoundPhoto(photo, "lost", isSensitiveCategory(category));
       }
       const created = await lostFoundService.createLostReport({
         category,
@@ -44,6 +47,7 @@ export default function ReportLostPage() {
         lastSeenLocation,
         lostDate,
         photoUrl,
+        visibleToPublic: showToPublic,
       });
       router.push(`/lost-found/${created.id}`);
     } catch (e: any) {
@@ -56,6 +60,7 @@ export default function ReportLostPage() {
   return (
     <div className="min-h-screen bg-surface">
       <div className="mx-auto max-w-2xl px-6 py-8">
+        <BackToLostFound />
         <h1 className="mb-6 text-xl font-bold text-gray-900">Report a lost item</h1>
 
         <div className="space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-card">
@@ -88,6 +93,15 @@ export default function ReportLostPage() {
           />
 
           <PhotoField file={photo} onChange={setPhoto} label="Photo (optional)" />
+
+          <div>
+            <Checkbox checked={showToPublic} onChange={setShowToPublic} label="Show to public" />
+            <p className="mt-1 text-xs text-gray-500">
+              {showToPublic
+                ? "Visible to everyone browsing Lost & Found."
+                : "Withheld from other users — only you and staff (custodian/admin) can see this report."}
+            </p>
+          </div>
 
           {error && <p className="text-sm font-medium text-red-500">{error}</p>}
           <Button size="lg" fullWidth loading={submitting} onClick={submit}>

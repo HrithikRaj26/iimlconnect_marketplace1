@@ -1,19 +1,66 @@
 import Link from "next/link";
-import React from "react";
-import { MessageSquare } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 interface TopNavProps {
   /** Which nav item to highlight as active. */
-  active?: "marketplace" | "listings" | "messages";
+  active?: "marketplace" | "listings" | "messages" | "ventures";
   onMenuClick?: () => void;
+  profile?: { name: string; avatar: string } | null;
 }
 
-export function TopNav({ active = "marketplace", onMenuClick }: TopNavProps) {
+export function TopNav({ active = "marketplace", onMenuClick, profile: propProfile }: TopNavProps) {
+  const [profile, setProfile] = useState<{ name: string; avatar: string } | null>(propProfile || null);
+
+  useEffect(() => {
+    if (propProfile) {
+      setProfile(propProfile);
+      return;
+    }
+
+    const fetchProfile = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const metadata = session.user.user_metadata || {};
+          const fullName = metadata.full_name || metadata.name || '';
+          let fName = metadata.given_name || metadata.first_name || '';
+          if (!fName && fullName) {
+            fName = fullName.split(' ')[0];
+          }
+          const avatar = metadata.avatar_url || metadata.picture || '';
+          setProfile({ name: fullName || fName || "Student", avatar });
+        }
+      } catch (e) {
+        console.error("Error loading top nav profile:", e);
+      }
+    };
+
+    fetchProfile();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        const metadata = session.user.user_metadata || {};
+        const fullName = metadata.full_name || metadata.name || '';
+        let fName = metadata.given_name || metadata.first_name || '';
+        if (!fName && fullName) {
+          fName = fullName.split(' ')[0];
+        }
+        const avatar = metadata.avatar_url || metadata.picture || '';
+        setProfile({ name: fullName || fName || "Student", avatar });
+      } else {
+        setProfile(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [propProfile]);
+
   const linkClass = (key: TopNavProps["active"]) =>
     key === active ? "text-brand" : "text-gray-500 hover:text-gray-800";
 
   return (
-    <header className="flex h-16 w-full items-center justify-between border-b border-gray-100 bg-white px-6">
+    <header className="flex h-16 w-full items-center justify-between border-b border-gray-100 bg-white px-6 shrink-0">
       <div className="flex items-center gap-4">
         {onMenuClick && (
           <button onClick={onMenuClick} className="text-gray-500 hover:text-gray-900 focus:outline-none">
@@ -42,11 +89,37 @@ export function TopNav({ active = "marketplace", onMenuClick }: TopNavProps) {
         </Link>
       </div>
 
-      <nav className="flex items-center gap-4">
-        <Link href="/messages" className={linkClass("messages")} title="Messages">
-          <MessageSquare className="w-5 h-5 text-gray-500 hover:text-gray-900 transition-colors" />
+      <div className="flex items-center gap-4">
+        <nav className="hidden items-center gap-6 text-sm font-medium md:flex mr-2">
+          <Link href="/marketplace" className={linkClass("marketplace")}>
+            Marketplace
+          </Link>
+          <Link href="/listing/create" className={linkClass("listings")}>
+            Sell an Item
+          </Link>
+          <Link href="/messages" className={linkClass("messages")}>
+            Messages
+          </Link>
+        </nav>
+        
+        {/* User Profile Avatar Link in Header */}
+        <Link 
+          href="/profile" 
+          title="Edit Profile"
+          className="flex items-center gap-2 rounded-xl p-1 hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100"
+        >
+          {profile?.avatar ? (
+            <img src={profile.avatar} alt="User Avatar" className="h-8 w-8 rounded-full object-cover border border-gray-200" />
+          ) : (
+            <div className="h-8 w-8 rounded-full bg-gradient-to-r from-orange-500 to-amber-600 flex items-center justify-center text-white text-[10px] font-bold shadow-sm">
+              {profile?.name ? profile.name[0].toUpperCase() : "👤"}
+            </div>
+          )}
+          <span className="hidden sm:inline text-xs font-bold text-gray-700 max-w-[100px] truncate">
+            {profile?.name || "My Profile"}
+          </span>
         </Link>
-      </nav>
+      </div>
     </header>
   );
 }

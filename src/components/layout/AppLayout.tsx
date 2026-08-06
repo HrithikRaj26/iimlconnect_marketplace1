@@ -34,7 +34,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     if (!fName && fullName) {
       fName = fullName.split(' ')[0];
     }
-    const avatar = metadata.avatar_url || metadata.picture || '';
+    const avatar = metadata.custom_avatar || metadata.avatar_url || metadata.picture || '';
     setProfile({ name: fullName || fName || "Student", avatar });
   };
 
@@ -57,8 +57,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {profile?.avatar ? (
               <img src={profile.avatar} alt="Profile" className="h-20 w-20 rounded-full object-cover shadow-sm mb-3 border-2 border-white" />
             ) : (
-              <div className="h-20 w-20 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl font-bold shadow-sm mb-3 border-2 border-white">
-                {profile?.name ? profile.name[0].toUpperCase() : "?"}
+              <div className="h-20 w-20 rounded-full bg-gradient-to-r from-orange-500 to-amber-600 flex items-center justify-center text-white text-2xl font-bold shadow-sm mb-3 border-2 border-white">
+                {profile?.name ? profile.name[0].toUpperCase() : "👤"}
               </div>
             )}
             <h2 className="text-lg font-bold text-gray-900 text-center leading-tight truncate w-full px-2">{profile?.name || "Welcome"}</h2>
@@ -118,9 +118,79 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Main Content Area */}
       <div className="flex flex-1 flex-col overflow-hidden min-w-0 transition-all duration-300">
-        <TopNav onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-        <main className="flex-1 overflow-y-auto">
-          {children}
+        <TopNav 
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)} 
+          profile={profile} 
+          active={
+            pathname.startsWith("/ventures") ? "ventures" :
+            pathname.startsWith("/messages") ? "messages" :
+            pathname.startsWith("/listing/create") ? "listings" :
+            "marketplace"
+          } 
+        />
+        <main className="flex-1 overflow-y-auto flex flex-col justify-between">
+          <div className="flex-1">
+            {children}
+          </div>
+          
+          {/* Beautiful Platform Footer */}
+          <footer className="w-full bg-white border-t border-gray-150 px-6 py-10 mt-12 bg-gradient-to-b from-transparent to-gray-50/40">
+            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+              {/* Brand and Info */}
+              <div className="space-y-3 col-span-1 md:col-span-2">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-600 text-white font-black text-sm shadow-sm">
+                    C
+                  </span>
+                  <span className="text-sm font-black text-gray-900 tracking-tight">IIML <span className="text-orange-600">Connect</span></span>
+                </div>
+                <p className="text-xs font-semibold text-gray-500 leading-relaxed max-w-sm">
+                  The unified hub for IIM Lucknow. Rent or buy listings, submit startup pitches, coordinate late-night items, and connect with peer student founders securely.
+                </p>
+              </div>
+
+              {/* Quick Links */}
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Platform Map</h4>
+                <ul className="space-y-2 text-xs font-bold text-gray-600">
+                  <li>
+                    <Link href="/" className="hover:text-orange-600 transition-colors">🏠 Dashboard</Link>
+                  </li>
+                  <li>
+                    <Link href="/marketplace" className="hover:text-orange-600 transition-colors">🛒 Marketplace</Link>
+                  </li>
+                  <li>
+                    <Link href="/lost-found" className="hover:text-orange-600 transition-colors">🔍 Lost & Found</Link>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Support & Tech Column */}
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Support & SLA</h4>
+                <ul className="space-y-2 text-xs font-bold text-gray-600">
+                  <li>
+                    <a href="mailto:support@iiml.ac.in" className="hover:text-orange-600 transition-colors">✉️ Helpdesk Email</a>
+                  </li>
+                  <li>
+                    <span className="text-gray-500">📄 Version 1.4.2</span>
+                  </li>
+                  <li>
+                    <span className="text-gray-450 text-[10px]">L-Campus Connect</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="max-w-7xl mx-auto border-t border-gray-100 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+              <p className="text-[10px] font-semibold text-gray-400">
+                &copy; {new Date().getFullYear()} IIM Lucknow Connect. All rights reserved.
+              </p>
+              <p className="text-[10px] font-bold text-gray-400">
+                Built with ❤️ by Student Founders for the IIML Ecosystem
+              </p>
+            </div>
+          </footer>
         </main>
       </div>
 

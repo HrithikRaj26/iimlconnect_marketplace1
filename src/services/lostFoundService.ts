@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { LostReport, FoundReport, ReportSummary, MatchQueueEntry } from '@/types/lostFound';
+import { LostReport, FoundReport, ReportSummary, MatchQueueEntry, InstantMatch } from '@/types/lostFound';
 
 const BUCKET = 'lost-found-photos';
 
@@ -42,6 +42,7 @@ export const lostFoundService = {
     lastSeenLocation: string;
     lostDate: string;
     photoUrl?: string;
+    visibleToPublic?: boolean;
   }) => request<LostReport>('POST', '/lost-reports', input),
 
   createFoundReport: (input: {
@@ -49,6 +50,8 @@ export const lostFoundService = {
     description: string;
     photoUrl: string;
     contentsWithheld?: boolean;
+    pickupLocation?: string;
+    foundLocation: string;
   }) => request<FoundReport>('POST', '/found-reports', input),
 
   checkin: (foundReportId: string, input: { itemLabel: string; storageRef?: string }) =>
@@ -86,13 +89,31 @@ export const lostFoundService = {
     const qs = params.toString();
     return request('GET', `/metrics/precision${qs ? `?${qs}` : ''}`);
   },
+
+  claim: (foundReportId: string) => request<{ status: string }>('POST', `/found-reports/${foundReportId}/claim`),
+
+  completeTransfer: (foundReportId: string) =>
+    request<{ status: string }>('POST', `/found-reports/${foundReportId}/complete-transfer`),
+
+  myMatches: () => request<InstantMatch[]>('GET', '/my-matches'),
+
+  updateReport: (id: string, input: Record<string, unknown>) => request<{ status: string }>('PATCH', `/reports/${id}`, input),
+
+  deleteReport: (id: string) => request<{ status: string }>('DELETE', `/reports/${id}`),
 };
 
-/** Mirrors SupabaseListingService.uploadImage — same private-bucket-path convention as the original React Native build. */
-export async function uploadLostFoundPhoto(file: File, reportType: 'lost' | 'found', tier: 1 | 2 | 3): Promise<string> {
+/**
+ * Mirrors SupabaseListingService.uploadImage — same private-bucket-path
+ * convention as the original React Native build. The path's leading folder
+ * ('1' or '3') reuses the existing Storage RLS policies unchanged (public-
+ * readable vs custodian/admin-only) — those policies were always
+ * effectively binary despite being framed as tiers, so no Storage migration
+ * is needed for the tier-logic removal.
+ */
+export async function uploadLostFoundPhoto(file: File, reportType: 'lost' | 'found', isSensitive: boolean): Promise<string> {
   const fileExt = file.name.split('.').pop();
   const fileName = `${Math.random().toString(36).slice(2)}_${Date.now()}.${fileExt}`;
-  const path = `${tier}/${reportType}/${fileName}`;
+  const path = `${isSensitive ? 3 : 1}/${reportType}/${fileName}`;
 
   const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
     cacheControl: '3600',
@@ -100,13 +121,4 @@ export async function uploadLostFoundPhoto(file: File, reportType: 'lost' | 'fou
   });
   if (error) throw new Error('Failed to upload photo: ' + error.message);
   return path;
-}
-
-/** photo_url is a private Storage path, not a public URL — resolve to a signed URL for display. */
-export async function resolveLostFoundPhotoUrl(pathOrUrl: string | null | undefined): Promise<string | null> {
-  if (!pathOrUrl) return null;
-  if (pathOrUrl.startsWith('http')) return pathOrUrl;
-  const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(pathOrUrl, 3600);
-  if (error || !data) return null;
-  return data.signedUrl;
 }

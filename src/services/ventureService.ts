@@ -16,10 +16,13 @@ export interface IVentureService {
       website?: string;
       instagram?: string;
       whatsapp?: string;
+      email?: string;
     };
+    terms_accepted?: boolean;
   }): Promise<Venture>;
-  updateVenture(id: string, data: Partial<VerveEditData>): Promise<Venture>;
+  updateVenture(id: string, data: any): Promise<Venture>;
   deleteVenture(id: string): Promise<void>;
+  deletePost(id: string): Promise<void>;
   submitReview(ventureId: string, rating: number, content: string): Promise<VentureReview>;
   getFeedPosts(sort?: "chronological" | "trending"): Promise<VenturePost[]>;
   createPost(data: {
@@ -38,8 +41,12 @@ export interface IVentureService {
     registrationsOverTime: { date: string; count: number }[];
     categoryDistribution: { category: string; count: number }[];
     pendingQueue: Venture[];
+    allVentures: Venture[];
   }>;
-  updateVentureStatus(id: string, status: "approved" | "rejected"): Promise<void>;
+  updateVentureStatus(id: string, status: "approved" | "rejected"): Promise<{ emailSent: boolean; emailError?: string }>;
+  suspendVenture(id: string): Promise<{ emailSent: boolean; emailError?: string }>;
+  reactivateVenture(id: string): Promise<{ emailSent: boolean; emailError?: string }>;
+  payVentureDue(id: string): Promise<void>;
   toggleVentureOpenStatus(id: string, isOpen: boolean): Promise<Venture>;
 }
 
@@ -54,6 +61,7 @@ interface VerveEditData {
     website?: string;
     instagram?: string;
     whatsapp?: string;
+    email?: string;
   };
   status: VentureStatus;
 }
@@ -131,7 +139,9 @@ class SupabaseVentureService implements IVentureService {
       website?: string;
       instagram?: string;
       whatsapp?: string;
+      email?: string;
     };
+    terms_accepted?: boolean;
   }): Promise<Venture> {
     const { data: sessionData } = await supabase.auth.getSession();
     if (!sessionData.session) throw new Error("Authentication required.");
@@ -163,6 +173,8 @@ class SupabaseVentureService implements IVentureService {
       owner_name: ownerName,
       owner_batch: ownerBatch,
       is_open: false,
+      terms_accepted: data.terms_accepted || false,
+      current_due: 0.00,
     };
 
     const { data: newVenture, error } = await supabase
@@ -175,18 +187,37 @@ class SupabaseVentureService implements IVentureService {
     return newVenture as Venture;
   }
 
-  async updateVenture(id: string, data: Partial<VerveEditData>): Promise<Venture> {
+  async updateVenture(id: string, data: any): Promise<Venture> {
+    // Check if the venture is already approved
+    const { data: current } = await supabase
+      .from("ventures")
+      .select("status")
+      .eq("id", id)
+      .single();
+
+    let updateObj: any = {};
+    if (current && current.status === "approved") {
+      // If live/approved, keep it live but store modifications in pending_updates
+      updateObj = { pending_updates: data };
+    } else {
+      // Otherwise, overwrite main columns directly and set to pending review
+      updateObj = {
+        ...data,
+        status: "pending_approval"
+      };
+    }
+
     const { data: updated, error } = await supabase
       .from("ventures")
-      .update(data)
+      .update(updateObj)
       .eq("id", id)
       .select()
       .single();
 
     if (error) throw new Error(error.message);
 
-    // Badge logic check: if updated status is approved, check Serial Entrepreneur badge
-    if (data.status === "approved") {
+    // Badge logic check: if updated status is approved (e.g. from overwrite), check Serial Entrepreneur
+    if (updated.status === "approved") {
       await this.checkAndGrantSerialEntrepreneur(updated.owner_id);
     }
 
@@ -207,6 +238,11 @@ class SupabaseVentureService implements IVentureService {
 
   async deleteVenture(id: string): Promise<void> {
     const { error } = await supabase.from("ventures").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+  }
+
+  async deletePost(id: string): Promise<void> {
+    const { error } = await supabase.from("posts").delete().eq("id", id);
     if (error) throw new Error(error.message);
   }
 
@@ -415,6 +451,7 @@ class SupabaseVentureService implements IVentureService {
     registrationsOverTime: { date: string; count: number }[];
     categoryDistribution: { category: string; count: number }[];
     pendingQueue: Venture[];
+    allVentures: Venture[];
   }> {
     // Disabled temporarily to prevent high egress/browser crashing.
     // TODO: Implement via Next.js API Route + Supabase SQL View/RPC.
@@ -428,23 +465,214 @@ class SupabaseVentureService implements IVentureService {
       registrationsOverTime: [],
       categoryDistribution: [],
       pendingQueue: [],
+      allVentures: [],
     };
   }
 
-  async updateVentureStatus(id: string, status: "approved" | "rejected"): Promise<void> {
+  async suspendVenture(id: string): Promise<{ emailSent: boolean; emailError?: string }> {
+    const { data: venture } = await supabase
+      .from("ventures")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (!venture) throw new Error("Venture not found.");
+
     const { data: updated, error } = await supabase
       .from("ventures")
-      .update({ status })
+      .update({ status: "suspended" })
       .eq("id", id)
       .select()
       .single();
 
     if (error) throw new Error(error.message);
 
-    // If approved, trigger Serial Entrepreneur badge checks
+    let emailSent = false;
+    let emailError: string | undefined = undefined;
+
+    if (updated) {
+      const studentEmail = updated.contact_links?.email || `${updated.owner_name.toLowerCase().replace(/\s+/g, '')}@iiml.ac.in`;
+
+      try {
+        const res = await fetch("/api/ventures/approve-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ventureName: updated.name,
+            ownerName: updated.owner_name,
+            recipientEmail: studentEmail,
+            status: "suspended",
+            dueAmount: updated.current_due,
+          }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          emailError = errData.error || "Email route failed";
+          console.warn(`Resend suspension email failed: ${emailError}`);
+        } else {
+          emailSent = true;
+          console.log(`📧 Suspension email triggered for "${updated.name}" to ${studentEmail}`);
+        }
+      } catch (err: any) {
+        emailError = err.message || "Network error dispatching email";
+        console.error("Failed to send suspension email via API route:", err);
+      }
+    }
+
+    return { emailSent, emailError };
+  }
+
+  async reactivateVenture(id: string): Promise<{ emailSent: boolean; emailError?: string }> {
+    const { data: venture } = await supabase
+      .from("ventures")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (!venture) throw new Error("Venture not found.");
+
+    const { data: updated, error } = await supabase
+      .from("ventures")
+      .update({ status: "approved" })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    let emailSent = false;
+    let emailError: string | undefined = undefined;
+
+    if (updated) {
+      const studentEmail = updated.contact_links?.email || `${updated.owner_name.toLowerCase().replace(/\s+/g, '')}@iiml.ac.in`;
+
+      try {
+        const res = await fetch("/api/ventures/approve-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ventureName: updated.name,
+            ownerName: updated.owner_name,
+            recipientEmail: studentEmail,
+            isUpdate: false,
+            status: "approved",
+          }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          emailError = errData.error || "Email route failed";
+          console.warn(`Resend reactivation email failed: ${emailError}`);
+        } else {
+          emailSent = true;
+          console.log(`📧 Reactivation email triggered for "${updated.name}" to ${studentEmail}`);
+        }
+      } catch (err: any) {
+        emailError = err.message || "Network error dispatching email";
+        console.error("Failed to send reactivation email via API route:", err);
+      }
+    }
+
+    return { emailSent, emailError };
+  }
+
+  async updateVentureStatus(id: string, status: "approved" | "rejected"): Promise<{ emailSent: boolean; emailError?: string }> {
+    const { data: venture } = await supabase
+      .from("ventures")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (!venture) throw new Error("Venture not found.");
+
+    let updateObj: any = { status };
+    
+    if (status === "approved") {
+      updateObj.approved_at = new Date().toISOString();
+      
+      if (venture.pending_updates) {
+        // Unpack pending updates
+        const p = venture.pending_updates;
+        updateObj.name = p.name;
+        updateObj.tagline = p.tagline;
+        updateObj.description = p.description;
+        updateObj.category = p.category;
+        updateObj.logo_url = p.logo_url;
+        updateObj.offerings = p.offerings;
+        updateObj.contact_links = p.contact_links;
+        updateObj.pending_updates = null;
+      }
+    } else if (status === "rejected") {
+      if (venture.status === "approved") {
+        updateObj = {
+          status: "approved",
+          pending_updates: null
+        };
+      }
+    }
+    
+    const { data: updated, error } = await supabase
+      .from("ventures")
+      .update(updateObj)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    let emailSent = false;
+    let emailError: string | undefined = undefined;
+
+    const isUpdate = !!venture.pending_updates;
+
+    // If approved, trigger Serial Entrepreneur badge checks and trigger Resend email route
     if (status === "approved" && updated) {
       await this.checkAndGrantSerialEntrepreneur(updated.owner_id);
+
+      const studentEmail = updated.contact_links?.email || `${updated.owner_name.toLowerCase().replace(/\s+/g, '')}@iiml.ac.in`;
+
+      try {
+        const res = await fetch("/api/ventures/approve-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ventureName: updated.name,
+            ownerName: updated.owner_name,
+            recipientEmail: studentEmail,
+            isUpdate,
+          }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          emailError = errData.error || "Email route failed";
+          console.warn(`Resend failed: ${emailError}`);
+        } else {
+          emailSent = true;
+          console.log(`📧 Congratulatory email triggered for "${updated.name}" to ${studentEmail}`);
+        }
+      } catch (err: any) {
+        emailError = err.message || "Network error dispatching email";
+        console.error("Failed to send approval email via API route:", err);
+      }
     }
+
+    return { emailSent, emailError };
+  }
+
+  async payVentureDue(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("ventures")
+      .update({ current_due: 0.00, status: "approved" })
+      .eq("id", id);
+    if (error) throw new Error(error.message);
   }
 
   // ── Deterministic Badge Award System ────────────────────────────────────────

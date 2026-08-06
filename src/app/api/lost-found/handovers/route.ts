@@ -20,11 +20,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'proof_type is required' }, { status: 422 });
     case 'not_found':
       return NextResponse.json({ message: 'Found report not found' }, { status: 404 });
-    case 'invalid_proof_for_tier':
+    case 'invalid_proof_for_sensitive_item':
       return NextResponse.json(
         {
           message:
-            'Tier-3 handovers require documentary/technical proof (receipt, serial, imei, or device_unlock), not verbal',
+            'Sensitive-item handovers require documentary/technical proof (receipt, serial, imei, or device_unlock), not verbal',
         },
         { status: 422 },
       );
