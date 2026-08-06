@@ -66,19 +66,28 @@ export default function AdminPanel() {
       const name = approvedVenture?.name || "Venture";
       const isUpdate = !!approvedVenture?.pending_updates;
       
-      await ventureService.updateVentureStatus(id, nextStatus);
+      const result = await ventureService.updateVentureStatus(id, nextStatus);
       
       if (nextStatus === "approved") {
         const emailAddress = approvedVenture?.contact_links?.email || `${approvedVenture?.owner_name.toLowerCase().replace(/\s+/g, '')}@iiml.ac.in`;
         
-        setNotifyDialog({
-          isOpen: true,
-          title: "Venture Moderated!",
-          message: isUpdate 
-            ? `The updates for "${name}" have been approved and applied live.`
-            : `"${name}" has been successfully approved and added to the campus catalog.`,
-          emailSentTo: emailAddress,
-        });
+        if (result.emailSent) {
+          setNotifyDialog({
+            isOpen: true,
+            title: "Venture Moderated! ✨",
+            message: isUpdate 
+              ? `The updates for "${name}" have been approved and applied live. A confirmation email has been dispatched.`
+              : `"${name}" has been successfully approved and added to the campus catalog. A congratulatory email has been dispatched.`,
+            emailSentTo: emailAddress,
+          });
+        } else {
+          setNotifyDialog({
+            isOpen: true,
+            title: "Venture Approved (Email Failed) ⚠️",
+            message: `"${name}" has been approved in the database, but the email notification failed to send: "${result.emailError || "Unknown Resend error"}"`,
+            emailSentTo: `${emailAddress} (Failed: ${result.emailError})`,
+          });
+        }
       } else {
         setNotifyDialog({
           isOpen: true,

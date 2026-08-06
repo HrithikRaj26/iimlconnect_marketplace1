@@ -42,7 +42,7 @@ export interface IVentureService {
     categoryDistribution: { category: string; count: number }[];
     pendingQueue: Venture[];
   }>;
-  updateVentureStatus(id: string, status: "approved" | "rejected"): Promise<void>;
+  updateVentureStatus(id: string, status: "approved" | "rejected"): Promise<{ emailSent: boolean; emailError?: string }>;
   payVentureDue(id: string): Promise<void>;
   toggleVentureOpenStatus(id: string, isOpen: boolean): Promise<Venture>;
 }
@@ -536,7 +536,7 @@ class SupabaseVentureService implements IVentureService {
     };
   }
 
-  async updateVentureStatus(id: string, status: "approved" | "rejected"): Promise<void> {
+  async updateVentureStatus(id: string, status: "approved" | "rejected"): Promise<{ emailSent: boolean; emailError?: string }> {
     const { data: venture } = await supabase
       .from("ventures")
       .select("*")
@@ -580,6 +580,9 @@ class SupabaseVentureService implements IVentureService {
 
     if (error) throw new Error(error.message);
 
+    let emailSent = false;
+    let emailError: string | undefined = undefined;
+
     // If approved, trigger Serial Entrepreneur badge checks and trigger Resend email route
     if (status === "approved" && updated) {
       await this.checkAndGrantSerialEntrepreneur(updated.owner_id);
@@ -587,7 +590,7 @@ class SupabaseVentureService implements IVentureService {
       const studentEmail = updated.contact_links?.email || `${updated.owner_name.toLowerCase().replace(/\s+/g, '')}@iiml.ac.in`;
 
       try {
-        await fetch("/api/ventures/approve-email", {
+        const res = await fetch("/api/ventures/approve-email", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -598,11 +601,22 @@ class SupabaseVentureService implements IVentureService {
             recipientEmail: studentEmail,
           }),
         });
-        console.log(`📧 Congratulatory email triggered for "${updated.name}" to ${studentEmail}`);
-      } catch (err) {
+
+        if (!res.ok) {
+          const errData = await res.json();
+          emailError = errData.error || "Email route failed";
+          console.warn(`Resend failed: ${emailError}`);
+        } else {
+          emailSent = true;
+          console.log(`📧 Congratulatory email triggered for "${updated.name}" to ${studentEmail}`);
+        }
+      } catch (err: any) {
+        emailError = err.message || "Network error dispatching email";
         console.error("Failed to send approval email via API route:", err);
       }
     }
+
+    return { emailSent, emailError };
   }
 
   async payVentureDue(id: string): Promise<void> {

@@ -65,6 +65,14 @@ export async function POST(request: Request) {
       `,
     });
 
+    if (emailResponse.error) {
+      console.error("Resend API Error details:", emailResponse.error);
+      return NextResponse.json(
+        { error: emailResponse.error.message || "Failed to send email via Resend" },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json({ success: true, id: emailResponse.data?.id });
   } catch (error: any) {
     console.error("Resend API Route Error:", error);
