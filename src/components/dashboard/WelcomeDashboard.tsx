@@ -2,6 +2,16 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import GlobalSearchBar from "./GlobalSearchBar";
+import { 
+  ShoppingBag, 
+  PlusCircle, 
+  Search, 
+  CheckCircle, 
+  Rocket, 
+  ShieldAlert,
+  ChevronDown
+} from "lucide-react";
 
 export default function WelcomeDashboard({ session }: { session: any }) {
   const router = useRouter();
@@ -24,79 +34,115 @@ export default function WelcomeDashboard({ session }: { session: any }) {
     }
   }, [session]);
 
+  const ActionButton = ({ 
+    icon: Icon, 
+    label, 
+    onClick, 
+    isNew = false,
+    colorClass = "text-gray-700" 
+  }: any) => (
+    <div 
+      onClick={onClick}
+      className="flex flex-col items-center justify-start group cursor-pointer w-24 mx-2"
+    >
+      <div className={`flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-sm border border-gray-100 group-hover:shadow-md group-hover:-translate-y-1 transition-all duration-200 mb-3 ${colorClass}`}>
+        <Icon strokeWidth={1.5} size={28} />
+      </div>
+      <span className="text-[13px] font-medium text-gray-600 text-center leading-tight mb-1 group-hover:text-gray-900">
+        {label}
+      </span>
+      {isNew && (
+        <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+          New
+        </span>
+      )}
+    </div>
+  );
+
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-          {firstName ? `Welcome back, ${firstName}!` : "Welcome to IIML Connect"}
-        </h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Select a module to get started.
-        </p>
+    <div className="min-h-screen bg-[#FAFAFA] flex flex-col items-center pt-8 md:pt-16 px-4">
+      <GlobalSearchBar firstName={firstName} />
+
+      <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row items-stretch justify-center bg-white rounded-3xl p-8 shadow-sm border border-gray-100 gap-8 md:gap-0">
+        
+        {/* MARKETPLACE SUITE */}
+        <div className="flex-1 flex flex-col items-center border-b md:border-b-0 md:border-r border-gray-100 pb-8 md:pb-0 relative">
+          <div className="flex items-center text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-8 cursor-pointer hover:text-gray-600 transition-colors">
+            Marketplace <ChevronDown size={12} className="ml-1" />
+          </div>
+          <div className="flex flex-row items-start justify-center flex-wrap gap-4">
+            <ActionButton 
+              icon={ShoppingBag} 
+              label="Search Listings" 
+              onClick={() => router.push("/marketplace")}
+              colorClass="text-blue-600"
+            />
+            <ActionButton 
+              icon={PlusCircle} 
+              label="Add Listing" 
+              onClick={() => router.push("/marketplace/new")}
+              colorClass="text-blue-600"
+            />
+          </div>
+        </div>
+
+        {/* LOST AND FOUND SUITE */}
+        <div className="flex-1 flex flex-col items-center border-b md:border-b-0 md:border-r border-gray-100 pb-8 md:pb-0 relative">
+          <div className="flex items-center text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-8 cursor-pointer hover:text-gray-600 transition-colors">
+            Lost & Found <ChevronDown size={12} className="ml-1" />
+          </div>
+          <div className="flex flex-row items-start justify-center flex-wrap gap-4">
+            <ActionButton 
+              icon={Search} 
+              label="Report Lost" 
+              onClick={() => router.push("/lost-found/report/lost")}
+              colorClass="text-purple-600"
+            />
+            <ActionButton 
+              icon={CheckCircle} 
+              label="Report Found" 
+              onClick={() => router.push("/lost-found/report/found")}
+              colorClass="text-purple-600"
+            />
+          </div>
+        </div>
+
+        {/* VENTURES SUITE */}
+        <div className="flex-1 flex flex-col items-center relative">
+          <div className="flex items-center text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-8 cursor-pointer hover:text-gray-600 transition-colors">
+            Student Ventures <ChevronDown size={12} className="ml-1" />
+          </div>
+          <div className="flex flex-row items-start justify-center flex-wrap gap-4">
+            <ActionButton 
+              icon={Rocket} 
+              label="Explore Hub" 
+              onClick={() => router.push("/ventures")}
+              colorClass="text-orange-600"
+            />
+            <ActionButton 
+              icon={PlusCircle} 
+              label="Register Venture" 
+              onClick={() => router.push("/ventures/new")}
+              colorClass="text-orange-600"
+            />
+          </div>
+        </div>
+
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div 
-          onClick={() => router.push("/marketplace")}
-          className="group relative flex flex-col items-start justify-between rounded-2xl bg-white p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-blue-600 mb-4">
-            <span className="text-2xl">🛒</span>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-brand">Buy and Sell</h3>
-            <p className="mt-2 text-sm text-gray-500">
-              Campus marketplace for verified students.
-            </p>
-          </div>
+      {/* ADMIN CONSOLE */}
+      {isAdmin && (
+        <div className="mt-12 mb-8">
+          <button 
+            onClick={() => router.push("/admin")}
+            className="flex items-center px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors border border-red-100 text-sm font-medium"
+          >
+            <ShieldAlert size={16} className="mr-2" />
+            Admin Console
+          </button>
         </div>
+      )}
 
-
-
-        <div 
-          onClick={() => router.push("/lost-found")}
-          className="group relative flex flex-col items-start justify-between rounded-2xl bg-white p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-50 text-purple-600 mb-4">
-            <span className="text-2xl">🔍</span>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-600">Lost and Found</h3>
-            <p className="mt-2 text-sm text-gray-500">
-              Report and recover lost items on campus.
-            </p>
-          </div>
-        </div>
-
-        <div 
-          onClick={() => router.push("/ventures")}
-          className="group relative flex flex-col items-start justify-between rounded-2xl bg-white p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-orange-50 text-orange-600 mb-4">
-            <span className="text-2xl">🚀</span>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-orange-600">Student Venture Hub</h3>
-            <p className="mt-2 text-sm text-gray-500">
-              Explore and support student startups.
-            </p>
-          </div>
-        </div>
-
-        {isAdmin && (
-          <div className="group relative flex flex-col items-start justify-between rounded-2xl bg-red-50 p-6 border border-red-200 hover:shadow-md transition-shadow cursor-pointer md:col-span-2">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-red-100 text-red-600 mb-4">
-              <span className="text-2xl">🛡️</span>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-red-700">Admin Console</h3>
-              <p className="mt-2 text-sm text-red-500">
-                Platform management and role assignments.
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
