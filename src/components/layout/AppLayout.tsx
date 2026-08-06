@@ -139,7 +139,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               {/* Brand and Info */}
               <div className="space-y-3 col-span-1 md:col-span-2">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600 text-white shadow-sm">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white shadow-sm">
                     <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
                       <path
                         d="M12 3l9 4.5-9 4.5-9-4.5L12 3zM3 12l9 4.5 9-4.5M3 16.5l9 4.5 9-4.5"
@@ -152,7 +152,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </span>
                   <div className="leading-tight">
                     <p className="text-sm font-bold text-gray-900">
-                      IIML <span className="text-orange-600">Connect</span>
+                      IIML <span className="text-brand">Connect</span>
                     </p>
                   </div>
                 </div>

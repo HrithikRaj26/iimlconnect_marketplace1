@@ -69,7 +69,7 @@ interface VerveEditData {
 
 class SupabaseVentureService implements IVentureService {
   async getVentures(filters: { query?: string; category?: string; sort?: "popular" | "newest" }): Promise<Venture[]> {
-    let query = supabase.from("ventures").select("*").eq("status", "approved");
+    let query = supabase.from("ventures").select("*").eq("status", "approved").eq("is_open", true);
 
     if (filters.category && filters.category !== "All") {
       query = query.eq("category", filters.category);
