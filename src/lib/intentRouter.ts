@@ -24,6 +24,8 @@ export async function routeQuery(query: string, mode: "regex" | "llm"): Promise<
         const data = await res.json();
         finalIntent = data.intent;
         extractedEntity = data.extractedEntity || query;
+      } else {
+        throw new Error(`API returned ${res.status}`);
       }
     } catch (e) {
       console.error("LLM routing failed, falling back to regex.", e);
