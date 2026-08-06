@@ -160,7 +160,7 @@ class SupabaseChatService implements IChatService {
     const nowStr = new Date().toISOString();
 
     // 1. Insert message
-    const { error: msgErr } = await supabase
+    let { error: msgErr } = await supabase
       .from("messages")
       .insert({
         id: msgId,
@@ -171,6 +171,20 @@ class SupabaseChatService implements IChatService {
         text_content: text,
         is_read: false
       });
+
+    if (msgErr && (msgErr.message?.includes("is_read") || msgErr.code === "PGRST204")) {
+      const { error: retryErr } = await supabase
+        .from("messages")
+        .insert({
+          id: msgId,
+          conversation_id: conversationId,
+          sender_id: currentUserId,
+          created_at: nowStr,
+          kind: "text",
+          text_content: text
+        });
+      msgErr = retryErr;
+    }
 
     if (msgErr) throw msgErr;
 
@@ -197,7 +211,7 @@ class SupabaseChatService implements IChatService {
     const preview = `Sent a price offer of ₹${amount}`;
 
     // 1. Insert offer message
-    const { error: msgErr } = await supabase
+    let { error: msgErr } = await supabase
       .from("messages")
       .insert({
         id: msgId,
@@ -211,6 +225,23 @@ class SupabaseChatService implements IChatService {
         offer_note: note || null,
         is_read: false
       });
+
+    if (msgErr && (msgErr.message?.includes("is_read") || msgErr.code === "PGRST204")) {
+      const { error: retryErr } = await supabase
+        .from("messages")
+        .insert({
+          id: msgId,
+          conversation_id: conversationId,
+          sender_id: currentUserId,
+          created_at: nowStr,
+          kind: "offer",
+          text_content: preview,
+          offer_amount: amount,
+          offer_status: "pending",
+          offer_note: note || null
+        });
+      msgErr = retryErr;
+    }
 
     if (msgErr) throw msgErr;
 
@@ -427,13 +458,17 @@ class SupabaseChatService implements IChatService {
   }
 
   async markAsRead(conversationId: string): Promise<void> {
-    const user = await this.getSessionUser();
-    await supabase
-      .from("messages")
-      .update({ is_read: true })
-      .eq("conversation_id", conversationId)
-      .neq("sender_id", user.id)
-      .eq("is_read", false);
+    try {
+      const user = await this.getSessionUser();
+      await supabase
+        .from("messages")
+        .update({ is_read: true })
+        .eq("conversation_id", conversationId)
+        .neq("sender_id", user.id)
+        .eq("is_read", false);
+    } catch (e) {
+      console.warn("Could not mark messages as read (is_read column may be missing):", e);
+    }
   }
 }
 
