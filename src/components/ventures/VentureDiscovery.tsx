@@ -320,20 +320,20 @@ export default function VentureDiscovery() {
             <div
               key={venture.id}
               onClick={() => handleCardClick(venture.id)}
-              className={`group flex flex-col justify-between rounded-2xl bg-white/70 backdrop-blur-md p-6 border transition-all duration-300 cursor-pointer ${
+              className={`group flex flex-col justify-between rounded-3xl bg-white/60 hover:bg-white/95 backdrop-blur-md p-6 border transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-orange-500/5 hover:-translate-y-1.5 ${
                 venture.is_featured 
-                  ? "border-amber-400/80 shadow-lg shadow-amber-500/10 hover:shadow-xl hover:shadow-amber-500/20 hover:border-amber-500/40 ring-1 ring-amber-400/20 animate-pulse-subtle hover:-translate-y-1" 
-                  : "border-white/80 shadow-md hover:shadow-xl hover:bg-white/90 hover:border-orange-500/20 hover:-translate-y-1"
+                  ? "border-amber-400/80 shadow-md shadow-amber-500/5 hover:border-amber-500 ring-2 ring-amber-400/10 animate-pulse-subtle" 
+                  : "border-gray-100 shadow-sm hover:border-orange-500/20"
               }`}
             >
               <div>
                 {/* Logo and Category */}
                 <div className="flex items-center justify-between">
-                  <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-gray-50 border border-gray-100">
+                  <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-gray-50 border border-gray-150 shrink-0">
                     <img
                       src={venture.logo_url || "https://images.unsplash.com/photo-1606857521015-7f9fcf423740?w=150&h=150&fit=crop"}
                       alt={venture.name}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                   </div>
                   <div className="flex items-center gap-1.5">
@@ -368,8 +368,11 @@ export default function VentureDiscovery() {
                 </p>
 
                 {/* Rating */}
-                <div className="mt-4 flex items-center gap-1">
-                  <span className="text-sm font-black text-gray-900">★ {venture.average_rating}</span>
+                <div className="mt-4 flex items-center gap-2">
+                  <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg text-xs font-black text-amber-700">
+                    <span>★</span>
+                    <span>{venture.average_rating}</span>
+                  </div>
                   <span className="text-xs font-semibold text-gray-400">({venture.reviews_count} reviews)</span>
                 </div>
 
@@ -398,7 +401,7 @@ export default function VentureDiscovery() {
                     target="_blank"
                     rel="noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="flex-1 text-center py-2.5 rounded-xl bg-orange-600 text-white hover:bg-orange-700 active:scale-98 transition-all shadow-sm shadow-orange-600/10 flex items-center justify-center gap-1.5"
+                    className="flex-1 text-center py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 text-white font-extrabold shadow-sm hover:brightness-105 active:scale-98 transition-all flex items-center justify-center gap-1.5 shadow-orange-600/10 group-hover:shadow-md group-hover:shadow-orange-600/20"
                   >
                     <span>Visit Website</span>
                     <span className="text-sm">↗</span>
@@ -406,7 +409,7 @@ export default function VentureDiscovery() {
                 ) : (
                   <button
                     type="button"
-                    className="flex-1 text-center py-2.5 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 active:scale-98 transition-all flex items-center justify-center gap-1.5"
+                    className="flex-1 text-center py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-150 text-gray-700 font-extrabold active:scale-98 transition-all flex items-center justify-center gap-1.5 group-hover:border-orange-500/20"
                   >
                     <span>View Details</span>
                     <span className="text-sm group-hover:translate-x-1 transition-transform">→</span>
