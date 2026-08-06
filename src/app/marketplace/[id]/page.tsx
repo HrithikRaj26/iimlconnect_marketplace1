@@ -162,7 +162,10 @@ export default function ListingDetailPage() {
                     Make an Offer
                   </Button>
                   <div className="mt-3 grid grid-cols-2 gap-3">
-                    <Button variant="secondary" onClick={() => router.push("/messages")}>
+                    <Button 
+                      variant="secondary" 
+                      onClick={() => router.push(`/messages?ownerId=${listing.seller_id}&ownerName=${encodeURIComponent(listing.seller_name)}&ventureName=${encodeURIComponent(listing.title)}&logoUrl=${encodeURIComponent(listing.image_url || '')}&askingPrice=${listing.price}&listingId=${listing.id}&listingType=item`)}
+                    >
                       Chat with Seller
                     </Button>
                     <Button variant="secondary">Save Listing</Button>
@@ -187,9 +190,9 @@ export default function ListingDetailPage() {
           sellerName: listing.seller_name,
           sellerRating: 4.9,
         }}
-        onSubmit={async () => {
+        onSubmit={async (amount, message) => {
           setOfferOpen(false);
-          router.push("/messages");
+          router.push(`/messages?ownerId=${listing.seller_id}&ownerName=${encodeURIComponent(listing.seller_name)}&ventureName=${encodeURIComponent(listing.title)}&logoUrl=${encodeURIComponent(listing.image_url || '')}&askingPrice=${listing.price}&listingId=${listing.id}&listingType=item&initialOfferAmount=${amount}&initialOfferNote=${encodeURIComponent(message || '')}`);
         }}
       />
     </div>

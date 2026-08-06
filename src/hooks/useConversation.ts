@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import {
   ChatMessage,
   Conversation,
@@ -26,6 +26,10 @@ interface UseConversationResult {
 
 export function useConversation(initial: Conversation): UseConversationResult {
   const [conversation, setConversation] = useState<Conversation>(initial);
+
+  useEffect(() => {
+    setConversation(initial);
+  }, [initial]);
 
   const patchMessage = useCallback(
     (messageId: string, patch: Partial<ChatMessage>) => {
