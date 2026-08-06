@@ -111,9 +111,11 @@ export async function POST(request: Request) {
       </div>
     `;
 
+    const fromEmail = process.env.RESEND_FROM_EMAIL || "IIML Connect <onboarding@resend.dev>";
+
     // Call Resend to send the congratulatory email
     let emailResponse = await resend.emails.send({
-      from: "IIML Connect <onboarding@resend.dev>",
+      from: fromEmail,
       to: recipientEmail,
       subject: emailSubject,
       html: emailHtml,
@@ -142,7 +144,7 @@ export async function POST(request: Request) {
         `;
         
         emailResponse = await resend.emails.send({
-          from: "IIML Connect <onboarding@resend.dev>",
+          from: fromEmail,
           to: fallbackEmail,
           subject: `[Sandbox Fallback] ${emailSubject}`,
           html: fallbackHtml,
