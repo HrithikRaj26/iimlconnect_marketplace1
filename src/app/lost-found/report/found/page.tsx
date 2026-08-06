@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TextArea } from "@/components/ui/TextArea";
 import { TextInput } from "@/components/ui/TextInput";
@@ -19,7 +19,18 @@ function prefillParam(key: string): string {
 }
 
 /** "Report Found" (Section 2.3). Photo is required (AC-2). Category/description/location can arrive prefilled from a lost report's "I Found This Item" button. */
+// useSearchParams() requires a Suspense boundary above it during static
+// prerendering, or the build fails outright — this wrapper is that
+// boundary; all the actual page logic stays in the inner component.
 export default function ReportFoundPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-surface" />}>
+      <ReportFoundPageInner />
+    </Suspense>
+  );
+}
+
+function ReportFoundPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const prefill = searchParams.get("prefill") || "";

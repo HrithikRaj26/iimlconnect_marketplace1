@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TextInput } from "@/components/ui/TextInput";
@@ -101,7 +101,18 @@ function FilterPill({
   );
 }
 
+// useSearchParams() requires a Suspense boundary above it during static
+// prerendering, or the build fails outright — this wrapper is that
+// boundary; all the actual page logic stays in the inner component.
 export default function LostFoundBrowsePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-surface" />}>
+      <LostFoundBrowsePageInner />
+    </Suspense>
+  );
+}
+
+function LostFoundBrowsePageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { userId } = useLostFoundAuth();

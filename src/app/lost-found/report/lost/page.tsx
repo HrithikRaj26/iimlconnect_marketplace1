@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TextInput } from "@/components/ui/TextInput";
 import { TextArea } from "@/components/ui/TextArea";
@@ -18,7 +18,18 @@ import { isSensitiveCategory } from "@/types/lostFound";
  * picker" stays a free-text field, same simplification as the original
  * React Native build (schema stores location as text, not lat/lng).
  */
+// useSearchParams() requires a Suspense boundary above it during static
+// prerendering, or the build fails outright — this wrapper is that
+// boundary; all the actual page logic stays in the inner component.
 export default function ReportLostPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-surface" />}>
+      <ReportLostPageInner />
+    </Suspense>
+  );
+}
+
+function ReportLostPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const prefill = searchParams.get("prefill") || "";
