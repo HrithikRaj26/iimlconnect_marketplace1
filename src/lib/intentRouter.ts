@@ -6,24 +6,27 @@ export interface IntentResult {
   intent: IntentKeys | null;
   extractedEntity: string;
   redirectTo: string | null;
+  message?: string;
 }
 
-export async function routeQuery(query: string, mode: "regex" | "llm"): Promise<IntentResult> {
+export async function routeQuery(query: string, mode: "regex" | "llm", contextResults?: any): Promise<IntentResult> {
   const normalizedQuery = query.toLowerCase().trim();
   let extractedEntity = query;
   let finalIntent: IntentKeys | null = null;
+  let aiMessage: string | undefined;
 
   if (mode === "llm") {
     try {
       const res = await fetch("/api/llm-router", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query })
+        body: JSON.stringify({ query, searchResults: contextResults })
       });
       if (res.ok) {
         const data = await res.json();
         finalIntent = data.intent;
         extractedEntity = data.extractedEntity || query;
+        aiMessage = data.message;
       } else {
         throw new Error(`API returned ${res.status}`);
       }
@@ -74,6 +77,7 @@ export async function routeQuery(query: string, mode: "regex" | "llm"): Promise<
   return {
     intent: finalIntent,
     extractedEntity,
-    redirectTo
+    redirectTo,
+    message: aiMessage
   };
 }

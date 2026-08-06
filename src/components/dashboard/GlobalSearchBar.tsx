@@ -54,6 +54,9 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
   const [isIntentLoading, setIsIntentLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchMode, setSearchMode] = useState<"regex" | "llm">("regex");
+  const [aiMessage, setAiMessage] = useState<string | null>(null);
+  const [aiRedirectTo, setAiRedirectTo] = useState<string | null>(null);
+  
   const { isListening, startListening } = useVoiceSearch((text) => {
     setQuery(text);
     // Optionally trigger search automatically on voice stop, but let's just prefill for now.
@@ -148,8 +151,11 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
       setShowDropdown(false);
       setIsIntentLoading(true);
       try {
-        const result = await routeQuery(query, searchMode);
-        if (result.redirectTo) {
+        const result = await routeQuery(query, searchMode, results);
+        if (result.message && searchMode === "llm") {
+          setAiMessage(result.message);
+          setAiRedirectTo(result.redirectTo);
+        } else if (result.redirectTo) {
           router.push(result.redirectTo);
         }
       } finally {
@@ -165,6 +171,35 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
   };
 
   const hasResults = results && (results.marketplace.length > 0 || results.ventures.length > 0 || results.lostFound.length > 0);
+
+  // Typewriter effect for AI message
+  const [typedAiMessage, setTypedAiMessage] = useState("");
+  useEffect(() => {
+    if (!aiMessage) {
+      setTypedAiMessage("");
+      return;
+    }
+    let i = 0;
+    setTypedAiMessage("");
+    const interval = setInterval(() => {
+      setTypedAiMessage(aiMessage.slice(0, i + 1));
+      i++;
+      if (i >= aiMessage.length) clearInterval(interval);
+    }, 25); // Fast typing speed
+    
+    // Auto redirect after typing finishes + 3 seconds
+    const totalTime = (aiMessage.length * 25) + 3000;
+    const redirectTimeout = setTimeout(() => {
+      if (aiRedirectTo) {
+        router.push(aiRedirectTo);
+      }
+    }, totalTime);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(redirectTimeout);
+    };
+  }, [aiMessage, aiRedirectTo, router]);
 
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col items-center mb-16 px-4 pt-12">
@@ -397,7 +432,46 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
             )}
           </div>
         )}
+
       </div>
+
+      {/* AI Message Overlay */}
+      {aiMessage && (
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl border border-blue-100 p-8 md:p-12 max-w-2xl w-full relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500 animate-pulse"></div>
+            
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
+                <Sparkles size={32} className="text-blue-600" />
+              </div>
+              
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 min-h-[4rem]">
+                {typedAiMessage}
+                <span className="animate-pulse text-blue-500 inline-block ml-1">|</span>
+              </h2>
+
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setAiMessage(null)}
+                  className="px-6 py-3 rounded-full font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => aiRedirectTo && router.push(aiRedirectTo)}
+                  className="px-8 py-3 rounded-full font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+                >
+                  Take me there <Zap size={18} />
+                </button>
+              </div>
+              <p className="text-xs text-gray-400 mt-6">
+                Redirecting automatically in a few seconds...
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
