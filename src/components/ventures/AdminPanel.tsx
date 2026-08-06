@@ -16,6 +16,7 @@ export default function AdminPanel() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [submittingId, setSubmittingId] = useState<string | null>(null);
+  const [selectedVenture, setSelectedVenture] = useState<Venture | null>(null);
 
   const loadStats = async () => {
     setLoading(true);
@@ -217,7 +218,14 @@ export default function AdminPanel() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 w-full md:w-auto">
+                <div className="flex items-center gap-2 w-full md:w-auto justify-end">
+                  <Button
+                    variant="secondary"
+                    onClick={() => setSelectedVenture(v)}
+                    className="border-gray-200 hover:bg-gray-50 text-gray-700 font-extrabold text-xs"
+                  >
+                    Review Details 🔍
+                  </Button>
                   <Button
                     loading={submittingId === v.id}
                     onClick={() => handleStatusUpdate(v.id, "approved")}
@@ -238,6 +246,181 @@ export default function AdminPanel() {
           </div>
         )}
       </div>
+
+      {/* Moderation Review Details Modal */}
+      {selectedVenture && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="relative bg-white rounded-3xl p-6 md:p-8 max-w-2xl w-full shadow-2xl border border-gray-100 flex flex-col max-h-[85vh] overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4 shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🛡️</span>
+                <div>
+                  <h3 className="text-base font-extrabold text-gray-900">Moderation Request Details</h3>
+                  <p className="text-[10px] font-semibold text-gray-400 mt-0.5">
+                    {selectedVenture.pending_updates ? "Profile Update Request" : "New Venture Registration"}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedVenture(null)}
+                className="text-gray-400 hover:text-gray-655 hover:bg-gray-100 rounded-lg p-1 font-extrabold text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Scrollable Body */}
+            <div className="flex-1 overflow-y-auto py-6 space-y-6 text-xs text-gray-650 font-semibold leading-relaxed">
+              {/* Branding Block */}
+              <div className="flex items-center gap-3 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                <img
+                  src={selectedVenture.logo_url || ""}
+                  className="h-14 w-14 rounded-xl object-cover border bg-white shrink-0"
+                />
+                <div>
+                  <h4 className="text-sm font-extrabold text-gray-900">{selectedVenture.name}</h4>
+                  <p className="text-[10px] font-bold text-orange-600 mt-0.5">{selectedVenture.category}</p>
+                  <p className="text-[11px] font-medium text-gray-500 italic mt-1">"{selectedVenture.tagline}"</p>
+                </div>
+              </div>
+
+              {/* Submitter Details */}
+              <div className="grid grid-cols-2 gap-4 border-b border-gray-100 pb-4">
+                <div>
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">Founder Submitter</span>
+                  <p className="text-gray-900 font-extrabold">{selectedVenture.owner_name}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider block mb-1">Batch / Class</span>
+                  <p className="text-gray-900 font-extrabold">{selectedVenture.owner_batch}</p>
+                </div>
+              </div>
+
+              {/* Stacked comparison details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Side: Live / Original Details */}
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-wider border-b pb-1.5">
+                    {selectedVenture.pending_updates ? "Current Live Details" : "Venture Description"}
+                  </h4>
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-[9px] font-bold text-gray-400 block mb-0.5">Pitch Description:</span>
+                      <p className="bg-gray-50/55 p-3 rounded-xl border border-gray-100 text-gray-600 whitespace-pre-wrap">{selectedVenture.description}</p>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-bold text-gray-400 block mb-1">Venture Offerings:</span>
+                      <div className="flex flex-wrap gap-1">
+                        {selectedVenture.offerings.map((o, idx) => (
+                          <span key={idx} className="bg-white border rounded px-2 py-0.5 text-[10px]">{o}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-bold text-gray-400 block mb-0.5">Contact Channels:</span>
+                      <p>Email: <span className="text-gray-800 font-bold">{selectedVenture.contact_links?.email || "None"}</span></p>
+                      <p className="mt-1">WhatsApp: <span className="text-gray-800 font-bold">{selectedVenture.contact_links?.whatsapp || "None"}</span></p>
+                      {selectedVenture.contact_links?.website && (
+                        <p className="mt-1">Website: <a href={selectedVenture.contact_links.website} target="_blank" rel="noreferrer" className="text-orange-600 underline font-bold">{selectedVenture.contact_links.website}</a></p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Side: Proposed Updates (Only if they exist) */}
+                {selectedVenture.pending_updates && (
+                  <div className="space-y-4 bg-orange-50/30 p-4 rounded-2xl border border-orange-100/70">
+                    <h4 className="text-[10px] font-black text-orange-850 uppercase tracking-wider border-b border-orange-100/50 pb-1.5">
+                      Proposed Changes
+                    </h4>
+                    <div className="space-y-3">
+                      {selectedVenture.pending_updates.name !== selectedVenture.name && (
+                        <div>
+                          <span className="text-[9px] font-bold text-orange-600 block mb-0.5">Brand Name:</span>
+                          <p className="text-orange-900 font-extrabold">{selectedVenture.pending_updates.name}</p>
+                        </div>
+                      )}
+                      {selectedVenture.pending_updates.tagline !== selectedVenture.tagline && (
+                        <div>
+                          <span className="text-[9px] font-bold text-orange-600 block mb-0.5">Tagline:</span>
+                          <p className="text-orange-900 font-bold">"{selectedVenture.pending_updates.tagline}"</p>
+                        </div>
+                      )}
+                      {selectedVenture.pending_updates.description !== selectedVenture.description && (
+                        <div>
+                          <span className="text-[9px] font-bold text-orange-600 block mb-0.5">Description:</span>
+                          <p className="bg-white p-3 rounded-xl border text-orange-950 font-medium whitespace-pre-wrap">{selectedVenture.pending_updates.description}</p>
+                        </div>
+                      )}
+                      {selectedVenture.pending_updates.offerings.join(",") !== selectedVenture.offerings.join(",") && (
+                        <div>
+                          <span className="text-[9px] font-bold text-orange-600 block mb-1">Offerings:</span>
+                          <div className="flex flex-wrap gap-1">
+                            {selectedVenture.pending_updates.offerings.map((o, idx) => (
+                              <span key={idx} className="bg-white border border-orange-200 text-orange-855 rounded px-2 py-0.5 text-[10px]">{o}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {(selectedVenture.pending_updates.contact_links?.email !== selectedVenture.contact_links?.email ||
+                        selectedVenture.pending_updates.contact_links?.whatsapp !== selectedVenture.contact_links?.whatsapp ||
+                        selectedVenture.pending_updates.contact_links?.website !== selectedVenture.contact_links?.website) && (
+                        <div>
+                          <span className="text-[9px] font-bold text-orange-600 block mb-0.5">Updated Channels:</span>
+                          <p>Email: <span className="text-orange-950 font-bold">{selectedVenture.pending_updates.contact_links?.email || "None"}</span></p>
+                          <p className="mt-1">WhatsApp: <span className="text-orange-950 font-bold">{selectedVenture.pending_updates.contact_links?.whatsapp || "None"}</span></p>
+                          {selectedVenture.pending_updates.contact_links?.website && (
+                            <p className="mt-1">Website: <span className="text-orange-950 font-bold">{selectedVenture.pending_updates.contact_links.website}</span></p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Footer Controls */}
+            <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-4 shrink-0">
+              <button
+                type="button"
+                onClick={() => setSelectedVenture(null)}
+                className="rounded-xl border border-gray-250 hover:bg-gray-50 text-gray-700 px-4 py-2.5 text-xs font-black transition-colors"
+              >
+                Close
+              </button>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  loading={submittingId === selectedVenture.id}
+                  onClick={async () => {
+                    const vid = selectedVenture.id;
+                    await handleStatusUpdate(vid, "approved");
+                    setSelectedVenture(null);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs px-5 py-2.5 rounded-xl shadow-md transition-colors"
+                >
+                  Approve Request
+                </Button>
+                <Button
+                  variant="secondary"
+                  loading={submittingId === selectedVenture.id}
+                  onClick={async () => {
+                    const vid = selectedVenture.id;
+                    await handleStatusUpdate(vid, "rejected");
+                    setSelectedVenture(null);
+                  }}
+                  className="border-red-100 hover:bg-red-50 text-red-600 hover:text-red-700 font-extrabold text-xs px-5 py-2.5 rounded-xl transition-colors"
+                >
+                  Reject Request
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
