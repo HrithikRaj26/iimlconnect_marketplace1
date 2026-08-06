@@ -49,7 +49,7 @@ export async function routeQuery(query: string, mode: "regex" | "llm", contextRe
             url: mapIntentToUrl(s.intent, s.extractedEntity, query)
           }));
           
-          if (options.length > 0) {
+          if (options && options.length > 0) {
             finalIntent = data.suggestions[0].intent;
             extractedEntity = data.suggestions[0].extractedEntity || query;
           }
