@@ -9,6 +9,14 @@ const SENSITIVE_HIDDEN_PHOTO = null;
 const PHOTO_BUCKET = 'lost-found-photos';
 export const PGP_OFFICE_LOCATION = 'PGP Office';
 
+/** Matches the retention notice shown on the claim checkbox ("details will be retained for the next 30 days for dispute resolution purposes"). */
+const CLAIMANT_DISPUTE_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+
+function isWithinDisputeWindow(transferCompletedAt: string | null): boolean {
+  if (!transferCompletedAt) return false;
+  return Date.now() - new Date(transferCompletedAt).getTime() <= CLAIMANT_DISPUTE_WINDOW_MS;
+}
+
 /**
  * Resolves a Storage path to a signed URL using the service-role client
  * (bypasses Storage RLS entirely). This used to happen client-side, with
@@ -277,7 +285,12 @@ async function hydrateFoundDetail(found: any, requester: LostFoundUser) {
   // Claimant identity retained on the item page once claimed, for future
   // disputes — the finder needs this regardless of whether they also see
   // finderContact below (that's their own info, not relevant to themselves).
-  if ((isStaff || isFinder) && found.claimant_id) {
+  // For 30 days after the transfer completes, it's visible to *any* viewer
+  // (not just finder/staff) — a third party disputing the claim needs to
+  // be able to see who it went to, matching the retention notice shown on
+  // the claim checkbox. After the window closes it reverts to finder/staff
+  // only.
+  if ((isStaff || isFinder || isWithinDisputeWindow(found.transfer_completed_at)) && found.claimant_id) {
     result.claimantContact = await getContact(found.claimant_id);
   }
 
