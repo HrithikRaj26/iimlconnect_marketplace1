@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Loader2, Mic } from "lucide-react";
+import { Search, Loader2, Mic, X } from "lucide-react";
 import { Button } from "@/components/ui/moving-border";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 import { routeQuery } from "@/lib/intentRouter";
 import { Sparkles, Zap } from "lucide-react";
+
+type ChatMessage = { role: "user" | "ai"; content: string; options?: { label: string; url: string }[] };
 
 const greetings = {
   morning: [
@@ -54,12 +56,21 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
   const [isIntentLoading, setIsIntentLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchMode, setSearchMode] = useState<"regex" | "llm">("regex");
-  const [aiMessage, setAiMessage] = useState<string | null>(null);
-  const [aiRedirectTo, setAiRedirectTo] = useState<string | null>(null);
+  
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const chatScrollRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll chat to bottom
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatHistory]);
   
   const { isListening, startListening } = useVoiceSearch((text) => {
     setQuery(text);
-    // Optionally trigger search automatically on voice stop, but let's just prefill for now.
   });
 
   useEffect(() => {
@@ -87,7 +98,6 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
     let i = 0;
     setTypedSecondPart("");
     
-    // Add a small delay before typing starts for a better effect
     const startDelay = setTimeout(() => {
       const interval = setInterval(() => {
         setTypedSecondPart(greetingSecondPart.slice(0, i + 1));
@@ -100,7 +110,6 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
     return () => clearTimeout(startDelay);
   }, [greetingSecondPart]);
 
-  // Debounced Search Effect
   useEffect(() => {
     if (query.trim().length < 2) {
       setResults(null);
@@ -110,7 +119,6 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
     }
 
     if (searchMode === "regex") {
-      // Regex is fast enough to run live
       routeQuery(query, "regex").then(result => {
         if (result.intent) {
           setLiveIntent(result);
@@ -120,9 +128,6 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
         }
       });
     } else {
-      // LLM is slower, don't run it on every keystroke, let the form submit handle it.
-      // Alternatively, we could debounce it, but since API calls cost money/time, 
-      // we'll just clear live intent for now.
       setLiveIntent(null);
     }
 
@@ -151,16 +156,46 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
       setShowDropdown(false);
       setIsIntentLoading(true);
       try {
-        const result = await routeQuery(query, searchMode, results);
-        if (result.message && searchMode === "llm") {
-          setAiMessage(result.message);
-          setAiRedirectTo(result.redirectTo);
-        } else if (result.redirectTo) {
-          router.push(result.redirectTo);
+        if (searchMode === "llm") {
+          setIsChatOpen(true);
+          const newHistory: ChatMessage[] = [...chatHistory, { role: "user", content: query }];
+          setChatHistory(newHistory);
+          const currentQuery = query;
+          setQuery("");
+          
+          const result = await routeQuery(currentQuery, searchMode, results, newHistory);
+          if (result.message) {
+            setChatHistory([...newHistory, { role: "ai", content: result.message, options: result.options }]);
+          }
+        } else {
+          const result = await routeQuery(query, searchMode, results);
+          if (result.redirectTo) {
+            router.push(result.redirectTo);
+          }
         }
       } finally {
         setIsIntentLoading(false);
       }
+    }
+  };
+
+  const handleFollowUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+    
+    setIsIntentLoading(true);
+    const newHistory: ChatMessage[] = [...chatHistory, { role: "user", content: chatInput }];
+    setChatHistory(newHistory);
+    const currentInput = chatInput;
+    setChatInput("");
+    
+    try {
+      const result = await routeQuery(currentInput, "llm", results, newHistory);
+      if (result.message) {
+        setChatHistory([...newHistory, { role: "ai", content: result.message, options: result.options }]);
+      }
+    } finally {
+      setIsIntentLoading(false);
     }
   };
 
@@ -171,35 +206,6 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
   };
 
   const hasResults = results && (results.marketplace.length > 0 || results.ventures.length > 0 || results.lostFound.length > 0);
-
-  // Typewriter effect for AI message
-  const [typedAiMessage, setTypedAiMessage] = useState("");
-  useEffect(() => {
-    if (!aiMessage) {
-      setTypedAiMessage("");
-      return;
-    }
-    let i = 0;
-    setTypedAiMessage("");
-    const interval = setInterval(() => {
-      setTypedAiMessage(aiMessage.slice(0, i + 1));
-      i++;
-      if (i >= aiMessage.length) clearInterval(interval);
-    }, 25); // Fast typing speed
-    
-    // Auto redirect after typing finishes + 3 seconds
-    const totalTime = (aiMessage.length * 25) + 3000;
-    const redirectTimeout = setTimeout(() => {
-      if (aiRedirectTo) {
-        router.push(aiRedirectTo);
-      }
-    }, totalTime);
-
-    return () => {
-      clearInterval(interval);
-      clearTimeout(redirectTimeout);
-    };
-  }, [aiMessage, aiRedirectTo, router]);
 
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col items-center mb-16 px-4 pt-12">
@@ -273,7 +279,6 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
           </Button>
         </form>
 
-        {/* Search Mode Toggle */}
         <div className="mt-4 flex justify-center">
           <div className="bg-gray-100 p-1 rounded-full inline-flex items-center">
             <button
@@ -303,10 +308,8 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
           </div>
         </div>
 
-        {/* Live Search Dropdown */}
         {showDropdown && (
           <div className="absolute top-16 left-0 right-0 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-40 max-h-[70vh] overflow-y-auto">
-            
             {liveIntent && searchMode === "regex" && (
               <div 
                 onClick={() => handleResultClick(liveIntent.redirectTo)}
@@ -355,7 +358,6 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
 
             {results && hasResults && (
               <div className="flex flex-col py-2">
-                {/* Marketplace Results */}
                 {results.marketplace.length > 0 && (
                   <div className="mb-2">
                     <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50">Marketplace</div>
@@ -381,7 +383,6 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
                   </div>
                 )}
 
-                {/* Venture Hub Results */}
                 {results.ventures.length > 0 && (
                   <div className="mb-2">
                     <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50">Student Ventures</div>
@@ -407,7 +408,6 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
                   </div>
                 )}
 
-                {/* Lost & Found Results */}
                 {results.lostFound.length > 0 && (
                   <div className="mb-2">
                     <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50">Lost & Found</div>
@@ -432,42 +432,89 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
             )}
           </div>
         )}
-
       </div>
 
-      {/* AI Message Overlay */}
-      {aiMessage && (
-        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl border border-blue-100 p-8 md:p-12 max-w-2xl w-full relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500 animate-pulse"></div>
+      {isChatOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col max-w-2xl w-full h-[80vh] relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500"></div>
+            <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                  <Sparkles size={20} className="text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 dark:text-white">AI Assistant</h3>
+                  <p className="text-xs text-gray-500">Always here to help</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsChatOpen(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
             
-            <div className="flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 shadow-inner">
-                <Sparkles size={32} className="text-blue-600" />
-              </div>
+            <div ref={chatScrollRef} className="flex-1 overflow-y-auto p-4 space-y-6">
+              {chatHistory.map((msg, idx) => (
+                <div key={idx} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                  <div className={`max-w-[85%] rounded-2xl px-5 py-3 ${
+                    msg.role === 'user' 
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 rounded-tr-sm' 
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-sm'
+                  }`}>
+                    {msg.content}
+                  </div>
+                  
+                  {msg.role === 'ai' && msg.options && msg.options.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2 w-full max-w-[90%]">
+                      {msg.options.map((opt, optIdx) => (
+                        <button
+                          key={optIdx}
+                          onClick={() => {
+                            setIsChatOpen(false);
+                            router.push(opt.url);
+                          }}
+                          className="px-4 py-2 text-sm font-medium rounded-full border border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-white dark:bg-gray-900 transition-all shadow-sm hover:shadow active:scale-95 flex items-center gap-2"
+                        >
+                          {opt.label} <Zap size={14} />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
               
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 min-h-[4rem]">
-                {typedAiMessage}
-                <span className="animate-pulse text-blue-500 inline-block ml-1">|</span>
-              </h2>
-
-              <div className="flex items-center gap-4">
+              {isIntentLoading && (
+                <div className="flex items-start">
+                  <div className="bg-gray-100 dark:bg-gray-800 text-gray-800 rounded-2xl px-5 py-4 rounded-tl-sm flex gap-1 items-center">
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="p-4 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+              <form onSubmit={handleFollowUp} className="relative">
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Type a follow-up..."
+                  className="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-full py-4 pl-6 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-gray-900 dark:text-white placeholder-gray-500"
+                  disabled={isIntentLoading}
+                />
                 <button
-                  onClick={() => setAiMessage(null)}
-                  className="px-6 py-3 rounded-full font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                  type="submit"
+                  disabled={!chatInput.trim() || isIntentLoading}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full disabled:opacity-50 transition-colors shadow-md"
                 >
-                  Cancel
+                  <Search size={18} />
                 </button>
-                <button
-                  onClick={() => aiRedirectTo && router.push(aiRedirectTo)}
-                  className="px-8 py-3 rounded-full font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
-                >
-                  Take me there <Zap size={18} />
-                </button>
-              </div>
-              <p className="text-xs text-gray-400 mt-6">
-                Redirecting automatically in a few seconds...
-              </p>
+              </form>
             </div>
           </div>
         </div>

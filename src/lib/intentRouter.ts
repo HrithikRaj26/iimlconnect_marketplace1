@@ -7,26 +7,53 @@ export interface IntentResult {
   extractedEntity: string;
   redirectTo: string | null;
   message?: string;
+  options?: { label: string; url: string }[];
 }
 
-export async function routeQuery(query: string, mode: "regex" | "llm", contextResults?: any): Promise<IntentResult> {
+export async function routeQuery(query: string, mode: "regex" | "llm", contextResults?: any, messages?: any[]): Promise<IntentResult> {
   const normalizedQuery = query.toLowerCase().trim();
   let extractedEntity = query;
   let finalIntent: IntentKeys | null = null;
   let aiMessage: string | undefined;
+  let options: { label: string; url: string }[] | undefined;
+
+  const mapIntentToUrl = (intent: string | null, entity: string, fallbackQuery: string) => {
+    switch (intent) {
+      case "CREATE_LOST_REPORT":
+        return `/lost-found?tab=found&q=${encodeURIComponent(entity)}`;
+      case "CREATE_FOUND_REPORT":
+        return `/lost-found?tab=lost&q=${encodeURIComponent(entity)}`;
+      case "MARKETPLACE_SEARCH":
+        return `/marketplace?q=${encodeURIComponent(entity || fallbackQuery)}`;
+      case "VENTURE_SEARCH":
+        return `/ventures?q=${encodeURIComponent(entity || fallbackQuery)}`;
+      default:
+        return `/search?q=${encodeURIComponent(fallbackQuery)}`;
+    }
+  };
 
   if (mode === "llm") {
     try {
       const res = await fetch("/api/llm-router", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query, searchResults: contextResults })
+        body: JSON.stringify({ query, searchResults: contextResults, messages })
       });
       if (res.ok) {
         const data = await res.json();
-        finalIntent = data.intent;
-        extractedEntity = data.extractedEntity || query;
         aiMessage = data.message;
+        
+        if (data.suggestions && Array.isArray(data.suggestions)) {
+          options = data.suggestions.map((s: any) => ({
+            label: s.title,
+            url: mapIntentToUrl(s.intent, s.extractedEntity, query)
+          }));
+          
+          if (options.length > 0) {
+            finalIntent = data.suggestions[0].intent;
+            extractedEntity = data.suggestions[0].extractedEntity || query;
+          }
+        }
       } else {
         throw new Error(`API returned ${res.status}`);
       }
@@ -56,28 +83,14 @@ export async function routeQuery(query: string, mode: "regex" | "llm", contextRe
   let redirectTo = `/search?q=${encodeURIComponent(query)}`;
 
   if (finalIntent) {
-    switch (finalIntent as IntentKeys) {
-      case "CREATE_LOST_REPORT":
-        // If they lost something, they want to search the Found items.
-        redirectTo = `/lost-found?tab=found&q=${encodeURIComponent(extractedEntity)}`;
-        break;
-      case "CREATE_FOUND_REPORT":
-        // If they found something, they want to search the Lost items.
-        redirectTo = `/lost-found?tab=lost&q=${encodeURIComponent(extractedEntity)}`;
-        break;
-      case "MARKETPLACE_SEARCH":
-        redirectTo = `/marketplace?q=${encodeURIComponent(extractedEntity || query)}`;
-        break;
-      case "VENTURE_SEARCH":
-        redirectTo = `/ventures?q=${encodeURIComponent(extractedEntity || query)}`;
-        break;
-    }
+    redirectTo = mapIntentToUrl(finalIntent, extractedEntity, query);
   }
 
   return {
     intent: finalIntent,
     extractedEntity,
     redirectTo,
-    message: aiMessage
+    message: aiMessage,
+    options
   };
 }

@@ -68,17 +68,18 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
   }, [propProfile]);
 
   useEffect(() => {
-    let channel: any = null;
+    let channel: any;
+    let isMounted = true;
 
     const fetchUnread = async (userId: string) => {
       try {
         const { data: convs } = await supabase
-          .from("conversations")
-          .select("id")
-          .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
+          .from("conversation_participants")
+          .select("conversation_id")
+          .eq("profile_id", userId);
 
         if (convs && convs.length > 0) {
-          const ids = convs.map((c) => c.id);
+          const ids = convs.map((c: any) => c.conversation_id);
           const { count } = await supabase
             .from("messages")
             .select("*", { count: "exact", head: true })
@@ -86,9 +87,9 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
             .neq("sender_id", userId)
             .eq("is_read", false);
 
-          setUnreadChats(count || 0);
+          if (isMounted) setUnreadChats(count || 0);
         } else {
-          setUnreadChats(0);
+          if (isMounted) setUnreadChats(0);
         }
       } catch (e) {
         console.error("Error fetching unread count:", e);
@@ -96,12 +97,13 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
     };
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
+      if (session?.user && isMounted) {
         const userId = session.user.id;
         fetchUnread(userId);
 
+        const channelName = `top-nav-unread-${userId}-${Date.now()}`;
         channel = supabase
-          .channel("top-nav-unread")
+          .channel(channelName)
           .on(
             "postgres_changes",
             { event: "*", schema: "public", table: "messages" },
@@ -114,6 +116,7 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
     });
 
     return () => {
+      isMounted = false;
       if (channel) {
         supabase.removeChannel(channel);
       }
