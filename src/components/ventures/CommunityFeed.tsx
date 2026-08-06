@@ -24,6 +24,25 @@ export default function CommunityFeed() {
   const [eventLocation, setEventLocation] = useState("");
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setCurrentUserId(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setCurrentUserId(session.user.id);
+      } else {
+        setCurrentUserId(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const [activeEvent, setActiveEvent] = useState<VenturePost | null>(null);
 
@@ -50,6 +69,17 @@ export default function CommunityFeed() {
   useEffect(() => {
     loadFeed();
   }, [sortOrder]);
+
+  const handleDeletePost = async (postId: string) => {
+    if (!confirm("Are you sure you want to delete this post? This action cannot be undone.")) return;
+    try {
+      await ventureService.deletePost(postId);
+      setPosts(prev => prev.filter(p => p.id !== postId));
+    } catch (e: any) {
+      console.error(e);
+      alert(e.message || "Failed to delete post.");
+    }
+  };
 
   const handleLike = async (postId: string, isLiked: boolean) => {
     // Optimistic UI updates
@@ -231,9 +261,24 @@ export default function CommunityFeed() {
                     </div>
                   </div>
 
-                  <span className={`rounded px-2 py-0.5 text-[10px] font-extrabold border ${getPostTypeColor(post.type)}`}>
-                    {formatPostType(post.type)}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`rounded px-2 py-0.5 text-[10px] font-extrabold border ${getPostTypeColor(post.type)}`}>
+                      {formatPostType(post.type)}
+                    </span>
+                    
+                    {currentUserId && post.author_id === currentUserId && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePost(post.id)}
+                        className="p-1 text-gray-400 hover:text-red-650 hover:bg-red-50 rounded transition-colors"
+                        title="Delete Post"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Content Block */}

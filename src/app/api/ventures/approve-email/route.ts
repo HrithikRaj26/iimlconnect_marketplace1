@@ -34,13 +34,20 @@ export async function POST(request: Request) {
             Great news! Your student venture <strong>"${ventureName}"</strong> has been reviewed, approved by the moderation admin, and is now successfully live on the <strong>IIM Lucknow Venture Hub</strong> directory!
           </p>
           
-          <div style="background-color: #f9fafb; border: 1px solid #f3f4f6; padding: 16px; border-radius: 12px; margin-bottom: 24px;">
+          <div style="background-color: #f9fafb; border: 1px solid #f3f4f6; padding: 16px; border-radius: 12px; margin-bottom: 20px;">
             <p style="font-size: 13px; font-weight: 700; color: #4b5563; margin-top: 0; margin-bottom: 8px;">What you can do next:</p>
             <ul style="font-size: 13px; color: #4b5563; padding-left: 20px; margin-top: 0; margin-bottom: 0; line-height: 1.6;">
               <li>Toggle your startup operational status (Open/Closed) live in your founder dashboard.</li>
               <li>Broadcast news, flash sales, or late-night events to the campus feed.</li>
               <li>Gather rating reviews and direct inquiries from students.</li>
             </ul>
+          </div>
+          
+          <div style="background-color: #fff7ed; border: 1px solid #ffedd5; padding: 16px; border-radius: 12px; margin-bottom: 24px;">
+            <p style="font-size: 13px; font-weight: 800; color: #c2410c; margin-top: 0; margin-bottom: 8px;">📢 Pro-Tip: Notify the Campus!</p>
+            <p style="font-size: 12.5px; color: #ea580c; margin-top: 0; margin-bottom: 0; line-height: 1.5; font-weight: 600;">
+              Now that your venture details are approved and updated, we highly recommend publishing a new update or promotion post in the <strong>Community Feed</strong> to notify all students on campus about your latest details or menu offerings!
+            </p>
           </div>
           
           <div style="text-align: center; margin-top: 32px; margin-bottom: 16px;">

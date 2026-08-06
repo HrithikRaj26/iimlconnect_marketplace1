@@ -20,8 +20,9 @@ export interface IVentureService {
     };
     terms_accepted?: boolean;
   }): Promise<Venture>;
-  updateVenture(id: string, data: Partial<VerveEditData>): Promise<Venture>;
+  updateVenture(id: string, data: any): Promise<Venture>;
   deleteVenture(id: string): Promise<void>;
+  deletePost(id: string): Promise<void>;
   submitReview(ventureId: string, rating: number, content: string): Promise<VentureReview>;
   getFeedPosts(sort?: "chronological" | "trending"): Promise<VenturePost[]>;
   createPost(data: {
@@ -183,18 +184,37 @@ class SupabaseVentureService implements IVentureService {
     return newVenture as Venture;
   }
 
-  async updateVenture(id: string, data: Partial<VerveEditData>): Promise<Venture> {
+  async updateVenture(id: string, data: any): Promise<Venture> {
+    // Check if the venture is already approved
+    const { data: current } = await supabase
+      .from("ventures")
+      .select("status")
+      .eq("id", id)
+      .single();
+
+    let updateObj: any = {};
+    if (current && current.status === "approved") {
+      // If live/approved, keep it live but store modifications in pending_updates
+      updateObj = { pending_updates: data };
+    } else {
+      // Otherwise, overwrite main columns directly and set to pending review
+      updateObj = {
+        ...data,
+        status: "pending_approval"
+      };
+    }
+
     const { data: updated, error } = await supabase
       .from("ventures")
-      .update(data)
+      .update(updateObj)
       .eq("id", id)
       .select()
       .single();
 
     if (error) throw new Error(error.message);
 
-    // Badge logic check: if updated status is approved, check Serial Entrepreneur badge
-    if (data.status === "approved") {
+    // Badge logic check: if updated status is approved (e.g. from overwrite), check Serial Entrepreneur
+    if (updated.status === "approved") {
       await this.checkAndGrantSerialEntrepreneur(updated.owner_id);
     }
 
@@ -215,6 +235,11 @@ class SupabaseVentureService implements IVentureService {
 
   async deleteVenture(id: string): Promise<void> {
     const { error } = await supabase.from("ventures").delete().eq("id", id);
+    if (error) throw new Error(error.message);
+  }
+
+  async deletePost(id: string): Promise<void> {
+    const { error } = await supabase.from("posts").delete().eq("id", id);
     if (error) throw new Error(error.message);
   }
 
@@ -496,7 +521,7 @@ class SupabaseVentureService implements IVentureService {
       count
     })).reverse().slice(-7); // Last 7 days
 
-    const pendingQueue = (ventures || []).filter(v => v.status === "pending_approval") as Venture[];
+    const pendingQueue = (ventures || []).filter(v => v.status === "pending_approval" || (v.status === "approved" && v.pending_updates !== null)) as Venture[];
 
     return {
       totals: {
@@ -512,9 +537,38 @@ class SupabaseVentureService implements IVentureService {
   }
 
   async updateVentureStatus(id: string, status: "approved" | "rejected"): Promise<void> {
-    const updateObj: any = { status };
+    const { data: venture } = await supabase
+      .from("ventures")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (!venture) throw new Error("Venture not found.");
+
+    let updateObj: any = { status };
+    
     if (status === "approved") {
       updateObj.approved_at = new Date().toISOString();
+      
+      if (venture.pending_updates) {
+        // Unpack pending updates
+        const p = venture.pending_updates;
+        updateObj.name = p.name;
+        updateObj.tagline = p.tagline;
+        updateObj.description = p.description;
+        updateObj.category = p.category;
+        updateObj.logo_url = p.logo_url;
+        updateObj.offerings = p.offerings;
+        updateObj.contact_links = p.contact_links;
+        updateObj.pending_updates = null;
+      }
+    } else if (status === "rejected") {
+      if (venture.status === "approved") {
+        updateObj = {
+          status: "approved",
+          pending_updates: null
+        };
+      }
     }
     
     const { data: updated, error } = await supabase

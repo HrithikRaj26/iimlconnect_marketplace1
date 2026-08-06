@@ -34,17 +34,25 @@ export default function AdminPanel() {
   }, []);
 
   const handleStatusUpdate = async (id: string, nextStatus: "approved" | "rejected") => {
-    if (!confirm(`Are you sure you want to ${nextStatus === "approved" ? "Approve" : "Reject"} this venture?`)) return;
+    if (!confirm(`Are you sure you want to ${nextStatus === "approved" ? "Approve" : "Reject"} this request?`)) return;
     
     setSubmittingId(id);
     try {
+      const approvedVenture = stats?.pendingQueue.find(v => v.id === id);
+      const name = approvedVenture?.name || "Venture";
+      const isUpdate = !!approvedVenture?.pending_updates;
+      
       await ventureService.updateVentureStatus(id, nextStatus);
+      
       if (nextStatus === "approved") {
-        const approvedVenture = stats?.pendingQueue.find(v => v.id === id);
-        const name = approvedVenture?.name || "Venture";
         const emailAddress = approvedVenture?.contact_links?.email || `${approvedVenture?.owner_name.toLowerCase().replace(/\s+/g, '')}@iiml.ac.in`;
-        alert(`Success! "${name}" has been approved.\n\n📧 A congratulatory email notification has been dispatched to: ${emailAddress}`);
+        if (isUpdate) {
+          alert(`Success! The profile updates for "${name}" have been approved and applied live.\n\n📧 A confirmation email notification has been dispatched to: ${emailAddress}`);
+        } else {
+          alert(`Success! "${name}" has been approved.\n\n📧 A congratulatory email notification has been dispatched to: ${emailAddress}`);
+        }
       }
+      
       // Reload stats
       await loadStats();
     } catch (err) {
@@ -168,8 +176,41 @@ export default function AdminPanel() {
                   />
                   <div>
                     <h4 className="text-sm font-extrabold text-gray-900">{v.name}</h4>
-                    <p className="text-xs font-semibold text-orange-600">{v.category}</p>
-                    <p className="text-xs font-medium text-gray-500 italic mt-0.5">"{v.tagline}"</p>
+                    <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                      <span className="text-xs font-semibold text-orange-600">{v.category}</span>
+                      {v.pending_updates ? (
+                        <span className="rounded bg-orange-100 px-1.5 py-0.5 text-[9px] font-black text-orange-800 border border-orange-200">
+                          ⚠️ Profile Update Request
+                        </span>
+                      ) : (
+                        <span className="rounded bg-green-50 px-1.5 py-0.5 text-[9px] font-extrabold text-green-700 border border-green-200">
+                          New Venture Request
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs font-medium text-gray-500 italic mt-1">"{v.tagline}"</p>
+                    
+                    {v.pending_updates && (
+                      <div className="mt-3 text-[11px] bg-orange-50/70 border border-orange-100 rounded-xl p-3 text-gray-700 font-semibold space-y-1 max-w-md">
+                        <span className="text-[10px] font-black text-orange-700 tracking-wider uppercase block mb-1">Proposed Updates (Pending Admin Approval):</span>
+                        {v.pending_updates.name !== v.name && (
+                          <div>• Name: <span className="line-through text-gray-400">{v.name}</span> → <span className="text-orange-700 font-bold">{v.pending_updates.name}</span></div>
+                        )}
+                        {v.pending_updates.tagline !== v.tagline && (
+                          <div>• Tagline: <span className="line-through text-gray-400">{v.tagline}</span> → <span className="text-orange-700 font-bold">{v.pending_updates.tagline}</span></div>
+                        )}
+                        {v.pending_updates.description !== v.description && (
+                          <div className="line-clamp-2">• Description: <span className="text-orange-750 font-bold">{v.pending_updates.description}</span></div>
+                        )}
+                        {v.pending_updates.category !== v.category && (
+                          <div>• Category: <span className="line-through text-gray-400">{v.category}</span> → <span className="text-orange-700 font-bold">{v.pending_updates.category}</span></div>
+                        )}
+                        {v.pending_updates.offerings.join(",") !== v.offerings.join(",") && (
+                          <div>• Offerings: <span className="text-orange-700 font-bold">{v.pending_updates.offerings.join(", ")}</span></div>
+                        )}
+                      </div>
+                    )}
+
                     <p className="text-[10px] font-bold text-gray-400 mt-2">
                       Submitter: {v.owner_name} ({v.owner_batch})
                     </p>

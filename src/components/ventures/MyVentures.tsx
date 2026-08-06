@@ -42,6 +42,7 @@ export default function MyVentures() {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [registeredVentureName, setRegisteredVentureName] = useState("");
+  const [editingVentureId, setEditingVentureId] = useState<string | null>(null);
 
   const loadMyData = async () => {
     setLoading(true);
@@ -105,27 +106,48 @@ export default function MyVentures() {
 
     setSubmitting(true);
     try {
-      const newVenture = await ventureService.createVenture({
-        name,
-        tagline,
-        description,
-        category,
-        logo_url: logoUrl,
-        offerings,
-        contact_links: {
-          website: website.trim() || undefined,
-          instagram: instagram.trim() || undefined,
-          whatsapp: cleanWhatsapp,
-          email: email.trim().toLowerCase(),
-        },
-        terms_accepted: acceptTerms,
-      });
+      if (editingVentureId) {
+        const updated = await ventureService.updateVenture(editingVentureId, {
+          name,
+          tagline,
+          description,
+          category,
+          logo_url: logoUrl,
+          offerings,
+          contact_links: {
+            website: website.trim() || undefined,
+            instagram: instagram.trim() || undefined,
+            whatsapp: cleanWhatsapp,
+            email: email.trim().toLowerCase(),
+          }
+        });
 
-      setMyVentures([newVenture, ...myVentures]);
-      setRegisteredVentureName(name);
-      setShowSuccessModal(true);
+        setMyVentures(prev => prev.map(item => item.id === updated.id ? updated : item));
+        setRegisteredVentureName(name);
+        setShowSuccessModal(true);
+      } else {
+        const newVenture = await ventureService.createVenture({
+          name,
+          tagline,
+          description,
+          category,
+          logo_url: logoUrl,
+          offerings,
+          contact_links: {
+            website: website.trim() || undefined,
+            instagram: instagram.trim() || undefined,
+            whatsapp: cleanWhatsapp,
+            email: email.trim().toLowerCase(),
+          },
+          terms_accepted: acceptTerms,
+        });
+
+        setMyVentures([newVenture, ...myVentures]);
+        setRegisteredVentureName(name);
+        setShowSuccessModal(true);
+      }
     } catch (err: any) {
-      setErrorMsg(err.message || "Failed to create venture profile.");
+      setErrorMsg(err.message || "Failed to submit venture details.");
     } finally {
       setSubmitting(false);
     }
@@ -189,6 +211,7 @@ export default function MyVentures() {
     setAcceptTerms(false);
     setCurrentStep(1);
     setErrorMsg("");
+    setEditingVentureId(null);
   };
 
   const getStatusBadge = (status: VentureStatus) => {
@@ -271,12 +294,37 @@ export default function MyVentures() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                    <span className="text-xs font-semibold text-gray-400 pl-2">
+                  <div className="flex items-center gap-2 flex-wrap mt-2 md:mt-0 w-full md:w-auto justify-end">
+                    <span className="text-xs font-semibold text-gray-400 pl-2 pr-2">
                       ⭐ {v.average_rating} ({v.reviews_count} reviews)
                     </span>
+                    
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingVentureId(v.id);
+                        setName(v.name);
+                        setTagline(v.tagline);
+                        setDescription(v.description);
+                        setCategory(v.category);
+                        setLogoUrl(v.logo_url || PRESET_LOGOS[0]);
+                        setOfferings(v.offerings);
+                        setWebsite(v.contact_links.website || "");
+                        setInstagram(v.contact_links.instagram || "");
+                        setWhatsapp(v.contact_links.whatsapp || "");
+                        setEmail(v.contact_links.email || "");
+                        setAcceptTerms(v.terms_accepted || false);
+                        
+                        setShowWizard(true);
+                        setCurrentStep(1);
+                      }}
+                      className="rounded-xl border border-gray-250 hover:bg-gray-50 text-gray-700 px-3 py-1.5 text-xs font-bold transition-colors"
+                    >
+                      Edit Profile ⚙️
+                    </button>
+
                     {v.status === "approved" && (
-                      <div className="flex items-center gap-2 border-l border-gray-150 pl-4">
+                      <div className="flex items-center gap-2 border-l border-gray-150 pl-3">
                         <span className={`text-[10px] font-extrabold uppercase tracking-wider ${v.is_open ? "text-green-600" : "text-gray-400"}`}>
                           {v.is_open ? "Open" : "Closed"}
                         </span>
@@ -318,8 +366,12 @@ export default function MyVentures() {
         <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 space-y-8 shadow-sm">
           <div className="flex items-center justify-between border-b border-gray-100 pb-4">
             <div>
-              <h3 className="text-lg font-extrabold text-gray-900">Register Venture Profile Wizard</h3>
-              <p className="text-xs text-gray-500">Fill in the campus directory card coordinates.</p>
+              <h2 className="text-xl font-black text-gray-900">
+                {editingVentureId ? "⚙️ Edit Venture Profile" : "🚀 Start a Student Venture"}
+              </h2>
+              <p className="text-xs font-semibold text-gray-400 mt-1">
+                {editingVentureId ? "Update your startup details for admin moderation." : "Register your startup, side-project, or freelance service."}
+              </p>
             </div>
             <button
               onClick={() => setShowWizard(false)}
@@ -639,14 +691,34 @@ export default function MyVentures() {
               </svg>
             </div>
             
-            <div className="space-y-2">
-              <h3 className="text-xl font-black text-gray-900">🎉 Registration Submitted!</h3>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Awaiting Admin Moderation</p>
-              <p className="text-sm font-medium text-gray-500 leading-relaxed pt-2">
-                Congratulations! Your student venture <span className="font-extrabold text-gray-900">"{registeredVentureName}"</span> has been registered successfully.
+             <div className="space-y-2">
+              <h3 className="text-xl font-black text-gray-900">
+                {editingVentureId ? "✨ Profile Updates Submitted!" : "🎉 Registration Submitted!"}
+              </h3>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
+                {editingVentureId ? "Awaiting Update Approval" : "Awaiting Admin Moderation"}
               </p>
-              <p className="text-xs text-gray-400 leading-relaxed bg-gray-50 p-3 rounded-xl border">
-                It is now pending review. Once approved by our team, it will go live on the campus directory board and we will notify you at <span className="font-bold text-gray-600">{email}</span>!
+              <p className="text-sm font-medium text-gray-500 leading-relaxed pt-2">
+                {editingVentureId ? (
+                  <>
+                    Your updates for <span className="font-extrabold text-gray-900">"{registeredVentureName}"</span> have been saved.
+                  </>
+                ) : (
+                  <>
+                    Congratulations! Your student venture <span className="font-extrabold text-gray-900">"{registeredVentureName}"</span> has been registered successfully.
+                  </>
+                )}
+              </p>
+              <p className="text-xs text-gray-400 leading-relaxed bg-gray-50 p-3 rounded-xl border mt-2">
+                {editingVentureId ? (
+                  <>
+                    The updates are now pending moderation. The current live details will remain online to protect your business operations. Once approved, the new changes will take effect!
+                  </>
+                ) : (
+                  <>
+                    It is now pending review. Once approved by our team, it will go live on the campus directory board and we will notify you at <span className="font-bold text-gray-600">{email}</span>!
+                  </>
+                )}
               </p>
             </div>
 

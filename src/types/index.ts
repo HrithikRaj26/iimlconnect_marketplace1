@@ -220,6 +220,20 @@ export interface Venture {
   terms_accepted: boolean;
   approved_at?: string;
   current_due: number;
+  pending_updates?: {
+    name: string;
+    tagline: string;
+    description: string;
+    category: VentureCategory;
+    logo_url?: string;
+    offerings: string[];
+    contact_links: {
+      website?: string;
+      instagram?: string;
+      whatsapp?: string;
+      email?: string;
+    };
+  } | null;
 }
 
 export interface VentureReview {
