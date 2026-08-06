@@ -425,7 +425,7 @@ export default function VentureDiscovery() {
                 ) : (
                   <button
                     type="button"
-                    className="flex-1 text-center py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-150 text-gray-700 font-extrabold active:scale-98 transition-all flex items-center justify-center gap-1.5 group-hover:border-orange-500/20"
+                    className="flex-1 text-center py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 text-white font-extrabold shadow-sm hover:brightness-105 active:scale-98 transition-all flex items-center justify-center gap-1.5 shadow-orange-600/10 group-hover:shadow-md group-hover:shadow-orange-600/20"
                   >
                     <span>View Details</span>
                     <span className="text-sm group-hover:translate-x-1 transition-transform">→</span>
