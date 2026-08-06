@@ -23,3 +23,57 @@
   animation: card-wobble 0.6s ease-in-out;
 }
 
+/* Dark Mode Readability Overrides */
+.dark .text-gray-900 {
+  color: #f9fafb !important;
+}
+.dark .text-gray-800 {
+  color: #f3f4f6 !important;
+}
+.dark .text-gray-700 {
+  color: #e5e7eb !important;
+}
+.dark .text-gray-650 {
+  color: #d1d5db !important;
+}
+.dark .text-gray-600 {
+  color: #d1d5db !important;
+}
+.dark .text-gray-500 {
+  color: #9ca3af !important;
+}
+.dark .bg-white {
+  background-color: #111827 !important;
+}
+.dark .border-gray-200,
+.dark .border-gray-150,
+.dark .border-gray-100 {
+  border-color: #1f2937 !important;
+}
+.dark .bg-gray-50 {
+  background-color: #030712 !important;
+}
+.dark .bg-gray-100 {
+  background-color: #1f2937 !important;
+}
+.dark .hover\:bg-gray-50:hover {
+  background-color: #1f2937 !important;
+}
+.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #1f2937 !important;
+}
+.dark .divide-gray-50 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #1f2937 !important;
+}
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: #1f2937 !important;
+  color: #f9fafb !important;
+  border-color: #374151 !important;
+}
+.dark label {
+  color: #d1d5db !important;
+}
+
+
