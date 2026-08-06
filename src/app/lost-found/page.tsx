@@ -134,6 +134,7 @@ function LostFoundBrowsePageInner() {
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
   const [status, setStatus] = useState<string | undefined>(undefined);
+  const [mineTypeFilter, setMineTypeFilter] = useState<"" | "lost" | "found">("");
   const [lostDateFrom, setLostDateFrom] = useState("");
   const [lostDateTo, setLostDateTo] = useState("");
   const [foundDateFrom, setFoundDateFrom] = useState("");
@@ -206,6 +207,7 @@ function LostFoundBrowsePageInner() {
   const switchTab = (next: "lost" | "found" | "mine") => {
     setTab(next);
     setStatus(undefined); // status pills differ per tab, so a stale selection could silently filter to nothing
+    setMineTypeFilter(""); // the Lost/Found pill only exists on the My Reports tab
     // Each tab only shows its own date filter (Lost Date / Found Date /
     // Report Created Date), so clear all three on switch — otherwise a
     // filter set on one tab would keep silently narrowing another tab's
@@ -246,10 +248,15 @@ function LostFoundBrowsePageInner() {
   // exactly the case the "Matched" filter exists to surface.
   const isOwnReport = (r: ReportSummary) => (r.type === "lost" ? r.reporter_id === userId : r.finder_id === userId);
   const isMineTabMember = (r: ReportSummary) => isOwnReport(r) || (r.type === "found" && r.claimant_id === userId);
-  
+  // My Reports mixes both report types, so it gets its own Lost/Found pill
+  // to narrow down to one — a no-op outside that tab since mineTypeFilter
+  // only gets set there and is reset on every tab switch.
+  const matchesMineType = (r: ReportSummary): boolean => !mineTypeFilter || r.type === mineTypeFilter;
+
   let tabResults = (tab === "mine" ? results.filter(isMineTabMember) : results.filter((r) => r.type === tab))
     .filter(matchesStatus)
-    .filter(matchesDates);
+    .filter(matchesDates)
+    .filter(matchesMineType);
 
   if (searchQuery.trim()) {
     const fuse = new Fuse(tabResults, {
@@ -373,6 +380,23 @@ function LostFoundBrowsePageInner() {
                 ))}
               </div>
             </div>
+
+            {tab === "mine" && (
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-gray-800">Report Type</label>
+                <div className="flex flex-wrap gap-2">
+                  <FilterPill active={!mineTypeFilter} onClick={() => setMineTypeFilter("")}>
+                    All
+                  </FilterPill>
+                  <FilterPill active={mineTypeFilter === "lost"} onClick={() => setMineTypeFilter("lost")}>
+                    Lost
+                  </FilterPill>
+                  <FilterPill active={mineTypeFilter === "found"} onClick={() => setMineTypeFilter("found")}>
+                    Found
+                  </FilterPill>
+                </div>
+              </div>
+            )}
 
             {tab === "lost" && (
               <DateRangeField label="Lost Date" from={lostDateFrom} to={lostDateTo} onFromChange={setLostDateFrom} onToChange={setLostDateTo} />
