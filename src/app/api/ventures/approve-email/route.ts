@@ -16,6 +16,10 @@ export async function POST(request: Request) {
       );
     }
 
+    const host = request.headers.get("host");
+    const protocol = host?.includes("localhost") ? "http" : "https";
+    const baseUrl = host ? `${protocol}://${host}` : "https://iimlconnectmarketplace1.vercel.app";
+
     const isSuspension = status === "suspended";
 
     const emailSubject = isSuspension
@@ -94,7 +98,7 @@ export async function POST(request: Request) {
         ` : ""}
         
         <div style="text-align: center; margin-top: 32px; margin-bottom: 16px;">
-          <a href="http://localhost:3000/ventures" target="_blank" style="background-color: #ea580c; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 10px; font-size: 13px; font-weight: 900; display: inline-block; box-shadow: 0 4px 6px -1px rgba(234,88,12,0.2);">
+          <a href="${baseUrl}/ventures" target="_blank" style="background-color: #ea580c; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 10px; font-size: 13px; font-weight: 900; display: inline-block; box-shadow: 0 4px 6px -1px rgba(234,88,12,0.2);">
             ${isSuspension ? "Pay Outstanding Dues 💳" : "Open Venture Hub Dashboard 🚀"}
           </a>
         </div>
