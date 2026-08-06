@@ -285,12 +285,13 @@ async function hydrateFoundDetail(found: any, requester: LostFoundUser) {
   // Claimant identity retained on the item page once claimed, for future
   // disputes — the finder needs this regardless of whether they also see
   // finderContact below (that's their own info, not relevant to themselves).
-  // For 30 days after the transfer completes, it's visible to *any* viewer
-  // (not just finder/staff) — a third party disputing the claim needs to
-  // be able to see who it went to, matching the retention notice shown on
-  // the claim checkbox. After the window closes it reverts to finder/staff
-  // only.
-  if ((isStaff || isFinder || isWithinDisputeWindow(found.transfer_completed_at)) && found.claimant_id) {
+  // Visible to *any* viewer as soon as a claim exists — pending or
+  // completed — not just finder/staff, so a third party can immediately
+  // see who a found item went to. Once the transfer completes, that public
+  // visibility continues for 30 days (matching the retention notice shown
+  // on the claim checkbox), then reverts to finder/staff only.
+  const claimantPubliclyVisible = !!found.claimant_id && (!found.transfer_completed_at || isWithinDisputeWindow(found.transfer_completed_at));
+  if ((isStaff || isFinder || claimantPubliclyVisible) && found.claimant_id) {
     result.claimantContact = await getContact(found.claimant_id);
   }
 

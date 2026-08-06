@@ -201,9 +201,9 @@ export default function ReportDetailPage() {
             {report.claimantContact && (
               <div className="rounded-lg bg-brand-light p-4">
                 <p className="mb-1 text-sm font-bold text-gray-900">
-                  Claimed by {report.transfer_completed_at ? "(transfer completed)" : "(pending transfer)"}
+                  This item has been claimed{report.claimantContact.name ? ` by ${report.claimantContact.name}` : ""}
+                  {report.transfer_completed_at ? " (transfer completed)" : " (pending transfer)"}
                 </p>
-                {report.claimantContact.name && <p className="text-sm text-gray-700">{report.claimantContact.name}</p>}
                 {report.claimantContact.phone && <p className="text-sm text-gray-700">{report.claimantContact.phone}</p>}
                 {report.claimantContact.email && <p className="text-sm text-gray-700">{report.claimantContact.email}</p>}
                 {formatDate(report.claimed_at) && (
