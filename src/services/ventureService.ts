@@ -458,19 +458,59 @@ class SupabaseVentureService implements IVentureService {
     pendingQueue: Venture[];
     allVentures: Venture[];
   }> {
-    // Disabled temporarily to prevent high egress/browser crashing.
-    // TODO: Implement via Next.js API Route + Supabase SQL View/RPC.
+    const [venturesRes, reviewsRes, postsRes] = await Promise.all([
+      supabase.from("ventures").select("*"),
+      supabase.from("reviews").select("*", { count: "exact", head: true }),
+      supabase.from("posts").select("*", { count: "exact", head: true }),
+    ]);
+
+    if (venturesRes.error) throw new Error(venturesRes.error.message);
+
+    const allVentures = (venturesRes.data || []) as Venture[];
+    const totalReviews = reviewsRes.count || 0;
+    const totalPosts = postsRes.count || 0;
+
+    const registrations = allVentures.length;
+    const activeUsers = new Set(allVentures.map((v) => v.owner_id)).size;
+
+    // Category Distribution
+    const categoryMap: Record<string, number> = {};
+    allVentures.forEach((v) => {
+      categoryMap[v.category] = (categoryMap[v.category] || 0) + 1;
+    });
+    const categoryDistribution = Object.entries(categoryMap).map(([category, count]) => ({
+      category,
+      count,
+    }));
+
+    // Registrations over time
+    const dateMap: Record<string, number> = {};
+    allVentures.forEach((v) => {
+      if (v.created_at) {
+        const date = new Date(v.created_at).toISOString().split("T")[0];
+        dateMap[date] = (dateMap[date] || 0) + 1;
+      }
+    });
+    const registrationsOverTime = Object.entries(dateMap)
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    // Pending queue: either status is 'pending_approval' OR status is 'approved' and pending_updates is present
+    const pendingQueue = allVentures.filter(
+      (v) => v.status === "pending_approval" || (v.status === "approved" && v.pending_updates !== null)
+    );
+
     return {
       totals: {
-        registrations: 0,
-        activeUsers: 0,
-        totalReviews: 0,
-        totalPosts: 0,
+        registrations,
+        activeUsers,
+        totalReviews,
+        totalPosts,
       },
-      registrationsOverTime: [],
-      categoryDistribution: [],
-      pendingQueue: [],
-      allVentures: [],
+      registrationsOverTime,
+      categoryDistribution,
+      pendingQueue,
+      allVentures,
     };
   }
 
