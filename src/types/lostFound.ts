@@ -23,6 +23,7 @@ export const CATEGORIES = [
   'jewellery',
   'id card',
   'medication',
+  'miscellaneous',
 ];
 
 /** Binary sensitivity model (no tiers) — these categories are treated as sensitive. */
