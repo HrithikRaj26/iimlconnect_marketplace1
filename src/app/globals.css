@@ -23,7 +23,3 @@
   animation: card-wobble 0.6s ease-in-out;
 }
 
-/* Futura-style, everywhere in this module — scoped to Lost & Found only, applied via lost-found/layout.tsx. */
-.lost-found-fonts {
-  font-family: var(--font-futura), "Century Gothic", sans-serif;
-}

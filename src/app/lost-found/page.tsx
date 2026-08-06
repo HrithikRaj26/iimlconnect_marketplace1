@@ -101,7 +101,13 @@ function FilterPill({
 export default function LostFoundBrowsePage() {
   const router = useRouter();
   const { userId } = useLostFoundAuth();
-  const [tab, setTab] = useState<"lost" | "found" | "mine">("mine");
+  
+  // Read initial tab from URL if present
+  const initialTab = typeof window !== "undefined" 
+    ? (new URLSearchParams(window.location.search).get("tab") as "lost" | "found" | "mine") || "mine"
+    : "mine";
+  const [tab, setTab] = useState<"lost" | "found" | "mine">(initialTab);
+  
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
   const [status, setStatus] = useState<string | undefined>(undefined);

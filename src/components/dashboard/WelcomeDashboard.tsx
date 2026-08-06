@@ -96,7 +96,7 @@ export default function WelcomeDashboard({ session }: { session: any }) {
             <ActionButton 
               icon={Box} 
               label="Browse Items" 
-              onClick={() => router.push("/lost-found")}
+              onClick={() => router.push("/lost-found?tab=found")}
               colorClass="text-purple-600"
             />
             <ActionButton 
