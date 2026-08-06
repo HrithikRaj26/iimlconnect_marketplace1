@@ -583,6 +583,8 @@ class SupabaseVentureService implements IVentureService {
     let emailSent = false;
     let emailError: string | undefined = undefined;
 
+    const isUpdate = !!venture.pending_updates;
+
     // If approved, trigger Serial Entrepreneur badge checks and trigger Resend email route
     if (status === "approved" && updated) {
       await this.checkAndGrantSerialEntrepreneur(updated.owner_id);
@@ -599,6 +601,7 @@ class SupabaseVentureService implements IVentureService {
             ventureName: updated.name,
             ownerName: updated.owner_name,
             recipientEmail: studentEmail,
+            isUpdate,
           }),
         });
 
