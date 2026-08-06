@@ -402,50 +402,11 @@ class SupabaseVentureService implements IVentureService {
   }
 
   async getLeaderboards(): Promise<{ topVentures: Venture[]; topContributors: any[] }> {
-    // 1. Get Top Ventures sorted by score: rating * log(reviews_count + 1)
-    const { data: ventures } = await supabase.from("ventures").select("*").eq("status", "approved");
-    const sortedVentures = (ventures as Venture[] || [])
-      .sort((a, b) => b.average_rating * Math.log2(b.reviews_count + 1) - a.average_rating * Math.log2(a.reviews_count + 1))
-      .slice(0, 10);
-
-    // 2. Get Top Contributors based on badge counts and review logs
-    // Since we don't have a direct grouping on auth.users from client-side easily without admin APIs,
-    // we can dynamically aggregate contributors from reviews and user_badges table.
-    const { data: reviews } = await supabase.from("reviews").select("reviewer_name, reviewer_batch, reviewer_id");
-    const { data: badges } = await supabase.from("user_badges").select("user_id");
-
-    const contributorMap: Record<string, { name: string; batch: string; reviewsCount: number; badgeCount: number; score: number }> = {};
-
-    reviews?.forEach(r => {
-      if (!contributorMap[r.reviewer_id]) {
-        contributorMap[r.reviewer_id] = {
-          name: r.reviewer_name,
-          batch: r.reviewer_batch,
-          reviewsCount: 0,
-          badgeCount: 0,
-          score: 0,
-        };
-      }
-      contributorMap[r.reviewer_id].reviewsCount += 1;
-    });
-
-    badges?.forEach(b => {
-      if (contributorMap[b.user_id]) {
-        contributorMap[b.user_id].badgeCount += 1;
-      }
-    });
-
-    const contributors = Object.values(contributorMap)
-      .map(c => ({
-        ...c,
-        score: c.reviewsCount * 10 + c.badgeCount * 50
-      }))
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 10);
-
+    // Disabled temporarily to prevent high egress/browser crashing.
+    // TODO: Implement via Next.js API Route + Supabase SQL View/RPC.
     return {
-      topVentures: sortedVentures,
-      topContributors: contributors,
+      topVentures: [],
+      topContributors: [],
     };
   }
 
@@ -455,51 +416,18 @@ class SupabaseVentureService implements IVentureService {
     categoryDistribution: { category: string; count: number }[];
     pendingQueue: Venture[];
   }> {
-    const [{ count: regCount }, { data: ventures }] = await Promise.all([
-      supabase.from("ventures").select("*", { count: "exact", head: true }),
-      supabase.from("ventures").select("*"),
-    ]);
-
-    const { count: reviewCount } = await supabase.from("reviews").select("*", { count: "exact", head: true });
-    const { count: postCount } = await supabase.from("posts").select("*", { count: "exact", head: true });
-
-    const activeUsers = new Set((ventures || []).map(v => v.owner_id)).size;
-
-    // Compute category distribution
-    const categoriesMap: Record<string, number> = {};
-    (ventures || []).forEach(v => {
-      if (v.status === "approved") {
-        categoriesMap[v.category] = (categoriesMap[v.category] || 0) + 1;
-      }
-    });
-    const categoryDistribution = Object.entries(categoriesMap).map(([category, count]) => ({
-      category,
-      count
-    }));
-
-    // Compute registrations over time (group by day/week)
-    const datesMap: Record<string, number> = {};
-    (ventures || []).forEach(v => {
-      const d = new Date(v.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-      datesMap[d] = (datesMap[d] || 0) + 1;
-    });
-    const registrationsOverTime = Object.entries(datesMap).map(([date, count]) => ({
-      date,
-      count
-    })).reverse().slice(-7); // Last 7 days
-
-    const pendingQueue = (ventures || []).filter(v => v.status === "pending_approval") as Venture[];
-
+    // Disabled temporarily to prevent high egress/browser crashing.
+    // TODO: Implement via Next.js API Route + Supabase SQL View/RPC.
     return {
       totals: {
-        registrations: regCount || 0,
-        activeUsers: activeUsers || 0,
-        totalReviews: reviewCount || 0,
-        totalPosts: postCount || 0,
+        registrations: 0,
+        activeUsers: 0,
+        totalReviews: 0,
+        totalPosts: 0,
       },
-      registrationsOverTime,
-      categoryDistribution,
-      pendingQueue,
+      registrationsOverTime: [],
+      categoryDistribution: [],
+      pendingQueue: [],
     };
   }
 
