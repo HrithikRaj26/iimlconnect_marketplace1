@@ -107,7 +107,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
       {/* Sidebar - Desktop Push / Mobile Overlay */}
       <div 
         className={`fixed inset-y-0 left-0 z-50 w-64 shrink-0 transform bg-white border-r border-gray-200 transition-all duration-300 ease-in-out sm:relative sm:translate-x-0 ${

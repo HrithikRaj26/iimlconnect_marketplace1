@@ -2,7 +2,8 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { MessageSquare, LogOut, Sparkles } from "lucide-react";
+import { MessageSquare, LogOut, Sparkles, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/components/ui/ThemeProvider";
 
 interface TopNavProps {
   /** Which nav item to highlight as active. */
@@ -13,6 +14,7 @@ interface TopNavProps {
 
 export function TopNav({ active = "marketplace", onMenuClick, profile: propProfile }: TopNavProps) {
   const router = useRouter();
+  const { theme, toggle } = useTheme();
   const [profile, setProfile] = useState<{ name: string; avatar: string } | null>(propProfile || null);
   const [unreadChats, setUnreadChats] = useState(0);
 
@@ -122,7 +124,7 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
     key === active ? "text-brand" : "text-gray-500 hover:text-gray-800";
 
   return (
-    <header className="flex h-16 w-full items-center justify-between border-b border-gray-100 bg-white px-6 shrink-0">
+    <header className="flex h-16 w-full items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 shrink-0">
       <div className="flex items-center gap-4">
         {onMenuClick && (
           <button onClick={onMenuClick} className="text-gray-500 hover:text-gray-900 focus:outline-none">
@@ -171,6 +173,14 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
           </span>
         </Link>
         
+        <button
+          onClick={toggle}
+          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          className="flex items-center justify-center h-10 w-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors"
+        >
+          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+
         <button
           onClick={handleLogout}
           title="Sign Out"

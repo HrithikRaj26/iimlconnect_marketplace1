@@ -5,9 +5,17 @@
 @layer base {
   html, body {
     @apply h-full w-full bg-gray-50 text-gray-900;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  /* Dark mode base */
+  html.dark body {
+    background-color: #030712;
+    color: #f9fafb;
   }
 }
 
+/* ===== Animations ===== */
 @keyframes card-wobble {
   0% { transform: perspective(700px) rotate3d(0, 0, 0, 0deg) scale3d(1, 1, 1); }
   30% { transform: perspective(700px) rotate3d(1, 1, 0, 2.5deg) scale3d(1.015, 1.015, 1.015); }
@@ -18,53 +26,37 @@
 .card-wobble {
   transform-style: preserve-3d;
 }
-
 .card-wobble:hover {
   animation: card-wobble 0.6s ease-in-out;
 }
 
-/* Dark Mode Readability Overrides */
-.dark .text-gray-900 {
-  color: #f9fafb !important;
-}
-.dark .text-gray-800 {
-  color: #f3f4f6 !important;
-}
-.dark .text-gray-700 {
-  color: #e5e7eb !important;
-}
-.dark .text-gray-650 {
-  color: #d1d5db !important;
-}
-.dark .text-gray-600 {
-  color: #d1d5db !important;
-}
-.dark .text-gray-500 {
-  color: #9ca3af !important;
-}
-.dark .bg-white {
-  background-color: #111827 !important;
-}
+/* ===== Dark Mode: Text ===== */
+.dark .text-gray-900 { color: #f9fafb !important; }
+.dark .text-gray-800 { color: #f3f4f6 !important; }
+.dark .text-gray-700 { color: #e5e7eb !important; }
+.dark .text-gray-650 { color: #d1d5db !important; }
+.dark .text-gray-600 { color: #d1d5db !important; }
+.dark .text-gray-500 { color: #9ca3af !important; }
+.dark .text-gray-400 { color: #6b7280 !important; }
+
+/* ===== Dark Mode: Backgrounds ===== */
+.dark .bg-white          { background-color: #111827 !important; }
+.dark .bg-gray-50        { background-color: #030712 !important; }
+.dark .bg-gray-100       { background-color: #1f2937 !important; }
+.dark .bg-gray-200       { background-color: #374151 !important; }
+.dark .hover\:bg-gray-50:hover  { background-color: #1f2937 !important; }
+.dark .hover\:bg-gray-100:hover { background-color: #374151 !important; }
+
+/* ===== Dark Mode: Borders ===== */
 .dark .border-gray-200,
 .dark .border-gray-150,
-.dark .border-gray-100 {
-  border-color: #1f2937 !important;
-}
-.dark .bg-gray-50 {
-  background-color: #030712 !important;
-}
-.dark .bg-gray-100 {
-  background-color: #1f2937 !important;
-}
-.dark .hover\:bg-gray-50:hover {
-  background-color: #1f2937 !important;
-}
-.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
-  border-color: #1f2937 !important;
-}
-.dark .divide-gray-50 > :not([hidden]) ~ :not([hidden]) {
-  border-color: #1f2937 !important;
-}
+.dark .border-gray-100 { border-color: #1f2937 !important; }
+
+/* ===== Dark Mode: Dividers ===== */
+.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: #1f2937 !important; }
+.dark .divide-gray-50  > :not([hidden]) ~ :not([hidden]) { border-color: #1f2937 !important; }
+
+/* ===== Dark Mode: Forms ===== */
 .dark input,
 .dark textarea,
 .dark select {
@@ -72,8 +64,31 @@
   color: #f9fafb !important;
   border-color: #374151 !important;
 }
-.dark label {
-  color: #d1d5db !important;
+.dark label { color: #d1d5db !important; }
+
+/* ===== Dark Mode: Sidebar & Nav ===== */
+.dark header { background-color: #111827 !important; border-color: #1f2937 !important; }
+.dark nav, .dark aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+
+/* ===== Dark Mode: Cards & Surfaces ===== */
+.dark .shadow-sm,
+.dark .shadow,
+.dark .shadow-md,
+.dark .shadow-lg,
+.dark .shadow-xl {
+  --tw-shadow-color: rgba(0,0,0,0.5);
 }
 
+/* ===== Dark Mode: Footer ===== */
+.dark footer { background-color: #111827 !important; border-color: #1f2937 !important; }
 
+/* ===== Smooth transitions for theme switch ===== */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+/* Exclude transform-heavy elements from slow transition */
+button, a, svg, .animate-spin, .animate-pulse {
+  transition-duration: 0.1s;
+}
