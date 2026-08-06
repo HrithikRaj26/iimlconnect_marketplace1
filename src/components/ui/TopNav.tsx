@@ -14,6 +14,7 @@ interface TopNavProps {
 export function TopNav({ active = "marketplace", onMenuClick, profile: propProfile }: TopNavProps) {
   const router = useRouter();
   const [profile, setProfile] = useState<{ name: string; avatar: string } | null>(propProfile || null);
+  const [unreadChats, setUnreadChats] = useState(0);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -64,6 +65,59 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
     return () => subscription.unsubscribe();
   }, [propProfile]);
 
+  useEffect(() => {
+    let channel: any = null;
+
+    const fetchUnread = async (userId: string) => {
+      try {
+        const { data: convs } = await supabase
+          .from("conversations")
+          .select("id")
+          .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
+
+        if (convs && convs.length > 0) {
+          const ids = convs.map((c) => c.id);
+          const { count } = await supabase
+            .from("messages")
+            .select("*", { count: "exact", head: true })
+            .in("conversation_id", ids)
+            .neq("sender_id", userId)
+            .eq("is_read", false);
+
+          setUnreadChats(count || 0);
+        } else {
+          setUnreadChats(0);
+        }
+      } catch (e) {
+        console.error("Error fetching unread count:", e);
+      }
+    };
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const userId = session.user.id;
+        fetchUnread(userId);
+
+        channel = supabase
+          .channel("top-nav-unread")
+          .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: "messages" },
+            () => {
+              fetchUnread(userId);
+            }
+          )
+          .subscribe();
+      }
+    });
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, []);
+
   const linkClass = (key: TopNavProps["active"]) =>
     key === active ? "text-brand" : "text-gray-500 hover:text-gray-800";
 
@@ -90,8 +144,13 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
       </div>
 
       <div className="flex items-center gap-4">
-        <Link href="/messages" className="hidden md:flex items-center justify-center h-10 w-10 rounded-full hover:bg-gray-100 transition-colors mr-2 text-gray-500 hover:text-gray-900" title="Messages">
+        <Link href="/messages" className="relative hidden md:flex items-center justify-center h-10 w-10 rounded-full hover:bg-gray-100 transition-colors mr-2 text-gray-500 hover:text-gray-900" title="Messages">
           <MessageSquare size={20} />
+          {unreadChats > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-orange-600 text-[9px] font-black text-white ring-2 ring-white">
+              {unreadChats}
+            </span>
+          )}
         </Link>
         
         {/* User Profile Avatar Link in Header */}

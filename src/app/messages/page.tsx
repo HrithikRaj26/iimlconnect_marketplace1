@@ -72,6 +72,9 @@ function ChatWorkspaceWrapper() {
       if (data.length > 0 && !activeId) {
         setActiveId(data[0].id);
       }
+      if (activeId) {
+        await chatService.markAsRead(activeId);
+      }
     } catch (e) {
       console.error("Failed to load conversations:", e);
     } finally {
@@ -85,11 +88,20 @@ function ChatWorkspaceWrapper() {
     }
   }, [currentUserId]);
 
+  useEffect(() => {
+    if (activeId) {
+      chatService.markAsRead(activeId);
+    }
+  }, [activeId]);
+
   // Load single active conversation thread (e.g. on realtime update)
   const loadActiveConversation = async (id: string) => {
     try {
       const list = await chatService.getConversations();
       setConversations(list);
+      if (id === activeId) {
+        await chatService.markAsRead(id);
+      }
     } catch (e) {
       console.error(e);
     }

@@ -25,6 +25,7 @@ export interface IChatService {
     listingImage: string;
     listingAskingPrice: number;
   }): Promise<Conversation>;
+  markAsRead(conversationId: string): Promise<void>;
 }
 
 class SupabaseChatService implements IChatService {
@@ -69,6 +70,16 @@ class SupabaseChatService implements IChatService {
         .eq("conversation_id", row.id)
         .order("created_at", { ascending: true });
 
+      // Count unread messages (sender != currentUserId and is_read = false)
+      const { count } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .eq("conversation_id", row.id)
+        .neq("sender_id", currentUserId)
+        .eq("is_read", false);
+
+      const unreadCount = count || 0;
+
       const mappedMessages: ChatMessage[] = (msgRows || []).map(m => ({
         id: m.id,
         kind: m.kind as "text" | "offer",
@@ -97,7 +108,7 @@ class SupabaseChatService implements IChatService {
         },
         lastMessagePreview: row.last_message_preview,
         lastMessageAt: new Date(row.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        unreadCount: 0,
+        unreadCount,
         messages: mappedMessages,
         transaction: {
           status: row.status as any,
@@ -156,7 +167,8 @@ class SupabaseChatService implements IChatService {
         sender_id: currentUserId,
         created_at: nowStr,
         kind: "text",
-        text_content: text
+        text_content: text,
+        is_read: false
       });
 
     if (msgErr) throw msgErr;
@@ -194,7 +206,8 @@ class SupabaseChatService implements IChatService {
         text_content: preview,
         offer_amount: amount,
         offer_status: "pending",
-        offer_note: note || null
+        offer_note: note || null,
+        is_read: false
       });
 
     if (msgErr) throw msgErr;
@@ -319,6 +332,16 @@ class SupabaseChatService implements IChatService {
     const found = conversationsList.find(c => c.id === params.id);
     if (found) return found;
     throw new Error("Failed to initialize conversation channel.");
+  }
+
+  async markAsRead(conversationId: string): Promise<void> {
+    const user = await this.getSessionUser();
+    await supabase
+      .from("messages")
+      .update({ is_read: true })
+      .eq("conversation_id", conversationId)
+      .neq("sender_id", user.id)
+      .eq("is_read", false);
   }
 }
 
