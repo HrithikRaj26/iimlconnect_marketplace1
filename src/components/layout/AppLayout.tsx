@@ -139,10 +139,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               {/* Brand and Info */}
               <div className="space-y-3 col-span-1 md:col-span-2">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-600 text-white font-black text-sm shadow-sm">
-                    C
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600 text-white shadow-sm">
+                    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
+                      <path
+                        d="M12 3l9 4.5-9 4.5-9-4.5L12 3zM3 12l9 4.5 9-4.5M3 16.5l9 4.5 9-4.5"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                   </span>
-                  <span className="text-sm font-black text-gray-900 tracking-tight">IIML <span className="text-orange-600">Connect</span></span>
+                  <div className="leading-tight">
+                    <p className="text-sm font-bold text-gray-900">
+                      IIML <span className="text-orange-600">Connect</span>
+                    </p>
+                  </div>
                 </div>
                 <p className="text-xs font-semibold text-gray-500 leading-relaxed max-w-sm">
                   The unified hub for IIM Lucknow. Rent or buy listings, submit startup pitches, coordinate late-night items, and connect with peer student founders securely.
