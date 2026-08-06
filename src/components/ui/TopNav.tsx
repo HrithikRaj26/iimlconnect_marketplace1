@@ -2,7 +2,7 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { MessageSquare, LogOut } from "lucide-react";
+import { MessageSquare, LogOut, Sparkles } from "lucide-react";
 
 interface TopNavProps {
   /** Which nav item to highlight as active. */
@@ -78,20 +78,12 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
           </button>
         )}
         <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white">
-            <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-              <path
-                d="M12 3l9 4.5-9 4.5-9-4.5L12 3zM3 12l9 4.5 9-4.5M3 16.5l9 4.5 9-4.5"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/15">
+            <Sparkles size={16} className="animate-pulse" />
           </span>
           <div className="leading-tight">
-            <p className="text-sm font-bold text-gray-900">
-              IIML <span className="text-brand">Connect</span>
+            <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
+              IIML <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Connect</span>
             </p>
           </div>
         </Link>

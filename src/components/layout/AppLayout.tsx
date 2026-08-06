@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { ChevronUp, Sparkles } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { TopNav } from "@/components/ui/TopNav";
 
@@ -11,6 +12,42 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<{ name: string; avatar: string } | null>(null);
   const pathname = usePathname();
   const router = useRouter();
+
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const mainRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (mainRef.current) {
+        setShowScrollTop(mainRef.current.scrollTop > 300);
+      }
+    };
+
+    const mainElement = mainRef.current;
+    if (mainElement) {
+      mainElement.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      if (mainElement) {
+        mainElement.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    mainRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const getScrollToTopColorClass = () => {
+    if (pathname.startsWith("/ventures")) {
+      return "from-orange-500 to-amber-600 shadow-orange-500/25 dark:shadow-orange-955/40 hover:shadow-orange-500/40";
+    }
+    if (pathname.startsWith("/lost-found")) {
+      return "from-purple-600 to-fuchsia-600 shadow-purple-500/25 dark:shadow-purple-955/40 hover:shadow-purple-500/40";
+    }
+    return "from-blue-600 to-indigo-600 shadow-blue-500/25 dark:shadow-blue-955/40 hover:shadow-blue-500/40";
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -128,7 +165,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             "marketplace"
           } 
         />
-        <main className="flex-1 overflow-y-auto flex flex-col justify-between">
+        <main ref={mainRef} className="flex-1 overflow-y-auto flex flex-col justify-between">
           <div className="flex-1">
             {children}
           </div>
@@ -139,20 +176,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               {/* Brand and Info */}
               <div className="space-y-3 col-span-1 md:col-span-2">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-white shadow-sm">
-                    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-                      <path
-                        d="M12 3l9 4.5-9 4.5-9-4.5L12 3zM3 12l9 4.5 9-4.5M3 16.5l9 4.5 9-4.5"
-                        stroke="currentColor"
-                        strokeWidth="1.6"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/15">
+                    <Sparkles size={16} className="animate-pulse" />
                   </span>
                   <div className="leading-tight">
-                    <p className="text-sm font-bold text-gray-900">
-                      IIML <span className="text-brand">Connect</span>
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                      IIML <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Connect</span>
                     </p>
                   </div>
                 </div>
@@ -205,6 +234,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </footer>
         </main>
       </div>
+
+      {/* Floating Scroll to Top Button */}
+      {showScrollTop && (
+        <button
+          onClick={scrollToTop}
+          className={`fixed bottom-6 right-6 p-3 rounded-full text-white shadow-xl bg-gradient-to-r transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center hover:brightness-110 z-40 ${getScrollToTopColorClass()}`}
+          title="Scroll to Top"
+        >
+          <ChevronUp size={20} strokeWidth={2.5} />
+        </button>
+      )}
 
       {/* Mobile Backdrop overlay */}
       {sidebarOpen && (
