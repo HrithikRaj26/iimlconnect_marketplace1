@@ -19,7 +19,7 @@ export default function VenturesPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (session?.user?.email === "pgp41298@iiml.ac.in") {
+      if (session?.user?.email === "pgp41298@iiml.ac.in" || session?.user?.email === "pgp41103@iiml.ac.in") {
         setIsAdmin(true);
       }
       setLoading(false);
@@ -29,7 +29,7 @@ export default function VenturesPage() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session?.user?.email === "pgp41298@iiml.ac.in") {
+      if (session?.user?.email === "pgp41298@iiml.ac.in" || session?.user?.email === "pgp41103@iiml.ac.in") {
         setIsAdmin(true);
       } else {
         setIsAdmin(false);
@@ -107,11 +107,10 @@ export default function VenturesPage() {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-bold transition-all ${
-                        isActive
-                          ? "bg-white text-gray-900 shadow-sm"
-                          : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-                      }`}
+                      className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-bold transition-all ${isActive
+                        ? "bg-white text-gray-900 shadow-sm"
+                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
                     >
                       <span>{tab.icon}</span>
                       <span>{tab.label}</span>

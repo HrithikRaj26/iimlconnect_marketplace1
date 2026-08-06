@@ -18,7 +18,7 @@ export default function WelcomeDashboard({ session }: { session: any }) {
       }
       setFirstName(fName);
 
-      if (session.user.email === 'pgp41298@iiml.ac.in') {
+      if (session?.user?.email === "pgp41298@iiml.ac.in" || session?.user?.email === "pgp41103@iiml.ac.in") {
         setIsAdmin(true);
       }
     }
@@ -36,7 +36,7 @@ export default function WelcomeDashboard({ session }: { session: any }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div 
+        <div
           onClick={() => router.push("/marketplace")}
           className="group relative flex flex-col items-start justify-between rounded-2xl bg-white p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
         >
@@ -53,7 +53,7 @@ export default function WelcomeDashboard({ session }: { session: any }) {
 
 
 
-        <div 
+        <div
           onClick={() => router.push("/lost-found")}
           className="group relative flex flex-col items-start justify-between rounded-2xl bg-white p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
         >
@@ -68,7 +68,7 @@ export default function WelcomeDashboard({ session }: { session: any }) {
           </div>
         </div>
 
-        <div 
+        <div
           onClick={() => router.push("/ventures")}
           className="group relative flex flex-col items-start justify-between rounded-2xl bg-white p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
         >
