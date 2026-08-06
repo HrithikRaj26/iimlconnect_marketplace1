@@ -280,9 +280,9 @@ export default function MyVentures() {
       {!showWizard ? (
         <div className="space-y-6">
           {/* Top banner check */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
             <div>
-              <h2 className="text-lg font-extrabold text-gray-900">Manage Your Ventures</h2>
+              <h2 className="text-lg font-extrabold text-gray-900 dark:text-white">Manage Your Ventures</h2>
               <p className="mt-1 text-xs font-semibold text-gray-500">
                 You can list up to 3 campus startups, side-hustles, or freelance services (Currently: {myVentures.length}/3).
               </p>
@@ -304,8 +304,8 @@ export default function MyVentures() {
             )}
           </div>
 
-          {/* Playbook Manual Container */}
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
+          {/* Collapsible Guidance Playbook Manual */}
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden mb-6">
             <button
               type="button"
               onClick={() => setShowPlaybook(!showPlaybook)}
@@ -314,7 +314,7 @@ export default function MyVentures() {
               <div className="flex items-center gap-2.5 text-left">
                 <span className="text-xl">📚</span>
                 <div>
-                  <h3 className="text-sm font-extrabold text-gray-900">Campus Founder's Playbook</h3>
+                  <h3 className="text-sm font-extrabold text-gray-900 dark:text-white">Campus Founder's Playbook</h3>
                   <p className="text-[11px] font-semibold text-gray-500 mt-0.5">Quick guide to listing and scaling your venture on IIML Connect.</p>
                 </div>
               </div>
@@ -438,7 +438,7 @@ export default function MyVentures() {
               {myVentures.map((v) => (
                 <div
                   key={v.id}
-                  className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm"
+                  className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm"
                 >
                   <div className="flex items-center gap-4">
                     <img
@@ -527,8 +527,8 @@ export default function MyVentures() {
           )}
         </div>
       ) : (
-        /* Wizard layout container */
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 space-y-8 shadow-sm">
+        /* Register/Edit Wizard Stage */
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 md:p-8 space-y-8 shadow-sm">
           <div className="flex items-center justify-between border-b border-gray-100 pb-4">
             <div>
               <h2 className="text-xl font-black text-gray-900">

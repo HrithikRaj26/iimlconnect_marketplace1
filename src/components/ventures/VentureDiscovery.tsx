@@ -209,7 +209,7 @@ export default function VentureDiscovery() {
       )}
 
       {/* Discovery Filters Bar */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
         {/* Search */}
         <div className="relative flex-1">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -220,12 +220,12 @@ export default function VentureDiscovery() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search startups, offerings, key terms..."
-            className="block w-full rounded-xl border border-gray-200 bg-gray-50/50 py-2.5 pl-10 pr-12 text-sm font-semibold outline-none focus:border-orange-500 focus:bg-white transition-all text-gray-800"
+            className="block w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-850/50 py-2.5 pl-10 pr-12 text-sm font-semibold outline-none focus:border-orange-500 focus:bg-white dark:focus:bg-gray-900 transition-all text-gray-800 dark:text-gray-100"
           />
           <button
             type="button"
             onClick={startListening}
-            className={`absolute inset-y-0 right-2 my-auto flex h-8 w-8 items-center justify-center rounded-full transition-colors ${isListening ? 'bg-red-100 text-red-500 animate-pulse' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-200'}`}
+            className={`absolute inset-y-0 right-2 my-auto flex h-8 w-8 items-center justify-center rounded-full transition-colors ${isListening ? 'bg-red-100 text-red-500 animate-pulse' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-200 dark:hover:bg-gray-800'}`}
             title="Voice Search"
           >
             <Mic size={18} strokeWidth={2} />
@@ -233,16 +233,18 @@ export default function VentureDiscovery() {
         </div>
 
         {/* Sort */}
-        <div className="flex items-center gap-2">
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Sort by:</label>
-          <select
-            value={sortBy}
-            onChange={(e: any) => setSortBy(e.target.value)}
-            className="appearance-none rounded-xl border border-gray-200 bg-white pl-3 pr-8 py-2 text-xs font-extrabold text-gray-800 focus:border-orange-500 focus:outline-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%25234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.1rem_1.1rem] bg-no-repeat"
-          >
-            <option value="newest">Newest First</option>
-            <option value="popular">Highest Rated</option>
-          </select>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Sort By:</span>
+          <div className="relative">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as "newest" | "popular")}
+              className="appearance-none rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 pl-3 pr-8 py-2 text-xs font-extrabold text-gray-805 dark:text-gray-200 focus:border-orange-500 focus:outline-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%25234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.5rem_center] bg-[size:1.1rem_1.1rem] bg-no-repeat"
+            >
+              <option value="newest">Newest First</option>
+              <option value="popular">Highest Rated</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -256,8 +258,8 @@ export default function VentureDiscovery() {
               onClick={() => setSelectedCategory(cat)}
               className={`whitespace-nowrap rounded-xl px-4 py-2 text-xs font-extrabold shadow-sm transition-all ${
                 isActive
-                  ? "bg-gray-900 text-white"
-                  : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
+                  ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+                  : "bg-white text-gray-600 dark:bg-gray-900 dark:text-gray-300 border border-gray-200 dark:border-gray-850 hover:bg-gray-50 dark:hover:bg-gray-800"
               }`}
             >
               {cat}
@@ -331,10 +333,10 @@ export default function VentureDiscovery() {
             <div
               key={venture.id}
               onClick={() => handleCardClick(venture.id)}
-              className={`group flex flex-col justify-between rounded-3xl bg-white/60 hover:bg-white/95 backdrop-blur-md p-6 border transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-orange-500/5 hover:-translate-y-1.5 ${
+              className={`group flex flex-col justify-between rounded-3xl bg-white/60 dark:bg-gray-900/65 hover:bg-white/95 dark:hover:bg-gray-900/95 backdrop-blur-md p-6 border transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-orange-500/5 hover:-translate-y-1.5 ${
                 venture.is_featured 
-                  ? "border-amber-400/80 shadow-md shadow-amber-500/5 hover:border-amber-500 ring-2 ring-amber-400/10 animate-pulse-subtle" 
-                  : "border-gray-100 shadow-sm hover:border-orange-500/20"
+                  ? "border-amber-400/80 dark:border-amber-500/80 shadow-md shadow-amber-500/5 hover:border-amber-500 ring-2 ring-amber-400/10 animate-pulse-subtle" 
+                  : "border-gray-100 dark:border-gray-800 shadow-sm hover:border-orange-500/20 dark:hover:border-orange-500/30"
               }`}
             >
               <div>
@@ -435,16 +437,16 @@ export default function VentureDiscovery() {
       {/* Details Modal / Drawer */}
       {showDetailModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="relative flex h-[90vh] w-full max-w-4xl flex-col rounded-2xl bg-white shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+          <div className="relative flex h-[90vh] w-full max-w-4xl flex-col rounded-2xl bg-white dark:bg-gray-900 shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
               <span className="text-sm font-bold text-gray-400">Startup Profile</span>
               <button
                 onClick={() => {
                   setShowDetailModal(false);
                   setActiveVenture(null);
                 }}
-                className="h-8 w-8 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100 text-gray-500 font-extrabold text-lg"
+                className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-705 text-gray-500 dark:text-gray-400 font-extrabold text-lg"
               >
                 ✕
               </button>

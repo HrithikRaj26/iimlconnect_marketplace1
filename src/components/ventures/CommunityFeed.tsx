@@ -177,12 +177,12 @@ export default function CommunityFeed() {
   return (
     <div className="space-y-6">
       {/* Header filter actions */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
-        <div className="flex rounded-lg bg-gray-100 p-0.5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-gray-900 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <div className="flex rounded-lg bg-gray-100 dark:bg-gray-800 p-0.5">
           <button
             onClick={() => setSortOrder("chronological")}
             className={`rounded-md px-4 py-1.5 text-xs font-bold transition-all ${
-              sortOrder === "chronological" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"
+              sortOrder === "chronological" ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
             Chronological
@@ -190,7 +190,7 @@ export default function CommunityFeed() {
           <button
             onClick={() => setSortOrder("trending")}
             className={`rounded-md px-4 py-1.5 text-xs font-bold transition-all ${
-              sortOrder === "trending" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"
+              sortOrder === "trending" ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm" : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
             Trending Feed
@@ -230,10 +230,10 @@ export default function CommunityFeed() {
           ))}
         </div>
       ) : posts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl bg-white border border-gray-200 py-16 px-6 text-center">
+        <div className="flex flex-col items-center justify-center rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 py-16 px-6 text-center">
           <span className="text-5xl">💬</span>
-          <h3 className="mt-4 text-lg font-bold text-gray-900">Feed is Empty</h3>
-          <p className="mt-2 text-sm text-gray-500 max-w-xs">
+          <h3 className="mt-4 text-lg font-bold text-gray-900 dark:text-white">Feed is Empty</h3>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-xs">
             Startups haven't posted any updates yet. Broadcasts will show up here.
           </p>
         </div>
@@ -242,11 +242,11 @@ export default function CommunityFeed() {
           {posts.map((post) => {
             const isLiked = !!post.isLiked;
             return (
-              <div key={post.id} className="rounded-2xl bg-white p-6 border border-gray-200 shadow-sm space-y-4">
+              <div key={post.id} className="rounded-2xl bg-white dark:bg-gray-900 p-6 border border-gray-200 dark:border-gray-800 shadow-sm space-y-4">
                 {/* Venture Profile Details */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-gray-50 border border-gray-100 shrink-0">
+                    <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-800 shrink-0">
                       <img
                         src={post.venture?.logo_url || "https://images.unsplash.com/photo-1606857521015-7f9fcf423740?w=150&h=150&fit=crop"}
                         alt={post.venture?.name || "Venture"}
@@ -254,7 +254,7 @@ export default function CommunityFeed() {
                       />
                     </div>
                     <div>
-                      <h4 className="text-sm font-extrabold text-gray-900">{post.venture?.name}</h4>
+                      <h4 className="text-sm font-extrabold text-gray-900 dark:text-white">{post.venture?.name}</h4>
                       <p className="text-[10px] font-semibold text-gray-400">
                         {post.venture?.category} · {new Date(post.created_at).toLocaleDateString()}
                       </p>

@@ -163,7 +163,7 @@ export default function AdminPanel() {
       {/* Analytics Distributions Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Category distribution */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm space-y-4">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-wider">Venture Category Mix</h3>
           <div className="space-y-3 font-semibold text-xs text-gray-700">
             {stats.categoryDistribution.length === 0 ? (
@@ -189,7 +189,7 @@ export default function AdminPanel() {
         </div>
 
         {/* Growth trends */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm space-y-4">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-wider">Registration Growth Trends</h3>
           {stats.registrationsOverTime.length === 0 ? (
             <p className="text-xs font-semibold text-gray-450 italic py-8 text-center">No trend data available.</p>
@@ -212,9 +212,9 @@ export default function AdminPanel() {
       </div>
 
       {/* Moderation Approval Queue */}
-      <div id="approval-queue" className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-6">
+      <div id="approval-queue" className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm space-y-6">
         <div>
-          <h3 className="text-base font-extrabold text-gray-900">🛡️ Approval Queue</h3>
+          <h3 className="text-base font-extrabold text-gray-900 dark:text-white">🛡️ Approval Queue</h3>
           <p className="text-xs font-semibold text-gray-500 mt-0.5">Startups waiting for platform moderation review.</p>
         </div>
 
@@ -307,9 +307,9 @@ export default function AdminPanel() {
       </div>
 
       {/* Active Directory & SLA Moderation */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-6">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm space-y-6">
         <div>
-          <h3 className="text-base font-extrabold text-gray-900">🏢 Active Ventures & SLA Moderation</h3>
+          <h3 className="text-base font-extrabold text-gray-900 dark:text-white">🏢 Active Ventures & SLA Moderation</h3>
           <p className="text-xs font-semibold text-gray-500 mt-0.5">Directory list of approved campus startups. Suspend/reactivate listings manually.</p>
         </div>
 

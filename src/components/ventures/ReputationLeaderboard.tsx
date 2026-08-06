@@ -90,10 +90,10 @@ export default function ReputationLeaderboard() {
   return (
     <div className="space-y-8">
       {/* Reputation/Badge shelf */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm space-y-6">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 md:p-8 shadow-sm space-y-6">
         <div>
-          <h2 className="text-lg font-extrabold text-gray-900">🏆 Campus Reputation Shelf</h2>
-          <p className="text-xs font-semibold text-gray-500 mt-0.5">
+          <h2 className="text-lg font-extrabold text-gray-900 dark:text-white">🏆 Campus Reputation Shelf</h2>
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">
             Earn badges to build student trust, unlock founder capabilities, and rise on the contributor list.
           </p>
         </div>
@@ -160,7 +160,7 @@ export default function ReputationLeaderboard() {
                     }`}
                   >
                     {/* FRONT SIDE (Standard Badge Info) */}
-                    <div className={`absolute inset-0 backface-hidden rounded-2xl border p-5 flex flex-col justify-between transition-all bg-white/70 backdrop-blur-md border-white/80 shadow-md group-hover:shadow-lg group-hover:border-orange-200/50 ${
+                    <div className={`absolute inset-0 backface-hidden rounded-2xl border p-5 flex flex-col justify-between transition-all bg-white/70 dark:bg-gray-900/75 backdrop-blur-md border-white/80 dark:border-gray-800 shadow-md group-hover:shadow-lg group-hover:border-orange-200/50 ${
                       unlocked ? "opacity-100" : "opacity-80"
                     }`}>
                       <div className="space-y-2">
@@ -241,9 +241,9 @@ export default function ReputationLeaderboard() {
       {/* Leaderboards Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Top Ventures */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm space-y-6">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 md:p-8 shadow-sm space-y-6">
           <div>
-            <h3 className="text-base font-extrabold text-gray-900">⭐ Top Rated Ventures</h3>
+            <h3 className="text-base font-extrabold text-gray-900 dark:text-white">⭐ Top Rated Ventures</h3>
             <p className="text-xs font-semibold text-gray-500 mt-0.5">Startups with highest average student ratings.</p>
           </div>
 
@@ -257,7 +257,7 @@ export default function ReputationLeaderboard() {
             <p className="text-xs font-bold text-gray-400 italic text-center py-6">No approved ventures yet.</p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-100 text-sm">
+              <table className="min-w-full divide-y divide-gray-100 dark:divide-gray-800 text-sm">
                 <thead>
                   <tr className="text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                     <th className="pb-3 pr-2">Rank</th>
@@ -266,9 +266,9 @@ export default function ReputationLeaderboard() {
                     <th className="pb-3 pl-2 text-right">Rating Score</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50 font-medium text-gray-800">
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-800 font-medium text-gray-800 dark:text-gray-300">
                   {topVentures.map((venture, index) => (
-                    <tr key={venture.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={venture.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
                       <td className="py-3 pr-2 font-extrabold text-gray-500 text-xs">
                         {index === 0 ? "🥇 1" : index === 1 ? "🥈 2" : index === 2 ? "🥉 3" : `#${index + 1}`}
                       </td>
@@ -298,9 +298,9 @@ export default function ReputationLeaderboard() {
         </div>
 
         {/* Top Reviewers/Contributors */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 shadow-sm space-y-6">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 md:p-8 shadow-sm space-y-6">
           <div>
-            <h3 className="text-base font-extrabold text-gray-900">👥 Top Community Contributors</h3>
+            <h3 className="text-base font-extrabold text-gray-900 dark:text-white">👥 Top Community Contributors</h3>
             <p className="text-xs font-semibold text-gray-500 mt-0.5">Students supporting ventures with ratings and engagement.</p>
           </div>
 
@@ -314,7 +314,7 @@ export default function ReputationLeaderboard() {
             <p className="text-xs font-bold text-gray-400 italic text-center py-6">No contributors recorded yet.</p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-100 text-sm">
+              <table className="min-w-full divide-y divide-gray-100 dark:divide-gray-800 text-sm">
                 <thead>
                   <tr className="text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                     <th className="pb-3 pr-2">Rank</th>
@@ -323,9 +323,9 @@ export default function ReputationLeaderboard() {
                     <th className="pb-3 pl-2 text-right">Reputation Score</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50 font-medium text-gray-800">
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-800 font-medium text-gray-800 dark:text-gray-300">
                   {topContributors.map((c, index) => (
-                    <tr key={index} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={index} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
                       <td className="py-3 pr-2 font-extrabold text-gray-500 text-xs">
                         {index === 0 ? "🥇 1" : index === 1 ? "🥈 2" : index === 2 ? "🥉 3" : `#${index + 1}`}
                       </td>

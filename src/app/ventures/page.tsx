@@ -15,6 +15,20 @@ export default function VenturesPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>("discover");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('venture-theme') as 'light' | 'dark';
+    if (savedTheme) {
+      setTheme(savedTheme);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(nextTheme);
+    localStorage.setItem('venture-theme', nextTheme);
+  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -73,63 +87,75 @@ export default function VenturesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top Banner and Heading */}
-      <div className="bg-white border-b border-gray-200 px-6 py-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 md:text-3xl">
-                🚀 Student Venture Hub & Community
-              </h1>
-              <p className="mt-2 text-sm text-gray-500 md:text-base">
-                Discover student-run startups, read verified reviews, and connect directly with founders.
-              </p>
+    <div className={theme === 'dark' ? 'dark' : ''}>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+        {/* Top Banner and Heading */}
+        <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white md:text-3xl">
+                  🚀 Student Venture Hub & Community
+                </h1>
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 md:text-base">
+                  Discover student-run startups, read verified reviews, and connect directly with founders.
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-250 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
+                  title={theme === "light" ? "Switch to Night Mode 🌙" : "Switch to Day Mode ☀️"}
+                >
+                  <span className="text-sm">{theme === "light" ? "🌙" : "☀️"}</span>
+                </button>
+                {activeTab !== "my-ventures" && (
+                  <button
+                    onClick={() => setActiveTab("my-ventures")}
+                    className="inline-flex items-center justify-center rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-orange-700 hover:shadow transition-all"
+                  >
+                    + Register Your Venture
+                  </button>
+                )}
+              </div>
             </div>
-            {activeTab !== "my-ventures" && (
-              <button
-                onClick={() => setActiveTab("my-ventures")}
-                className="inline-flex items-center justify-center rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-orange-700 hover:shadow transition-all"
-              >
-                + Register Your Venture
-              </button>
-            )}
-          </div>
 
-          {/* Navigation Tabs */}
-          <div className="mt-8 overflow-x-auto">
-            <nav className="flex space-x-1 rounded-xl bg-gray-100 p-1" aria-label="Tabs">
-              {tabs
-                .filter((tab) => !tab.adminOnly || isAdmin)
-                .map((tab) => {
-                  const isActive = activeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-bold transition-all ${isActive
-                        ? "bg-white text-gray-900 shadow-sm"
-                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-                        }`}
-                    >
-                      <span>{tab.icon}</span>
-                      <span>{tab.label}</span>
-                    </button>
-                  );
-                })}
-            </nav>
+            {/* Navigation Tabs */}
+            <div className="mt-8 overflow-x-auto">
+              <nav className="flex space-x-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1" aria-label="Tabs">
+                {tabs
+                  .filter((tab) => !tab.adminOnly || isAdmin)
+                  .map((tab) => {
+                    const isActive = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-bold transition-all ${isActive
+                          ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                          : "text-gray-500 dark:text-gray-450 hover:bg-gray-50 dark:hover:bg-gray-800/80 hover:text-gray-900 dark:hover:text-white"
+                          }`}
+                      >
+                        <span>{tab.icon}</span>
+                        <span>{tab.label}</span>
+                      </button>
+                    );
+                  })}
+              </nav>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Main View Container */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {activeTab === "discover" && <VentureDiscovery />}
-        {activeTab === "feed" && <CommunityFeed />}
-        {activeTab === "reputation" && <ReputationLeaderboard />}
-        {activeTab === "my-ventures" && <MyVentures />}
-        {activeTab === "admin" && isAdmin && <AdminPanel />}
-      </main>
+        {/* Main View Container */}
+        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          {activeTab === "discover" && <VentureDiscovery />}
+          {activeTab === "feed" && <CommunityFeed />}
+          {activeTab === "reputation" && <ReputationLeaderboard />}
+          {activeTab === "my-ventures" && <MyVentures />}
+          {activeTab === "admin" && isAdmin && <AdminPanel />}
+        </main>
+      </div>
     </div>
   );
 }
