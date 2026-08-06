@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
-
-// Resend SDK will read process.env.RESEND_API_KEY
-const resend = new Resend(process.env.RESEND_API_KEY || "re_mock_key_for_compilation");
+import nodemailer from "nodemailer";
 
 export async function POST(request: Request) {
   try {
@@ -111,58 +108,29 @@ export async function POST(request: Request) {
       </div>
     `;
 
-    const fromEmail = process.env.RESEND_FROM_EMAIL || "IIML Connect <onboarding@resend.dev>";
+    const transporter = nodemailer.createTransport({
+      host: process.env.BREVO_SMTP_HOST || "smtp-relay.brevo.com",
+      port: parseInt(process.env.BREVO_SMTP_PORT || "587"),
+      secure: false,
+      auth: {
+        user: process.env.BREVO_SMTP_USER || "",
+        pass: process.env.BREVO_SMTP_PASSWORD || "",
+      },
+    });
 
-    // Call Resend to send the congratulatory email
-    let emailResponse = await resend.emails.send({
-      from: fromEmail,
+    const fromEmail = process.env.BREVO_FROM_EMAIL || "pgp41103@iiml.ac.in";
+
+    const info = await transporter.sendMail({
+      from: `"IIML Connect" <${fromEmail}>`,
       to: recipientEmail,
       subject: emailSubject,
       html: emailHtml,
     });
 
-    if (emailResponse.error) {
-      console.warn("Resend API Error on first attempt:", emailResponse.error);
-      const errMsg = emailResponse.error.message || "";
-      
-      // If sandbox limit restriction is hit, retry sending to the verified admin test address
-      if (
-        errMsg.includes("You can only send testing emails") || 
-        errMsg.includes("testing email") ||
-        errMsg.includes("verify a domain")
-      ) {
-        console.log("Sandbox mode detected. Retrying with fallback testing email: pgp41103@iiml.ac.in");
-        
-        const fallbackEmail = "pgp41103@iiml.ac.in";
-        const fallbackHtml = `
-          <div style="background-color: #fffbeb; border: 1px solid #fde68a; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #b45309; font-weight: bold; font-family: sans-serif;">
-            ⚠️ <strong>Sandbox Testing Mode Fallback</strong><br/>
-            This email was originally addressed to: <code>${recipientEmail}</code>.<br/>
-            Because your Resend key is in Sandbox mode, it was auto-forwarded to your registered test address.
-          </div>
-          ${emailHtml}
-        `;
-        
-        emailResponse = await resend.emails.send({
-          from: fromEmail,
-          to: fallbackEmail,
-          subject: `[Sandbox Fallback] ${emailSubject}`,
-          html: fallbackHtml,
-        });
-      }
-    }
-
-    if (emailResponse.error) {
-      console.error("Resend API Error details:", emailResponse.error);
-      return NextResponse.json(
-        { error: emailResponse.error.message || "Failed to send email via Resend" },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json({ success: true, id: emailResponse.data?.id });
+    console.log("Message sent to %s: %s", recipientEmail, info.messageId);
+    return NextResponse.json({ success: true, messageId: info.messageId });
   } catch (error: any) {
-    console.error("Resend API Route Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Brevo SMTP Error:", error);
+    return NextResponse.json({ error: error.message || "Failed to send email via Brevo SMTP" }, { status: 500 });
   }
 }
