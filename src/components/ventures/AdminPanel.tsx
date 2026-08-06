@@ -17,6 +17,19 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [submittingId, setSubmittingId] = useState<string | null>(null);
   const [selectedVenture, setSelectedVenture] = useState<Venture | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    isOpen: boolean;
+    ventureId: string;
+    action: "approved" | "rejected";
+    title: string;
+    message: string;
+  } | null>(null);
+  const [notifyDialog, setNotifyDialog] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    emailSentTo?: string;
+  } | null>(null);
 
   const loadStats = async () => {
     setLoading(true);
@@ -34,9 +47,19 @@ export default function AdminPanel() {
     loadStats();
   }, []);
 
-  const handleStatusUpdate = async (id: string, nextStatus: "approved" | "rejected") => {
-    if (!confirm(`Are you sure you want to ${nextStatus === "approved" ? "Approve" : "Reject"} this request?`)) return;
-    
+  const handleStatusUpdate = (id: string, nextStatus: "approved" | "rejected") => {
+    const target = stats?.pendingQueue.find(v => v.id === id);
+    const vName = target?.name || "Venture";
+    setConfirmDialog({
+      isOpen: true,
+      ventureId: id,
+      action: nextStatus,
+      title: nextStatus === "approved" ? "Approve Request" : "Reject Request",
+      message: `Are you sure you want to ${nextStatus === "approved" ? "approve and authorize" : "reject"} "${vName}"? This action takes effect immediately.`,
+    });
+  };
+
+  const executeStatusUpdate = async (id: string, nextStatus: "approved" | "rejected") => {
     setSubmittingId(id);
     try {
       const approvedVenture = stats?.pendingQueue.find(v => v.id === id);
@@ -47,18 +70,32 @@ export default function AdminPanel() {
       
       if (nextStatus === "approved") {
         const emailAddress = approvedVenture?.contact_links?.email || `${approvedVenture?.owner_name.toLowerCase().replace(/\s+/g, '')}@iiml.ac.in`;
-        if (isUpdate) {
-          alert(`Success! The profile updates for "${name}" have been approved and applied live.\n\n📧 A confirmation email notification has been dispatched to: ${emailAddress}`);
-        } else {
-          alert(`Success! "${name}" has been approved.\n\n📧 A congratulatory email notification has been dispatched to: ${emailAddress}`);
-        }
+        
+        setNotifyDialog({
+          isOpen: true,
+          title: "Venture Moderated!",
+          message: isUpdate 
+            ? `The updates for "${name}" have been approved and applied live.`
+            : `"${name}" has been successfully approved and added to the campus catalog.`,
+          emailSentTo: emailAddress,
+        });
+      } else {
+        setNotifyDialog({
+          isOpen: true,
+          title: "Venture Request Rejected",
+          message: `The request for "${name}" has been rejected.`,
+        });
       }
       
       // Reload stats
       await loadStats();
     } catch (err) {
       console.error(err);
-      alert("Failed to update status.");
+      setNotifyDialog({
+        isOpen: true,
+        title: "Moderation Failed",
+        message: "Failed to update moderation status. Please verify your connection.",
+      });
     } finally {
       setSubmittingId(null);
     }
@@ -430,6 +467,87 @@ export default function AdminPanel() {
                 </Button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Confirmation Dialog */}
+      {confirmDialog && confirmDialog.isOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="relative bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-gray-100 text-center space-y-5 animate-in zoom-in-95 duration-200">
+            <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full border shadow-xs ${
+              confirmDialog.action === "approved" 
+                ? "bg-green-50 text-green-500 border-green-150 animate-bounce" 
+                : "bg-red-50 text-red-500 border-red-150"
+            }`}>
+              {confirmDialog.action === "approved" ? (
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <span className="text-lg font-black font-mono">⚠️</span>
+              )}
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="text-base font-extrabold text-gray-900">{confirmDialog.title}</h3>
+              <p className="text-xs font-semibold text-gray-500 leading-relaxed">{confirmDialog.message}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmDialog(null)}
+                className="w-full rounded-xl border border-gray-250 hover:bg-gray-50 px-4 py-2.5 text-xs font-black text-gray-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  const { ventureId, action } = confirmDialog;
+                  setConfirmDialog(null);
+                  await executeStatusUpdate(ventureId, action);
+                }}
+                className={`w-full rounded-xl px-4 py-2.5 text-xs font-black text-white shadow-md transition-colors ${
+                  confirmDialog.action === "approved" 
+                    ? "bg-blue-600 hover:bg-blue-700" 
+                    : "bg-red-600 hover:bg-red-700"
+                }`}
+              >
+                {confirmDialog.action === "approved" ? "Yes, Approve" : "Yes, Reject"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Success Notification Dialog */}
+      {notifyDialog && notifyDialog.isOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="relative bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-gray-100 text-center space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-50 text-green-500 border border-green-150 shadow-xs">
+              <span className="text-xl">✨</span>
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="text-base font-extrabold text-gray-900">{notifyDialog.title}</h3>
+              <p className="text-xs font-medium text-gray-500 leading-relaxed pt-1">{notifyDialog.message}</p>
+              {notifyDialog.emailSentTo && (
+                <div className="text-[10px] font-bold text-gray-450 bg-gray-50 p-2.5 rounded-xl border border-gray-100 mt-2 text-left space-y-1">
+                  <span className="text-gray-400 block font-black uppercase tracking-wider text-[8px]">Notification Dispatch</span>
+                  <span className="truncate block font-semibold text-gray-600">Email: {notifyDialog.emailSentTo}</span>
+                </div>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setNotifyDialog(null)}
+              className="w-full rounded-xl bg-orange-600 px-4 py-2.5 text-xs font-black text-white hover:bg-orange-700 shadow-md transition-colors"
+            >
+              Done 🚀
+            </button>
           </div>
         </div>
       )}
