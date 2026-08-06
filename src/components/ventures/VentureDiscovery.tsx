@@ -176,7 +176,7 @@ export default function VentureDiscovery() {
   const handleContactFounder = () => {
     if (!activeVenture) return;
     // URL routing helper: redirect to Messages
-    const url = `/messages?ownerId=${activeVenture.owner_id}&ownerName=${encodeURIComponent(activeVenture.owner_name)}&ventureName=${encodeURIComponent(activeVenture.name)}&logoUrl=${encodeURIComponent(activeVenture.logo_url || '')}`;
+    const url = `/messages?ownerId=${activeVenture.owner_id}&ownerName=${encodeURIComponent(activeVenture.owner_name)}&ventureName=${encodeURIComponent(activeVenture.name)}&logoUrl=${encodeURIComponent(activeVenture.logo_url || '')}&listingId=${activeVenture.id}&listingType=venture`;
     router.push(url);
   };
 

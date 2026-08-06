@@ -139,9 +139,8 @@ function ChatWorkspaceWrapper() {
     if (!currentUserId || !currentUserProfile || loading) return;
 
     const initRedirectChat = async () => {
-      if (ownerId && ownerName && ventureName) {
-        // Build a unique, deterministic chat ID based on buyer and seller / listing IDs
-        const actualListingId = listingId || ownerId;
+      if (ownerId && ownerName && ventureName && listingId) {
+        const actualListingId = listingId;
         const actualListingType = listingType as "item" | "venture";
         const chatId = actualListingType === "venture" 
           ? `vchat_${actualListingId}_${currentUserId}`
@@ -154,44 +153,84 @@ function ChatWorkspaceWrapper() {
           return;
         }
 
-        try {
-          // 1. Create or retrieve conversation in database
-          await chatService.createOrGetConversation({
-            id: chatId,
-            buyerId: currentUserId,
-            buyerName: currentUserProfile.name,
-            buyerBatch: currentUserProfile.batch,
-            sellerId: ownerId,
-            sellerName: ownerName,
-            sellerBatch: actualListingType === "venture" ? "Venture Founder" : "Seller",
-            listingId: actualListingId,
-            listingType: actualListingType,
-            listingTitle: ventureName,
-            listingImage: logoUrl || "https://images.unsplash.com/photo-1606857521015-7f9fcf423740?w=150&h=150&fit=crop",
-            listingAskingPrice: askingPrice ? Number(askingPrice) : 0
-          });
+        // Check if conversation already exists in database
+        const existsInDb = conversations.some((c) => c.id === chatId);
 
-          // 2. If an initial offer amount is present, submit it as the first message
-          if (initialOfferAmount) {
+        if (existsInDb) {
+          setActiveId(chatId);
+          router.replace("/messages");
+          return;
+        }
+
+        // If it doesn't exist, create a draft conversation object on the client side!
+        const draftChat: Conversation = {
+          id: chatId,
+          participant: {
+            id: ownerId,
+            name: ownerName,
+            batch: actualListingType === "venture" ? "Venture Founder" : "Seller",
+            online: true,
+            verified: true,
+            avatarColor: "#2563EB"
+          },
+          listing: {
+            id: actualListingId,
+            title: ventureName,
+            askingPrice: askingPrice ? Number(askingPrice) : 0,
+            imageUrl: logoUrl || "https://images.unsplash.com/photo-1606857521015-7f9fcf423740?w=150&h=150&fit=crop"
+          },
+          lastMessagePreview: "No messages yet",
+          lastMessageAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          unreadCount: 0,
+          messages: [],
+          transaction: {
+            status: "negotiating"
+          }
+        };
+
+        // If an initial offer amount is present, we create it in database and send offer immediately
+        if (initialOfferAmount) {
+          try {
+            await chatService.createOrGetConversation({
+              id: chatId,
+              buyerId: currentUserId,
+              buyerName: currentUserProfile.name,
+              buyerBatch: currentUserProfile.batch,
+              sellerId: ownerId,
+              sellerName: ownerName,
+              sellerBatch: actualListingType === "venture" ? "Venture Founder" : "Seller",
+              listingId: actualListingId,
+              listingType: actualListingType,
+              listingTitle: ventureName,
+              listingImage: logoUrl || "https://images.unsplash.com/photo-1606857521015-7f9fcf423740?w=150&h=150&fit=crop",
+              listingAskingPrice: askingPrice ? Number(askingPrice) : 0
+            });
             const offerVal = Number(initialOfferAmount);
             const noteVal = initialOfferNote || "";
             await chatService.sendOffer(chatId, offerVal, noteVal);
+
+            setActiveId(chatId);
+            await loadConversations();
+          } catch (err) {
+            console.error("Failed to initialize database conversation for offer:", err);
           }
-
-          // 3. Set the newly created conversation active and refresh
+        } else {
+          // No initial offer: just add the draft chat to state list and open it!
+          setConversations((prev) => {
+            const hasDraft = prev.some(c => c.id === chatId);
+            if (hasDraft) return prev;
+            return [draftChat, ...prev];
+          });
           setActiveId(chatId);
-          await loadConversations();
-
-          // 4. Remove parameters from URL so refreshes don't re-trigger initialization
-          router.replace("/messages");
-        } catch (err) {
-          console.error("Failed to initialize redirected conversation:", err);
         }
+
+        // Remove parameters from URL
+        router.replace("/messages");
       }
     };
 
     initRedirectChat();
-  }, [currentUserId, currentUserProfile, ownerId, ownerName, ventureName, logoUrl, askingPrice, listingId, listingType, initialOfferAmount, initialOfferNote, loading]);
+  }, [currentUserId, currentUserProfile, ownerId, ownerName, ventureName, logoUrl, askingPrice, listingId, listingType, initialOfferAmount, initialOfferNote, loading, conversations]);
 
   const activeConversation = useMemo(() => {
     return conversations.find((c) => c.id === activeId) || conversations[0] || null;

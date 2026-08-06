@@ -153,6 +153,7 @@ class SupabaseChatService implements IChatService {
   }
 
   async sendMessage(conversationId: string, text: string): Promise<{ deliveredAt: number }> {
+    await this.ensureConversationExists(conversationId);
     const user = await this.getSessionUser();
     const currentUserId = user.id;
     const msgId = Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -188,6 +189,7 @@ class SupabaseChatService implements IChatService {
   }
 
   async sendOffer(conversationId: string, amount: number, note?: string): Promise<{ offer: Offer }> {
+    await this.ensureConversationExists(conversationId);
     const user = await this.getSessionUser();
     const currentUserId = user.id;
     const msgId = Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -332,6 +334,96 @@ class SupabaseChatService implements IChatService {
     const found = conversationsList.find(c => c.id === params.id);
     if (found) return found;
     throw new Error("Failed to initialize conversation channel.");
+  }
+
+  private async ensureConversationExists(conversationId: string): Promise<void> {
+    const { data: existing } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("id", conversationId)
+      .single();
+
+    if (existing) return;
+
+    // Parse conversation ID: e.g. "vchat_${listingId}_${buyerId}" or "lchat_${listingId}_${buyerId}"
+    const parts = conversationId.split("_");
+    if (parts.length < 3) return; // not a standard format
+    const prefix = parts[0]; // "vchat" or "lchat"
+    const listingId = parts[1];
+    const buyerId = parts[2];
+    const listingType = prefix === "vchat" ? "venture" : "item";
+
+    // Query listing/venture details
+    let listingTitle = "";
+    let listingImage = "";
+    let listingAskingPrice = 0;
+    let sellerId = "";
+    let sellerName = "";
+    let sellerBatch = "";
+
+    if (listingType === "venture") {
+      const { data: venture } = await supabase
+        .from("ventures")
+        .select("*")
+        .eq("id", listingId)
+        .single();
+
+      if (venture) {
+        listingTitle = venture.name;
+        listingImage = venture.logo_url || "";
+        sellerId = venture.owner_id;
+        sellerName = venture.owner_name;
+        sellerBatch = "Venture Founder";
+      }
+    } else {
+      const { data: listing } = await supabase
+        .from("listings")
+        .select("*")
+        .eq("id", listingId)
+        .single();
+
+      if (listing) {
+        listingTitle = listing.title;
+        listingImage = listing.image_url || "";
+        listingAskingPrice = Number(listing.price);
+        sellerId = listing.seller_id;
+        sellerName = listing.seller_name;
+        sellerBatch = "Seller";
+      }
+    }
+
+    // Query buyer details
+    const user = await this.getSessionUser();
+    const buyerName = user.user_metadata?.full_name || user.user_metadata?.name || "Student";
+    const buyerBatch = user.user_metadata?.batch || "PGP 2025-27";
+
+    // Insert conversation row!
+    const nowStr = new Date().toISOString();
+    const { error: insErr } = await supabase
+      .from("conversations")
+      .insert({
+        id: conversationId,
+        created_at: nowStr,
+        buyer_id: buyerId,
+        buyer_name: buyerName,
+        buyer_batch: buyerBatch,
+        seller_id: sellerId,
+        seller_name: sellerName,
+        seller_batch: sellerBatch,
+        listing_id: listingId,
+        listing_type: listingType,
+        listing_title: listingTitle,
+        listing_image: listingImage,
+        listing_asking_price: listingAskingPrice,
+        status: "negotiating",
+        last_message_preview: "No messages yet",
+        last_message_at: nowStr
+      });
+
+    if (insErr) {
+      console.error("Error inserting conversation on-demand:", insErr);
+      throw insErr;
+    }
   }
 
   async markAsRead(conversationId: string): Promise<void> {
