@@ -23,7 +23,11 @@ export default function MyVentures() {
   const [loading, setLoading] = useState(true);
   const [showWizard, setShowWizard] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [showGuidancePrompt, setShowGuidancePrompt] = useState(false);
+  const [showPlaybook, setShowPlaybook] = useState(true);
+  const [playbookTab, setPlaybookTab] = useState(1);
   const [userName, setUserName] = useState("Verified Student");
+  const [editingVentureId, setEditingVentureId] = useState<string | null>(null);
 
   // Wizard state fields
   const [name, setName] = useState("");
@@ -42,7 +46,6 @@ export default function MyVentures() {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [registeredVentureName, setRegisteredVentureName] = useState("");
-  const [editingVentureId, setEditingVentureId] = useState<string | null>(null);
 
   const loadMyData = async () => {
     setLoading(true);
@@ -54,6 +57,11 @@ export default function MyVentures() {
       if (sessionData.session?.user) {
         const metadata = sessionData.session.user.user_metadata || {};
         setUserName(metadata.full_name || metadata.name || "Verified Student");
+      }
+
+      // Auto-collapse playbook if they already have registered ventures
+      if (data.length > 0) {
+        setShowPlaybook(false);
       }
     } catch (e) {
       console.error(e);
@@ -247,12 +255,130 @@ export default function MyVentures() {
               <button
                 onClick={() => {
                   resetForm();
-                  setShowWizard(true);
+                  if (myVentures.length === 0) {
+                    setShowGuidancePrompt(true);
+                  } else {
+                    setShowWizard(true);
+                  }
                 }}
                 className="inline-flex items-center justify-center rounded-xl bg-orange-600 px-4 py-2.5 text-xs font-black text-white hover:bg-orange-700 transition-colors"
               >
                 + Register New Venture
               </button>
+            )}
+          </div>
+
+          {/* Playbook Manual Container */}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-6">
+            <button
+              type="button"
+              onClick={() => setShowPlaybook(!showPlaybook)}
+              className="w-full flex items-center justify-between p-5 bg-gray-50/50 hover:bg-gray-50 transition-colors border-b border-gray-100"
+            >
+              <div className="flex items-center gap-2.5 text-left">
+                <span className="text-xl">📚</span>
+                <div>
+                  <h3 className="text-sm font-extrabold text-gray-900">Campus Founder's Playbook</h3>
+                  <p className="text-[11px] font-semibold text-gray-500 mt-0.5">Quick guide to listing and scaling your venture on IIML Connect.</p>
+                </div>
+              </div>
+              <span className="text-gray-400 font-extrabold text-lg transition-transform duration-200">
+                {showPlaybook ? "▲" : "▼"}
+              </span>
+            </button>
+
+            {showPlaybook && (
+              <div className="p-6 space-y-6 animate-in slide-in-from-top-2 duration-200">
+                {/* Steps tabs */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 border-b border-gray-100 pb-4">
+                  {[
+                    { step: 1, title: "1. Brand Profile", icon: "🚀" },
+                    { step: 2, title: "2. Offerings", icon: "✓" },
+                    { step: 3, title: "3. Coordinates", icon: "💬" },
+                    { step: 4, title: "4. SLA & Billing", icon: "💳" },
+                  ].map((t) => (
+                    <button
+                      key={t.step}
+                      type="button"
+                      onClick={() => setPlaybookTab(t.step)}
+                      className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-black transition-all ${
+                        playbookTab === t.step
+                          ? "border-orange-500 bg-orange-50/50 text-orange-700 shadow-xs"
+                          : "border-gray-150 bg-white text-gray-650 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span>{t.icon}</span>
+                      <span>{t.title}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Step Content */}
+                <div className="space-y-4 min-h-[140px] flex flex-col justify-between">
+                  {playbookTab === 1 && (
+                    <div className="space-y-2 animate-in fade-in duration-200">
+                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-wider">Step 1: Presenting Your Brand</h4>
+                      <p className="text-xs font-medium text-gray-650 leading-relaxed">
+                        A great venture starts with clear branding. Provide a catchy, short brand name, a single-sentence tagline that explains your concept, and a detailed description listing operational hours and location.
+                      </p>
+                      <p className="text-xs font-bold text-orange-600 bg-orange-50/50 border border-orange-100 rounded-lg p-2.5">
+                        💡 Tip: Choose a recognizable avatar or preset logo to look professional on the Discover board!
+                      </p>
+                    </div>
+                  )}
+
+                  {playbookTab === 2 && (
+                    <div className="space-y-2 animate-in fade-in duration-200">
+                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-wider">Step 2: Cataloging Your Offerings</h4>
+                      <p className="text-xs font-medium text-gray-650 leading-relaxed">
+                        Under the "Offerings" step, specify exactly what items, products, combos, or professional services you sell. You can add items one-by-one to create a customized catalog list.
+                      </p>
+                      <p className="text-xs font-bold text-green-700 bg-green-50/50 border border-green-150 rounded-lg p-2.5">
+                        ✓ Example: "Late Night Maggie", "Egg Rolls", "Python Tutoring", "Custom Merch Design"
+                      </p>
+                    </div>
+                  )}
+
+                  {playbookTab === 3 && (
+                    <div className="space-y-2 animate-in fade-in duration-200">
+                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-wider">Step 3: Secure Connect Channels</h4>
+                      <p className="text-xs font-medium text-gray-655 leading-relaxed">
+                        Provide your WhatsApp number (in format +91XXXXXXXXXX) and your official student email ID. To protect your details, student clients must use interactive scratch cards to unlock these coordinates on the board.
+                      </p>
+                      <p className="text-xs font-bold text-gray-500 bg-gray-50 border rounded-lg p-2.5 italic">
+                        🔒 Privacy Note: Scratch actions are remembered to prevent repetitive friction for verified students.
+                      </p>
+                    </div>
+                  )}
+
+                  {playbookTab === 4 && (
+                    <div className="space-y-2 animate-in fade-in duration-200">
+                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-wider">Step 4: Platform SLA & Commission Rules</h4>
+                      <p className="text-xs font-medium text-gray-655 leading-relaxed">
+                        To maintain the matchmaking directory, the platform collects a commission based on transaction traffic. The billing cycles are bi-weekly, starting from your venture approval date.
+                      </p>
+                      <div className="rounded-lg bg-red-50 border border-red-100 p-2.5 space-y-1">
+                        <p className="text-xs font-extrabold text-red-800">⚠️ Suspension Risk Clause:</p>
+                        <p className="text-[11px] font-semibold text-red-700 leading-relaxed">
+                          If billing dues are left unpaid for more than 7 days past the cycle deadline, your venture will be automatically suspended indefinitely. You can pay dues securely on your dashboard to reactivate it.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Navigation button inside playbook */}
+                  <div className="flex justify-end pt-4 border-t border-gray-100">
+                    <button
+                      type="button"
+                      onClick={() => setPlaybookTab(prev => prev === 4 ? 1 : prev + 1)}
+                      className="text-xs font-extrabold text-orange-600 hover:text-orange-700 flex items-center gap-1"
+                    >
+                      <span>Next Section ({playbookTab === 4 ? "Restart" : `${playbookTab + 1}/4`})</span>
+                      <span>→</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
 
@@ -318,7 +444,7 @@ export default function MyVentures() {
                         setShowWizard(true);
                         setCurrentStep(1);
                       }}
-                      className="rounded-xl border border-gray-250 hover:bg-gray-50 text-gray-700 px-3 py-1.5 text-xs font-bold transition-colors"
+                      className="rounded-xl border border-gray-255 hover:bg-gray-50 text-gray-700 px-3 py-1.5 text-xs font-bold transition-colors"
                     >
                       Edit Profile ⚙️
                     </button>
@@ -729,6 +855,59 @@ export default function MyVentures() {
             >
               Awesome! 🚀
             </button>
+          </div>
+        </div>
+      )}
+
+      {showGuidancePrompt && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="relative bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-gray-100 text-center space-y-5 animate-in zoom-in-95 duration-200">
+            <span className="text-4xl block">📚</span>
+            <div className="space-y-1">
+              <h3 className="text-lg font-black text-gray-900">Founder Guidelines & SLA</h3>
+              <p className="text-xs text-gray-500 font-semibold leading-relaxed">
+                Before registering your first campus venture, please review the critical platform operation rules:
+              </p>
+            </div>
+            
+            <div className="text-left bg-gray-50 border rounded-2xl p-4 text-[11px] font-semibold text-gray-600 space-y-2.5 leading-relaxed">
+              <div className="flex gap-2">
+                <span className="text-orange-500">💼</span>
+                <span><strong>Moderation:</strong> All submissions and profile updates are verified by admin before going live.</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-orange-500">💳</span>
+                <span><strong>Commission SLA:</strong> Invoices are generated bi-weekly. Unpaid invoices past 7 days result in immediate, indefinite suspension.</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-orange-500">🎯</span>
+                <span><strong>Directory Target:</strong> Keep profiles accurate to retain trust and gather positive student reviews.</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowGuidancePrompt(false);
+                  setShowPlaybook(true);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="w-full rounded-xl border border-gray-250 hover:bg-gray-50 px-4 py-2.5 text-xs font-black text-gray-700 transition-colors"
+              >
+                Read Manual
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowGuidancePrompt(false);
+                  setShowWizard(true);
+                }}
+                className="w-full rounded-xl bg-orange-600 px-4 py-2.5 text-xs font-black text-white hover:bg-orange-700 shadow-md transition-colors"
+              >
+                I'm Fine, Proceed
+              </button>
+            </div>
           </div>
         </div>
       )}
