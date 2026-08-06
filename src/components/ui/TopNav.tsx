@@ -1,6 +1,7 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import { MessageSquare } from "lucide-react";
 
 interface TopNavProps {
   /** Which nav item to highlight as active. */
@@ -90,17 +91,9 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
       </div>
 
       <div className="flex items-center gap-4">
-        <nav className="hidden items-center gap-6 text-sm font-medium md:flex mr-2">
-          <Link href="/marketplace" className={linkClass("marketplace")}>
-            Marketplace
-          </Link>
-          <Link href="/listing/create" className={linkClass("listings")}>
-            Sell an Item
-          </Link>
-          <Link href="/messages" className={linkClass("messages")}>
-            Messages
-          </Link>
-        </nav>
+        <Link href="/messages" className="hidden md:flex items-center justify-center h-10 w-10 rounded-full hover:bg-gray-100 transition-colors mr-2 text-gray-500 hover:text-gray-900" title="Messages">
+          <MessageSquare size={20} />
+        </Link>
         
         {/* User Profile Avatar Link in Header */}
         <Link 
