@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { TextArea } from "@/components/ui/TextArea";
 import { TextInput } from "@/components/ui/TextInput";
 import { Button } from "@/components/ui/Button";
@@ -21,8 +21,10 @@ function prefillParam(key: string): string {
 /** "Report Found" (Section 2.3). Photo is required (AC-2). Category/description/location can arrive prefilled from a lost report's "I Found This Item" button. */
 export default function ReportFoundPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const prefill = searchParams.get("prefill") || "";
   const [category, setCategory] = useState(() => prefillParam("category"));
-  const [description, setDescription] = useState(() => prefillParam("description"));
+  const [description, setDescription] = useState(() => prefillParam("description") || prefill);
   const [foundLocation, setFoundLocation] = useState(() => prefillParam("location"));
   const [photo, setPhoto] = useState<File | null>(null);
   const [locationChoice, setLocationChoice] = useState<"pgp" | "custom">("pgp");

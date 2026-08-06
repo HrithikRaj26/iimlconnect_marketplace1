@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { TextInput } from "@/components/ui/TextInput";
 import { TextArea } from "@/components/ui/TextArea";
 import { Button } from "@/components/ui/Button";
@@ -20,8 +20,11 @@ import { isSensitiveCategory } from "@/types/lostFound";
  */
 export default function ReportLostPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const prefill = searchParams.get("prefill") || "";
+  
   const [category, setCategory] = useState("");
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(prefill);
   const [lastSeenLocation, setLastSeenLocation] = useState("");
   const [lostDate, setLostDate] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);

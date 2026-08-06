@@ -1,0 +1,14 @@
+{
+  "CREATE_LOST_REPORT": [
+    "lost", "misplaced", "dropped", "left my", "can't find", "cant find", "searching for my", "i lost", "where is my", "missing"
+  ],
+  "CREATE_FOUND_REPORT": [
+    "found", "discovered", "picked up", "someone left", "whose is this", "is this anyone's", "is this anyones"
+  ],
+  "MARKETPLACE_SEARCH": [
+    "buy", "purchase", "sell", "selling", "ticket", "tickets", "marketplace", "looking to buy", "looking for a", "need a", "want to buy"
+  ],
+  "VENTURE_SEARCH": [
+    "startup", "venture", "service", "freelance", "founder", "student business", "hire a"
+  ]
+}

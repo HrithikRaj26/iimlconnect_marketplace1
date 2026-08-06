@@ -1,7 +1,8 @@
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, LogOut } from "lucide-react";
 
 interface TopNavProps {
   /** Which nav item to highlight as active. */
@@ -11,7 +12,13 @@ interface TopNavProps {
 }
 
 export function TopNav({ active = "marketplace", onMenuClick, profile: propProfile }: TopNavProps) {
+  const router = useRouter();
   const [profile, setProfile] = useState<{ name: string; avatar: string } | null>(propProfile || null);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
+  };
 
   useEffect(() => {
     if (propProfile) {
@@ -112,6 +119,14 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
             {profile?.name || "My Profile"}
           </span>
         </Link>
+        
+        <button
+          onClick={handleLogout}
+          title="Sign Out"
+          className="flex items-center justify-center h-10 w-10 rounded-full hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors"
+        >
+          <LogOut size={18} />
+        </button>
       </div>
     </header>
   );

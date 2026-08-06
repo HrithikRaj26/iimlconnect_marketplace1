@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { TextInput } from "@/components/ui/TextInput";
 import { Button } from "@/components/ui/Button";
 import { ReportCard } from "@/components/lost-found/ReportCard";
@@ -103,16 +103,23 @@ function FilterPill({
 
 export default function LostFoundBrowsePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { userId } = useLostFoundAuth();
   
-  // Read initial tab from URL if present
-  const initialTab = typeof window !== "undefined" 
-    ? (new URLSearchParams(window.location.search).get("tab") as "lost" | "found" | "mine") || "mine"
-    : "mine";
+  const initialTab = (searchParams.get("tab") as "lost" | "found" | "mine") || "mine";
   const [tab, setTab] = useState<"lost" | "found" | "mine">(initialTab);
   
-  const [searchQuery, setSearchQuery] = useState("");
+  const initialQuery = searchParams.get("q") || "";
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const { isListening, startListening } = useVoiceSearch(setSearchQuery);
+
+  // Sync tab state if URL changes
+  useEffect(() => {
+    const urlTab = searchParams.get("tab") as "lost" | "found" | "mine";
+    if (urlTab && ["lost", "found", "mine"].includes(urlTab) && urlTab !== tab) {
+      setTab(urlTab);
+    }
+  }, [searchParams]);
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
   const [status, setStatus] = useState<string | undefined>(undefined);
