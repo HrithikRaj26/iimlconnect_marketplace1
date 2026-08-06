@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ventureService } from "@/services/ventureService";
@@ -794,8 +795,23 @@ export default function VentureDiscovery() {
       )}
 
       {/* First Review Milestone Confetti Success Modal */}
-      {showFirstReviewSuccess && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <AnimatePresence>
+        {showFirstReviewSuccess && (
+          <motion.div
+            key="review-success-overlay"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.2 } }}
+            exit={{ opacity: 0, transition: { duration: 0.18 } }}
+          >
+          <motion.div
+            className="relative bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 p-8 max-w-sm w-full overflow-hidden"
+            initial={{ opacity: 0, scale: 0.88, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0,
+              transition: { type: "spring", stiffness: 400, damping: 28 } }}
+            exit={{ opacity: 0, scale: 0.92, y: 12,
+              transition: { duration: 0.18, ease: "easeIn" } }}
+          >
           <style>{`
             @keyframes confetti-fall {
               0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
@@ -860,8 +876,10 @@ export default function VentureDiscovery() {
               Awesome! 🚀
             </button>
           </div>
-        </div>
-      )}
+          </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

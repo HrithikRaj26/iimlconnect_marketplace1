@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/moving-border";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 import { routeQuery } from "@/lib/intentRouter";
 import { Sparkles, Zap } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 type ChatMessage = { role: "user" | "ai"; content: string; options?: { label: string; url: string }[] };
 
@@ -434,9 +435,23 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
         )}
       </div>
 
-      {isChatOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col max-w-2xl w-full h-[80vh] relative overflow-hidden">
+      <AnimatePresence>
+        {isChatOpen && (
+          <motion.div
+            key="chat-overlay"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.2 } }}
+            exit={{ opacity: 0, transition: { duration: 0.18 } }}
+          >
+            <motion.div
+              className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col max-w-2xl w-full h-[80vh] relative overflow-hidden"
+              initial={{ opacity: 0, scale: 0.92, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0,
+                transition: { type: "spring", stiffness: 380, damping: 30 } }}
+              exit={{ opacity: 0, scale: 0.94, y: 10,
+                transition: { duration: 0.18, ease: "easeIn" } }}
+            >
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500"></div>
             <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center gap-3">
@@ -516,9 +531,10 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
                 </button>
               </form>
             </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

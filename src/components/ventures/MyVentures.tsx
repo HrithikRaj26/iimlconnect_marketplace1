@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ventureService } from "@/services/ventureService";
 import { Venture, VentureCategory, VentureStatus } from "@/types";
 import { Button } from "@/components/ui/Button";
@@ -834,8 +835,23 @@ export default function MyVentures() {
         </div>
       )}
 
-      {showSuccessModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <AnimatePresence>
+        {showSuccessModal && (
+          <motion.div
+            key="success-modal"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.2 } }}
+            exit={{ opacity: 0, transition: { duration: 0.18 } }}
+          >
+          <motion.div
+            className="relative bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 p-8 max-w-sm w-full overflow-hidden"
+            initial={{ opacity: 0, scale: 0.88, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0,
+              transition: { type: "spring", stiffness: 400, damping: 28 } }}
+            exit={{ opacity: 0, scale: 0.92, y: 12,
+              transition: { duration: 0.18, ease: "easeIn" } }}
+          >
           <style>{`
             @keyframes confetti-fall {
               0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
@@ -922,12 +938,28 @@ export default function MyVentures() {
               Awesome! 🚀
             </button>
           </div>
-        </div>
-      )}
+          </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {showGuidancePrompt && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="relative bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-gray-100 text-center space-y-5 animate-in zoom-in-95 duration-200">
+      <AnimatePresence>
+        {showGuidancePrompt && (
+          <motion.div
+            key="guidance-overlay"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.2 } }}
+            exit={{ opacity: 0, transition: { duration: 0.18 } }}
+          >
+          <motion.div
+            className="relative bg-white dark:bg-gray-900 rounded-3xl p-6 max-w-md w-full shadow-2xl border border-gray-100 dark:border-gray-800 text-center space-y-5"
+            initial={{ opacity: 0, scale: 0.88, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0,
+              transition: { type: "spring", stiffness: 400, damping: 28 } }}
+            exit={{ opacity: 0, scale: 0.92, y: 12,
+              transition: { duration: 0.18, ease: "easeIn" } }}
+          >
             <span className="text-4xl block">📚</span>
             <div className="space-y-1">
               <h3 className="text-lg font-black text-gray-900">Founder Guidelines & SLA</h3>
@@ -974,9 +1006,10 @@ export default function MyVentures() {
                 I'm Fine, Proceed
               </button>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -1080,9 +1113,23 @@ function BillingSection({ venture, onPaySuccess }: BillingSectionProps) {
       )}
 
       {/* Payment Gateway Modal */}
-      {showPaymentModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-gray-100 relative space-y-6 animate-in zoom-in-95 duration-300">
+      <AnimatePresence>
+        {showPaymentModal && (
+          <motion.div
+            key="payment-overlay"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, transition: { duration: 0.2 } }}
+            exit={{ opacity: 0, transition: { duration: 0.18 } }}
+          >
+          <motion.div
+            className="bg-white dark:bg-gray-900 rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-gray-100 dark:border-gray-800 relative space-y-6"
+            initial={{ opacity: 0, scale: 0.88, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0,
+              transition: { type: "spring", stiffness: 400, damping: 28 } }}
+            exit={{ opacity: 0, scale: 0.92, y: 12,
+              transition: { duration: 0.18, ease: "easeIn" } }}
+          >
             <button
               onClick={() => setShowPaymentModal(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-extrabold text-sm"
@@ -1159,9 +1206,10 @@ function BillingSection({ venture, onPaySuccess }: BillingSectionProps) {
                 </button>
               </form>
             )}
-          </div>
-        </div>
-      )}
+          </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
