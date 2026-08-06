@@ -42,6 +42,7 @@ const setupVenturesDB = async () => {
         reviews_count integer NOT NULL DEFAULT 0,
         owner_name text NOT NULL,
         owner_batch text NOT NULL,
+        pending_updates jsonb DEFAULT NULL,
         created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
       );
 

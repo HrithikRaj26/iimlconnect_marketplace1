@@ -28,6 +28,8 @@ export default function MyVentures() {
   const [playbookTab, setPlaybookTab] = useState(1);
   const [userName, setUserName] = useState("Verified Student");
   const [editingVentureId, setEditingVentureId] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Wizard state fields
   const [name, setName] = useState("");
@@ -67,6 +69,40 @@ export default function MyVentures() {
       console.error(e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    setUploadError(null);
+
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `logo_${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+      const filePath = `ventures/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from("marketplace-images")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("marketplace-images")
+        .getPublicUrl(filePath);
+
+      setLogoUrl(publicUrl);
+    } catch (err: any) {
+      console.error("Error uploading logo:", err);
+      setUploadError(err.message || "Failed to upload logo.");
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -428,17 +464,20 @@ export default function MyVentures() {
                     <button
                       type="button"
                       onClick={() => {
+                        const edits = (v.pending_updates as any) || {};
                         setEditingVentureId(v.id);
-                        setName(v.name);
-                        setTagline(v.tagline);
-                        setDescription(v.description);
-                        setCategory(v.category);
-                        setLogoUrl(v.logo_url || PRESET_LOGOS[0]);
-                        setOfferings(v.offerings);
-                        setWebsite(v.contact_links.website || "");
-                        setInstagram(v.contact_links.instagram || "");
-                        setWhatsapp(v.contact_links.whatsapp || "");
-                        setEmail(v.contact_links.email || "");
+                        setName(edits.name || v.name);
+                        setTagline(edits.tagline || v.tagline);
+                        setDescription(edits.description || v.description);
+                        setCategory(edits.category || v.category);
+                        setLogoUrl(edits.logo_url || v.logo_url || PRESET_LOGOS[0]);
+                        setOfferings(edits.offerings || v.offerings);
+                        
+                        const links = edits.contact_links || v.contact_links || {};
+                        setWebsite(links.website || "");
+                        setInstagram(links.instagram || "");
+                        setWhatsapp(links.whatsapp || "");
+                        setEmail(links.email || "");
                         setAcceptTerms(v.terms_accepted || false);
                         
                         setShowWizard(true);
@@ -581,6 +620,33 @@ export default function MyVentures() {
                       </button>
                     ))}
                   </div>
+                </div>
+
+                {/* Custom Image Upload Option */}
+                <div className="max-w-xl space-y-2">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block">Or Upload Brand Logo Image File:</label>
+                  <div className="flex items-center gap-3">
+                    <label className="cursor-pointer inline-flex items-center justify-center rounded-xl bg-orange-600 hover:bg-orange-700 px-4 py-2.5 text-xs font-black text-white transition-colors gap-2 shadow-xs disabled:opacity-50">
+                      <span>{uploadingImage ? "Uploading..." : "Choose Image File 📁"}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={uploadingImage}
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                      />
+                    </label>
+                    {logoUrl && (
+                      <div className="relative h-10 w-10 overflow-hidden rounded-lg border border-gray-150 shrink-0">
+                        <img src={logoUrl} className="h-full w-full object-cover" />
+                      </div>
+                    )}
+                  </div>
+                  {uploadError && (
+                    <p className="text-[10px] font-bold text-red-600 bg-red-50 p-2 rounded-lg border border-red-100">
+                      ⚠️ {uploadError}
+                    </p>
+                  )}
                 </div>
 
                 {/* Custom Image URL Option */}
