@@ -241,13 +241,14 @@ function LostFoundBrowsePageInner() {
     if (!inDateRange(r.created_at, createdDateFrom, createdDateTo)) return false;
     return true;
   };
-  // A report you authored (filed the lost report / found the item) vs. a
-  // report you merely claimed (someone else's found item you said is
-  // yours) — the claimant never authored it, so it can't be edited, but it
-  // still belongs in "My Reports" as a stake you have in it, and it's
-  // exactly the case the "Matched" filter exists to surface.
+  // "My Reports" is reports you authored (filed the lost report / found the
+  // item) — a found report you merely claimed was filed by someone else and
+  // doesn't belong here, even though claiming it is what makes your own
+  // lost report of the same category start showing as "Matched" (see
+  // isEffectivelyMatched's lost-report branch above, which cross-references
+  // the full `results` set rather than depending on tab membership).
   const isOwnReport = (r: ReportSummary) => (r.type === "lost" ? r.reporter_id === userId : r.finder_id === userId);
-  const isMineTabMember = (r: ReportSummary) => isOwnReport(r) || (r.type === "found" && r.claimant_id === userId);
+  const isMineTabMember = isOwnReport;
   // My Reports mixes both report types, so it gets its own Lost/Found pill
   // to narrow down to one — a no-op outside that tab since mineTypeFilter
   // only gets set there and is reset on every tab switch.
