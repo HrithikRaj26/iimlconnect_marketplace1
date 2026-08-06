@@ -41,8 +41,11 @@ export interface IVentureService {
     registrationsOverTime: { date: string; count: number }[];
     categoryDistribution: { category: string; count: number }[];
     pendingQueue: Venture[];
+    allVentures: Venture[];
   }>;
   updateVentureStatus(id: string, status: "approved" | "rejected"): Promise<{ emailSent: boolean; emailError?: string }>;
+  suspendVenture(id: string): Promise<{ emailSent: boolean; emailError?: string }>;
+  reactivateVenture(id: string): Promise<{ emailSent: boolean; emailError?: string }>;
   payVentureDue(id: string): Promise<void>;
   toggleVentureOpenStatus(id: string, isOpen: boolean): Promise<Venture>;
 }
@@ -487,6 +490,7 @@ class SupabaseVentureService implements IVentureService {
     registrationsOverTime: { date: string; count: number }[];
     categoryDistribution: { category: string; count: number }[];
     pendingQueue: Venture[];
+    allVentures: Venture[];
   }> {
     const [{ count: regCount }, { data: ventures }] = await Promise.all([
       supabase.from("ventures").select("*", { count: "exact", head: true }),
@@ -522,6 +526,7 @@ class SupabaseVentureService implements IVentureService {
     })).reverse().slice(-7); // Last 7 days
 
     const pendingQueue = (ventures || []).filter(v => v.status === "pending_approval" || (v.status === "approved" && v.pending_updates !== null)) as Venture[];
+    const allVentures = (ventures || []).filter(v => v.status === "approved" || v.status === "suspended") as Venture[];
 
     return {
       totals: {
@@ -533,7 +538,120 @@ class SupabaseVentureService implements IVentureService {
       registrationsOverTime,
       categoryDistribution,
       pendingQueue,
+      allVentures,
     };
+  }
+
+  async suspendVenture(id: string): Promise<{ emailSent: boolean; emailError?: string }> {
+    const { data: venture } = await supabase
+      .from("ventures")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (!venture) throw new Error("Venture not found.");
+
+    const { data: updated, error } = await supabase
+      .from("ventures")
+      .update({ status: "suspended" })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    let emailSent = false;
+    let emailError: string | undefined = undefined;
+
+    if (updated) {
+      const studentEmail = updated.contact_links?.email || `${updated.owner_name.toLowerCase().replace(/\s+/g, '')}@iiml.ac.in`;
+
+      try {
+        const res = await fetch("/api/ventures/approve-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ventureName: updated.name,
+            ownerName: updated.owner_name,
+            recipientEmail: studentEmail,
+            status: "suspended",
+            dueAmount: updated.current_due,
+          }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          emailError = errData.error || "Email route failed";
+          console.warn(`Resend suspension email failed: ${emailError}`);
+        } else {
+          emailSent = true;
+          console.log(`📧 Suspension email triggered for "${updated.name}" to ${studentEmail}`);
+        }
+      } catch (err: any) {
+        emailError = err.message || "Network error dispatching email";
+        console.error("Failed to send suspension email via API route:", err);
+      }
+    }
+
+    return { emailSent, emailError };
+  }
+
+  async reactivateVenture(id: string): Promise<{ emailSent: boolean; emailError?: string }> {
+    const { data: venture } = await supabase
+      .from("ventures")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (!venture) throw new Error("Venture not found.");
+
+    const { data: updated, error } = await supabase
+      .from("ventures")
+      .update({ status: "approved" })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    let emailSent = false;
+    let emailError: string | undefined = undefined;
+
+    if (updated) {
+      const studentEmail = updated.contact_links?.email || `${updated.owner_name.toLowerCase().replace(/\s+/g, '')}@iiml.ac.in`;
+
+      try {
+        const res = await fetch("/api/ventures/approve-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ventureName: updated.name,
+            ownerName: updated.owner_name,
+            recipientEmail: studentEmail,
+            isUpdate: false,
+            status: "approved",
+          }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          emailError = errData.error || "Email route failed";
+          console.warn(`Resend reactivation email failed: ${emailError}`);
+        } else {
+          emailSent = true;
+          console.log(`📧 Reactivation email triggered for "${updated.name}" to ${studentEmail}`);
+        }
+      } catch (err: any) {
+        emailError = err.message || "Network error dispatching email";
+        console.error("Failed to send reactivation email via API route:", err);
+      }
+    }
+
+    return { emailSent, emailError };
   }
 
   async updateVentureStatus(id: string, status: "approved" | "rejected"): Promise<{ emailSent: boolean; emailError?: string }> {

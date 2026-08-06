@@ -10,6 +10,7 @@ interface Stats {
   registrationsOverTime: { date: string; count: number }[];
   categoryDistribution: { category: string; count: number }[];
   pendingQueue: Venture[];
+  allVentures: Venture[];
 }
 
 export default function AdminPanel() {
@@ -298,6 +299,95 @@ export default function AdminPanel() {
                   >
                     Reject
                   </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Active Directory & SLA Moderation */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-6">
+        <div>
+          <h3 className="text-base font-extrabold text-gray-900">🏢 Active Ventures & SLA Moderation</h3>
+          <p className="text-xs font-semibold text-gray-500 mt-0.5">Directory list of approved campus startups. Suspend/reactivate listings manually.</p>
+        </div>
+
+        {stats.allVentures.length === 0 ? (
+          <div className="text-center py-8 rounded-xl border border-dashed border-gray-200">
+            <p className="text-xs font-bold text-gray-400 italic">No approved or active ventures listed yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1">
+            {stats.allVentures.map((v) => (
+              <div key={v.id} className="rounded-xl border border-gray-150 p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gray-50/20">
+                <div className="flex items-center gap-3">
+                  <img src={v.logo_url || ""} className="h-10 w-10 rounded-lg object-cover border bg-white shrink-0" />
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="text-xs font-black text-gray-900">{v.name}</h4>
+                      <span className={`rounded-full px-2 py-0.5 text-[9px] font-extrabold border ${
+                        v.status === "suspended" 
+                          ? "bg-red-50 text-red-700 border-red-200" 
+                          : "bg-green-50 text-green-700 border-green-200"
+                      }`}>
+                        {v.status === "suspended" ? "Suspended ⚠️" : "Active 🟢"}
+                      </span>
+                    </div>
+                    <p className="text-[10px] font-semibold text-gray-400 mt-1">Founder: {v.owner_name} | Platform Due: ₹{v.current_due}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {v.status === "suspended" ? (
+                    <Button
+                      loading={submittingId === v.id}
+                      onClick={async () => {
+                        setSubmittingId(v.id);
+                        try {
+                          const result = await ventureService.reactivateVenture(v.id);
+                          if (result.emailSent) {
+                            alert(`Success! "${v.name}" has been reactivated. Email sent to owner.`);
+                          } else {
+                            alert(`Success! "${v.name}" has been reactivated. Email failed: ${result.emailError}`);
+                          }
+                          await loadStats();
+                        } catch (err: any) {
+                          alert("Failed to reactivate: " + err.message);
+                        } finally {
+                          setSubmittingId(null);
+                        }
+                      }}
+                      className="bg-green-600 hover:bg-green-700 text-white font-extrabold text-[10px] py-1.5 px-3 rounded-lg"
+                    >
+                      Reactivate 🟢
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="secondary"
+                      loading={submittingId === v.id}
+                      onClick={async () => {
+                        if (!confirm(`Are you sure you want to suspend "${v.name}"?`)) return;
+                        setSubmittingId(v.id);
+                        try {
+                          const result = await ventureService.suspendVenture(v.id);
+                          if (result.emailSent) {
+                            alert(`Success! "${v.name}" has been suspended. Warning email sent.`);
+                          } else {
+                            alert(`Success! "${v.name}" has been suspended. Email failed: ${result.emailError}`);
+                          }
+                          await loadStats();
+                        } catch (err: any) {
+                          alert("Failed to suspend: " + err.message);
+                        } finally {
+                          setSubmittingId(null);
+                        }
+                      }}
+                      className="border-red-150 hover:bg-red-50 text-red-600 hover:text-red-700 font-extrabold text-[10px] py-1.5 px-3 rounded-lg"
+                    >
+                      Suspend ⚠️
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
