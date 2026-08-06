@@ -75,7 +75,7 @@ export default function AdminPanel() {
   return (
     <div className="space-y-8 animate-in fade-in duration-150">
       {/* Overview Analytics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <div className="bg-white rounded-2xl border p-5 shadow-sm space-y-1">
           <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Total Ventures</p>
           <p className="text-2xl font-black text-gray-900">{stats.totals.registrations}</p>
@@ -89,9 +89,28 @@ export default function AdminPanel() {
           <p className="text-2xl font-black text-gray-900">{stats.totals.totalReviews}</p>
         </div>
         <div className="bg-white rounded-2xl border p-5 shadow-sm space-y-1">
-          <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Total broadcasts</p>
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Total Broadcasts</p>
           <p className="text-2xl font-black text-gray-900">{stats.totals.totalPosts}</p>
         </div>
+
+        {/* Interactive Moderation Stats Card */}
+        <button
+          onClick={() => {
+            const el = document.getElementById("approval-queue");
+            if (el) {
+              el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }}
+          className="bg-white rounded-2xl border p-5 shadow-sm space-y-1 hover:border-orange-500/40 hover:shadow-md transition-all text-left group"
+        >
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-wider group-hover:text-orange-600 transition-colors">Approval Pending 🛡️</p>
+          <p className="text-2xl font-black text-gray-900 flex items-center gap-2">
+            <span>{stats.pendingQueue.length}</span>
+            {stats.pendingQueue.length > 0 && (
+              <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse inline-block" />
+            )}
+          </p>
+        </button>
       </div>
 
       {/* Analytics Distributions Row */}
@@ -125,35 +144,28 @@ export default function AdminPanel() {
         {/* Growth trends */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-4">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-wider">Registration Growth Trends</h3>
-          <div className="flex flex-col justify-end h-40 pt-4 space-y-2">
-            {stats.registrationsOverTime.length === 0 ? (
-              <p className="text-gray-400 italic text-center w-full">No registrations logged over time.</p>
-            ) : (
-              <div className="flex items-end justify-between h-full w-full px-2">
-                {stats.registrationsOverTime.map((r, idx) => {
-                  const maxCount = Math.max(...stats.registrationsOverTime.map(item => item.count), 1);
-                  const barHeight = (r.count / maxCount) * 100;
-                  return (
-                    <div key={idx} className="flex flex-col items-center gap-1.5 flex-1 group">
-                      <span className="text-[10px] font-bold text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {r.count}
-                      </span>
-                      <div
-                        className="w-8 rounded-t bg-orange-400 hover:bg-orange-500 transition-all shrink-0 cursor-pointer"
-                        style={{ height: `${Math.max(10, barHeight * 0.8)}px` }}
-                      />
-                      <span className="text-[10px] font-extrabold text-gray-400 truncate max-w-[60px]">{r.date}</span>
+          {stats.registrationsOverTime.length === 0 ? (
+            <p className="text-xs font-semibold text-gray-450 italic py-8 text-center">No trend data available.</p>
+          ) : (
+            <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+              {stats.registrationsOverTime.map((r, idx) => {
+                return (
+                  <div key={idx} className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0 font-semibold text-xs text-gray-700">
+                    <div className="flex items-center gap-2">
+                      <span className="text-orange-500">📈</span>
+                      <span>{r.count} registrations</span>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+                    <span className="text-[10px] font-extrabold text-gray-400 truncate max-w-[60px]">{r.date}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Moderation Approval Queue */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-6">
+      <div id="approval-queue" className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-6">
         <div>
           <h3 className="text-base font-extrabold text-gray-900">🛡️ Approval Queue</h3>
           <p className="text-xs font-semibold text-gray-500 mt-0.5">Startups waiting for platform moderation review.</p>
