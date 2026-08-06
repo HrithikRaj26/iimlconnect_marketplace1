@@ -8,8 +8,9 @@ import { supabase } from "@/lib/supabase";
 import { TopNav } from "@/components/ui/TopNav";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Can default to true on desktop if preferred
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profile, setProfile] = useState<{ name: string; avatar: string } | null>(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -51,17 +52,27 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) updateProfile(session);
+      if (session) {
+        updateProfile(session);
+      } else {
+        // No session — redirect to login page
+        router.replace('/');
+      }
+      setSessionChecked(true);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) updateProfile(session);
-      else setProfile(null);
+      else {
+        setProfile(null);
+        router.replace('/');
+      }
     });
 
     return () => subscription.unsubscribe();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const updateProfile = (session: any) => {
@@ -79,6 +90,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
     router.push("/");
   };
+
+  // Block render until session check resolves (prevents flash of protected content)
+  if (!sessionChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-3">
+          <svg className="animate-spin h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
