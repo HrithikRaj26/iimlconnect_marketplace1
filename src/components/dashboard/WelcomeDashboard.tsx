@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import GlobalSearchBar from "./GlobalSearchBar";
+import StreakWidget from "./StreakWidget";
 import { 
   ShoppingBag, 
   PlusCircle, 
@@ -17,6 +18,7 @@ import {
 export default function WelcomeDashboard({ session }: { session: any }) {
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
+  const [userId, setUserId] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -28,6 +30,7 @@ export default function WelcomeDashboard({ session }: { session: any }) {
         fName = fullName.split(' ')[0];
       }
       setFirstName(fName);
+      setUserId(session.user.id);
 
       if (session.user.email === 'pgp41298@iiml.ac.in') {
         setIsAdmin(true);
@@ -136,6 +139,9 @@ export default function WelcomeDashboard({ session }: { session: any }) {
         </div>
 
       </div>
+
+      {/* Activity Streaks Widget */}
+      {userId && <StreakWidget userId={userId} />}
 
       {/* ADMIN CONSOLE */}
       {isAdmin && (

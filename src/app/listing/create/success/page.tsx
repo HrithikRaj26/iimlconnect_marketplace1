@@ -6,6 +6,8 @@ import Link from "next/link";
 import { TopNav } from "@/components/ui/TopNav";
 import { Button } from "@/components/ui/Button";
 import { useListingDraft } from "@/hooks/useListingDraft";
+import { supabase } from "@/lib/supabase";
+import { updateSellerStreak } from "@/services/streakService";
 
 export default function ListingSuccessPage() {
   const router = useRouter();
@@ -17,7 +19,12 @@ export default function ListingSuccessPage() {
   useEffect(() => {
     if (!publishedListing) {
       router.replace("/listing/create");
+      return;
     }
+    // Increment weekly seller streak fire-and-forget
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.id) updateSellerStreak(session.user.id);
+    });
   }, [publishedListing, router]);
 
   if (!publishedListing) return null;

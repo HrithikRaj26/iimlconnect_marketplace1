@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ChevronUp, Sparkles } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { TopNav } from "@/components/ui/TopNav";
+import { checkAndUpdateLoginStreak } from "@/services/streakService";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -54,6 +55,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         updateProfile(session);
+        // Fire-and-forget: update daily login streak
+        checkAndUpdateLoginStreak(session.user.id);
       } else {
         // No session — redirect to login page
         router.replace('/');

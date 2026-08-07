@@ -9,6 +9,7 @@ import { Venture, VentureCategory, VentureReview } from "@/types";
 import { Button } from "@/components/ui/Button";
 import { TextArea } from "@/components/ui/TextArea";
 import { supabase } from "@/lib/supabase";
+import { updateReviewStreak } from "@/services/streakService";
 import { Mic } from "lucide-react";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 
@@ -158,6 +159,9 @@ export default function VentureDiscovery() {
 
       // Check if this was the user's first review
       if (currentUserId) {
+        // Update review streak (fire-and-forget)
+        updateReviewStreak(currentUserId);
+
         const { count } = await supabase
           .from("reviews")
           .select("*", { count: "exact", head: true })
