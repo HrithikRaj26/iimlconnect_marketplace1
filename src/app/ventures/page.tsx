@@ -7,6 +7,7 @@ import CommunityFeed from "@/components/ventures/CommunityFeed";
 import ReputationLeaderboard from "@/components/ventures/ReputationLeaderboard";
 import MyVentures from "@/components/ventures/MyVentures";
 import AdminPanel from "@/components/ventures/AdminPanel";
+import { useTheme } from "@/components/ui/ThemeProvider";
 
 type TabId = "discover" | "feed" | "reputation" | "my-ventures" | "admin";
 
@@ -15,20 +16,7 @@ export default function VenturesPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabId>("discover");
   const [isAdmin, setIsAdmin] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('venture-theme') as 'light' | 'dark';
-    if (savedTheme) {
-      setTheme(savedTheme);
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const nextTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(nextTheme);
-    localStorage.setItem('venture-theme', nextTheme);
-  };
+  const { theme, toggle: toggleTheme } = useTheme();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -87,8 +75,7 @@ export default function VenturesPage() {
   ];
 
   return (
-    <div className={theme === 'dark' ? 'dark' : ''}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
         {/* Top Banner and Heading */}
         <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-8">
           <div className="mx-auto max-w-7xl">
@@ -155,7 +142,6 @@ export default function VenturesPage() {
           {activeTab === "my-ventures" && <MyVentures />}
           {activeTab === "admin" && isAdmin && <AdminPanel />}
         </main>
-      </div>
     </div>
   );
 }
