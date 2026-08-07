@@ -7,6 +7,7 @@ import { ChevronUp, Sparkles } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { TopNav } from "@/components/ui/TopNav";
 import { checkAndUpdateLoginStreak } from "@/services/streakService";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -42,13 +43,36 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   const getScrollToTopColorClass = () => {
+    // 🟠 Ventures — orange/amber brand
     if (pathname.startsWith("/ventures")) {
-      return "from-orange-500 to-amber-600 shadow-orange-500/25 dark:shadow-orange-955/40 hover:shadow-orange-500/40";
+      return "from-orange-500 to-amber-500 shadow-orange-500/30 hover:shadow-orange-500/50";
     }
+    // 🟣 Lost & Found — purple/fuchsia
     if (pathname.startsWith("/lost-found")) {
-      return "from-purple-600 to-fuchsia-600 shadow-purple-500/25 dark:shadow-purple-955/40 hover:shadow-purple-500/40";
+      return "from-purple-600 to-fuchsia-600 shadow-purple-500/30 hover:shadow-purple-500/50";
     }
-    return "from-blue-600 to-indigo-600 shadow-blue-500/25 dark:shadow-blue-955/40 hover:shadow-blue-500/40";
+    // 💬 Messages — teal/cyan
+    if (pathname.startsWith("/messages")) {
+      return "from-teal-500 to-cyan-500 shadow-teal-500/30 hover:shadow-teal-500/50";
+    }
+    // 👤 Profile — violet/slate
+    if (pathname.startsWith("/profile")) {
+      return "from-violet-600 to-slate-600 shadow-violet-500/30 hover:shadow-violet-500/50";
+    }
+    // 🛒 Marketplace & listing create flow — blue/indigo
+    if (pathname.startsWith("/marketplace") || pathname.startsWith("/listing")) {
+      return "from-blue-600 to-indigo-600 shadow-blue-500/30 hover:shadow-blue-500/50";
+    }
+    // 🔍 Search — sky/blue
+    if (pathname.startsWith("/search")) {
+      return "from-sky-500 to-blue-500 shadow-sky-500/30 hover:shadow-sky-500/50";
+    }
+    // 🛡️ Admin — red/rose
+    if (pathname.startsWith("/admin")) {
+      return "from-red-600 to-rose-600 shadow-red-500/30 hover:shadow-red-500/50";
+    }
+    // 🏠 Dashboard / home — brand blue/indigo (default)
+    return "from-blue-600 to-indigo-600 shadow-blue-500/30 hover:shadow-blue-500/50";
   };
 
   useEffect(() => {
@@ -264,16 +288,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
-      {/* Floating Scroll to Top Button */}
-      {showScrollTop && (
-        <button
-          onClick={scrollToTop}
-          className={`fixed bottom-6 right-6 p-3 rounded-full text-white shadow-xl bg-gradient-to-r transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center hover:brightness-110 z-40 ${getScrollToTopColorClass()}`}
-          title="Scroll to Top"
-        >
-          <ChevronUp size={20} strokeWidth={2.5} />
-        </button>
-      )}
+      {/* Floating Scroll to Top Button — color matches current page */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            key="scroll-top-btn"
+            onClick={scrollToTop}
+            className={`fixed bottom-6 right-6 z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br text-white shadow-xl border border-white/10 hover:brightness-110 transition-[filter] ${getScrollToTopColorClass()}`}
+            title="Scroll to Top"
+            initial={{ opacity: 0, scale: 0.6, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0,
+              transition: { type: "spring", stiffness: 420, damping: 26 } }}
+            exit={{ opacity: 0, scale: 0.6, y: 16,
+              transition: { duration: 0.15, ease: "easeIn" } }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <ChevronUp size={22} strokeWidth={2.5} />
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Mobile Backdrop overlay */}
       {sidebarOpen && (
