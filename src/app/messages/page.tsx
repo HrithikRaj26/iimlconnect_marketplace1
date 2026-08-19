@@ -107,12 +107,16 @@ function ChatWorkspaceWrapper() {
     }
   };
 
-  // Setup Realtime subscriptions
+  // Setup Realtime subscriptions + polling fallback.
+  // Polling is essential: Supabase Realtime requires each table to be added
+  // to the `supabase_realtime` publication. If that isn't done, only polling
+  // will keep both parties in sync (offer accept/decline/counter, receipts).
   useEffect(() => {
     if (!currentUserId || !activeId) return;
 
+    const channelName = `chat-realtime-${currentUserId}-${Date.now()}`;
     const channel = supabase
-      .channel("chat-realtime")
+      .channel(channelName)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "conversations" },
@@ -123,14 +127,21 @@ function ChatWorkspaceWrapper() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "messages" },
-        (payload) => {
+        () => {
           loadActiveConversation(activeId);
         }
       )
       .subscribe();
 
+    // Polling every 3s as a defensive fallback so the other party always
+    // sees offer accept / decline / counter within a few seconds.
+    const pollInterval = setInterval(() => {
+      loadActiveConversation(activeId);
+    }, 3000);
+
     return () => {
       supabase.removeChannel(channel);
+      clearInterval(pollInterval);
     };
   }, [currentUserId, activeId]);
 

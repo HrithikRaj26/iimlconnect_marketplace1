@@ -70,16 +70,18 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
   useEffect(() => {
     let channel: any;
     let isMounted = true;
+    let pollIntervalRef: ReturnType<typeof setInterval> | null = null;
 
     const fetchUnread = async (userId: string) => {
       try {
+        // Get all conversations where the current user is either buyer or seller
         const { data: convs } = await supabase
-          .from("conversation_participants")
-          .select("conversation_id")
-          .eq("profile_id", userId);
+          .from("conversations")
+          .select("id")
+          .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
 
         if (convs && convs.length > 0) {
-          const ids = convs.map((c: any) => c.conversation_id);
+          const ids = convs.map((c: any) => c.id);
           const { count } = await supabase
             .from("messages")
             .select("*", { count: "exact", head: true })
@@ -101,6 +103,7 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
         const userId = session.user.id;
         fetchUnread(userId);
 
+        // Realtime: refresh when any message changes
         const channelName = `top-nav-unread-${userId}-${Date.now()}`;
         channel = supabase
           .channel(channelName)
@@ -112,6 +115,10 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
             }
           )
           .subscribe();
+
+        // Polling fallback: refresh every 5s in case realtime isn't enabled
+        const pollId = setInterval(() => fetchUnread(userId), 5000);
+        pollIntervalRef = pollId;
       }
     });
 
@@ -119,6 +126,9 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
       isMounted = false;
       if (channel) {
         supabase.removeChannel(channel);
+      }
+      if (pollIntervalRef) {
+        clearInterval(pollIntervalRef);
       }
     };
   }, []);
@@ -149,12 +159,20 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
       </div>
 
       <div className="flex items-center gap-4">
-        <Link href="/messages" className="relative hidden md:flex items-center justify-center h-10 w-10 rounded-full hover:bg-gray-100 transition-colors mr-2 text-gray-500 hover:text-gray-900" title="Messages">
+        <Link href="/messages" className="relative hidden md:flex items-center justify-center h-10 w-10 rounded-full hover:bg-gray-100 transition-colors mr-2 text-gray-500 hover:text-gray-900" title={unreadChats > 0 ? `${unreadChats} unread` : "Messages"}>
           <MessageSquare size={20} />
           {unreadChats > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-orange-600 text-[9px] font-black text-white ring-2 ring-white">
-              {unreadChats}
-            </span>
+            <>
+              {/* Pulsing red dot — always visible when there are unread messages */}
+              <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75"></span>
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-red-600 ring-2 ring-white"></span>
+              </span>
+              {/* Count badge, offset below the dot */}
+              <span className="absolute top-3.5 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-orange-600 px-1 text-[9px] font-black text-white ring-1 ring-white">
+                {unreadChats}
+              </span>
+            </>
           )}
         </Link>
         
