@@ -210,20 +210,6 @@ class SupabaseChatService implements IChatService {
     const nowStr = new Date().toISOString();
     const preview = `Sent a price offer of ₹${amount}`;
 
-    // 0. Mark all prior pending offers in this conversation as "countered"
-    // so that stale Accept/Decline buttons disappear on both users' screens.
-    // Only the most recent offer should be actionable at any time.
-    try {
-      await supabase
-        .from("messages")
-        .update({ offer_status: "countered" })
-        .eq("conversation_id", conversationId)
-        .eq("kind", "offer")
-        .eq("offer_status", "pending");
-    } catch (e) {
-      console.warn("Could not mark prior offers as countered:", e);
-    }
-
     // 1. Insert offer message
     let { error: msgErr } = await supabase
       .from("messages")
@@ -321,38 +307,6 @@ class SupabaseChatService implements IChatService {
       .eq("id", conversationId);
 
     if (convErr) throw convErr;
-
-    // ── On accept: mark the underlying listing as sold ──────────────────────
-    // This removes the item from the marketplace search feed automatically.
-    // We look up the conversation row to know which listing (and which table)
-    // to mark. `listing_type` is either "item" (marketplace listing) or
-    // "venture" (venture — we don't mark those sold).
-    if (action === "accept") {
-      try {
-        const { data: convRow } = await supabase
-          .from("conversations")
-          .select("listing_id, listing_type")
-          .eq("id", conversationId)
-          .single();
-
-        if (convRow?.listing_type === "item" && convRow.listing_id) {
-          // Best-effort: `status` column is added by migration
-          // marketplace_migration_005_listing_status_and_realtime.sql
-          const { error: soldErr } = await supabase
-            .from("listings")
-            .update({ status: "sold" })
-            .eq("id", convRow.listing_id);
-          if (soldErr) {
-            console.warn(
-              "Could not mark listing as sold (status column may be missing — run migration 005):",
-              soldErr
-            );
-          }
-        }
-      } catch (e) {
-        console.warn("Failed to mark listing as sold:", e);
-      }
-    }
 
     return { ok: true };
   }

@@ -129,19 +129,7 @@ export function useConversation(initial: Conversation): UseConversationResult {
         status: "sending",
         offer: optimisticOffer,
       };
-      // Optimistically mark any prior pending offers as countered
-      // so stale Accept/Decline buttons disappear immediately on this client.
-      setConversation((prev) => ({
-        ...prev,
-        messages: [
-          ...prev.messages.map((m) =>
-            m.kind === "offer" && m.offer && m.offer.status === "pending"
-              ? { ...m, offer: { ...m.offer, status: "countered" as OfferStatus } }
-              : m
-          ),
-          optimisticMessage,
-        ],
-      }));
+      appendMessage(optimisticMessage);
       try {
         await chatService.sendOffer(conversation.id, amount, note);
         patchMessage(optimisticMessage.id, { status: "delivered" });
@@ -149,7 +137,7 @@ export function useConversation(initial: Conversation): UseConversationResult {
         patchMessage(optimisticMessage.id, { status: "failed" });
       }
     },
-    [conversation.id, patchMessage]
+    [appendMessage, conversation.id, patchMessage]
   );
 
   const respondToOffer = useCallback(
