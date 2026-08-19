@@ -89,10 +89,17 @@ export default function ListingDetailPage() {
           {/* Gallery */}
           <div>
             <div className="relative h-96 w-full overflow-hidden rounded-2xl bg-gray-100">
-              <Image src={listing.image_url || '/placeholder.png'} alt={listing.title} fill sizes="600px" className="object-cover" unoptimized />
+              <Image src={listing.image_url || '/placeholder.png'} alt={listing.title} fill sizes="600px" className={`object-cover ${listing.status === 'sold' ? 'grayscale opacity-70' : ''}`} unoptimized />
               <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-success shadow-sm">
                 {conditionLabel} Condition
               </span>
+              {listing.status === 'sold' && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="rounded-lg bg-red-600 px-6 py-3 text-2xl font-black uppercase tracking-widest text-white shadow-xl rotate-[-12deg] border-4 border-white">
+                    SOLD
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -156,6 +163,16 @@ export default function ListingDetailPage() {
                     You posted this listing. You can edit or remove it at any time.
                   </p>
                 </>
+              ) : listing.status === 'sold' ? (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-center">
+                  <p className="text-sm font-bold text-red-700">This item has been sold</p>
+                  <p className="mt-1 text-xs text-red-500">
+                    The seller and buyer agreed on a price. Browse similar items on the marketplace.
+                  </p>
+                  <Link href="/marketplace" className="mt-3 inline-block">
+                    <Button variant="secondary">Back to Marketplace</Button>
+                  </Link>
+                </div>
               ) : (
                 <>
                   <Button fullWidth size="lg" onClick={() => setOfferOpen(true)}>

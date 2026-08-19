@@ -16,6 +16,11 @@ class SupabaseSearchService implements ISearchService {
       .from('listings')
       .select('*');
 
+    // Hide sold listings. `status` is added by migration
+    // marketplace_migration_005_listing_status_and_realtime.sql.
+    // `or(...)` covers legacy rows where the column is NULL.
+    query = query.or('status.is.null,status.neq.sold');
+
     // Apply Filters (Skip text query here so we can fuzzy search in memory)
     if (filters.categories.length) {
       query = query.in('category', filters.categories);

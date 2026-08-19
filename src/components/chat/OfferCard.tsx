@@ -46,6 +46,28 @@ export function OfferCard({
     );
   }
 
+  // ── Countered (superseded by a newer offer) ─────────────────────────────────
+  if (offer.status === "countered") {
+    return (
+      <div className={["flex", align].join(" ")}>
+        <div className="w-64 rounded-2xl border border-gray-200 bg-gray-50 p-4 opacity-70">
+          <div className="mb-1 flex items-center justify-between">
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-500">
+              <span className="h-2 w-2 rounded-full bg-gray-400" />
+              Countered
+            </span>
+            <span className="text-[10px] text-gray-400">{time}</span>
+          </div>
+          <p className="text-2xl font-bold text-gray-500 line-through">{formatINR(offer.amount)}</p>
+          <p className="text-xs text-gray-400">
+            {isMine ? "You offered" : "Offered"} · {listingTitle}
+          </p>
+          <p className="mt-2 text-xs text-gray-400">A newer offer has been sent — see below.</p>
+        </div>
+      </div>
+    );
+  }
+
   // ── Accepted ─────────────────────────────────────────────────────────────────
   if (offer.status === "accepted") {
     return (
