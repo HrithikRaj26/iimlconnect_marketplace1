@@ -14,6 +14,7 @@ export default function ProfileBuilder() {
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [mobile, setMobile] = useState("");
+  const [isGuest, setIsGuest] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -30,6 +31,12 @@ export default function ProfileBuilder() {
           setBio(metadata.bio || "");
           setAvatarUrl(metadata.custom_avatar || metadata.avatar_url || "");
           setMobile(metadata.mobile || metadata.phone || "");
+
+          const userIsGuest = metadata.is_guest || !session.user.email || !!session.user.phone;
+          setIsGuest(userIsGuest);
+          if (userIsGuest && !metadata.batch) {
+            setBatch("External Guest");
+          }
         }
       } catch (e) {
         console.error("Error loading user profile:", e);
@@ -93,6 +100,8 @@ export default function ProfileBuilder() {
     }
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentMetadata = session?.user?.user_metadata || {};
       const { data, error } = await supabase.auth.updateUser({
         data: {
           first_name: firstName.trim(),
@@ -103,6 +112,7 @@ export default function ProfileBuilder() {
           avatar_url: avatarUrl,
           custom_avatar: avatarUrl,
           mobile: mobile.trim(),
+          is_guest: currentMetadata.is_guest || isGuest
         },
       });
 
@@ -134,6 +144,12 @@ export default function ProfileBuilder() {
         </div>
 
         <form onSubmit={handleSaveProfile} className="space-y-6">
+          {(firstName === "" || firstName === "Student" || firstName === "Guest") && (
+            <div className="rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-105 dark:border-amber-900/30 p-4 text-xs font-bold text-amber-800 dark:text-amber-400">
+              ⚠️ Please set your actual First Name and Last Name below to complete your registration details.
+            </div>
+          )}
+
           {message && (
             <div
               className={`rounded-xl p-4 text-xs font-bold border ${
@@ -264,6 +280,7 @@ export default function ProfileBuilder() {
                 className="appearance-none w-full rounded-lg border border-gray-300 bg-white pl-4 pr-10 py-2.5 text-sm text-gray-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand outline-none font-medium bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%25234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.75rem_center] bg-[size:1.1rem_1.1rem] bg-no-repeat"
               >
                 <option value="">Select your batch...</option>
+                <option value="External Guest">External Guest</option>
                 <option value="PGP 1">PGP 1</option>
                 <option value="PGP 2">PGP 2</option>
                 <option value="ABM 1">ABM 1</option>

@@ -51,7 +51,7 @@ function playWelcomeSound() {
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [profile, setProfile] = useState<{ name: string; avatar: string } | null>(null);
+  const [profile, setProfile] = useState<{ name: string; avatar: string; isGuest?: boolean } | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -163,7 +163,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       fName = fullName.split(' ')[0];
     }
     const avatar = metadata.custom_avatar || metadata.avatar_url || metadata.picture || '';
-    setProfile({ name: fullName || fName || "Student", avatar });
+    const isGuest = metadata.is_guest || !session.user.email || !!session.user.phone;
+    const defaultName = isGuest ? "Guest" : "Student";
+    setProfile({ name: fullName || fName || defaultName, avatar, isGuest });
   };
 
   const handleLogout = async () => {
@@ -218,7 +220,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
             )}
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 text-center leading-tight truncate w-full px-2">{profile?.name || "Welcome"}</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Verified Student</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {profile?.isGuest ? "External Guest" : "Verified Student"}
+            </p>
           </div>
 
           {/* Navigation */}
@@ -286,6 +290,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         />
         <main ref={mainRef} className="flex-1 overflow-y-auto flex flex-col justify-between">
           <div className="flex-1">
+            {profile && (profile.name === "Guest" || profile.name === "Student" || !profile.name.trim()) && (
+              <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/40 text-amber-800 dark:text-amber-400 font-extrabold text-xs py-3 px-4 text-center flex flex-wrap items-center justify-center gap-2 shadow-xs animate-pulse">
+                <span>⚠️ Your profile is incomplete. Please set your actual name to complete registration.</span>
+                <Link href="/profile" className="underline font-black hover:text-amber-950 dark:hover:text-amber-300">
+                  Update Profile Now →
+                </Link>
+              </div>
+            )}
             {children}
           </div>
           
