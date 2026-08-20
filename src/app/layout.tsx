@@ -28,8 +28,8 @@ export default function RootLayout({
                   var stored = localStorage.getItem('iiml-theme');
                   if (stored === 'dark') {
                     document.documentElement.classList.add('dark');
-                  } else if (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
                   }
                 } catch(e) {}
               })();
