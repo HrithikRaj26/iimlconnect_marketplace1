@@ -146,11 +146,12 @@ export default function ReportDetailPage() {
   };
 
   const handleShare = async () => {
+    if (!report) return;
     const url = window.location.href;
-    const isLost = report?.type === 'lost';
-    const location = isLost ? report?.last_seen_location : report?.found_location;
+    const isLost = report.type === 'lost';
+    const location = isLost ? report.last_seen_location : report.found_location;
     const locationText = location ? ` at "${location}"` : '';
-    const text = `${isLost ? 'Lost' : 'Found'} "${report?.category}"${locationText} on IIML Campus. Check it out on IIML Connect!`;
+    const text = `${isLost ? 'Lost' : 'Found'} "${report.category}"${locationText} on IIML Campus. Check it out on IIML Connect!`;
     
     if (navigator.share) {
       try {

@@ -54,6 +54,7 @@ export default function ListingDetailPage() {
   };
 
   const handleShare = async () => {
+    if (!listing) return;
     const url = window.location.href;
     const text = `Check out "${listing.title}" for ₹${listing.price} on IIML Connect!`;
     
