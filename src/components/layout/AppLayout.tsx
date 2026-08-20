@@ -135,9 +135,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
+      {/* Mobile Backdrop */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSidebarOpen(false)}
+            className="fixed inset-0 z-[55] bg-gray-900/40 backdrop-blur-sm sm:hidden"
+          />
+        )}
+      </AnimatePresence>
+
       {/* Sidebar - Desktop Push / Mobile Overlay */}
       <div 
-        className={`fixed inset-y-0 left-0 z-50 w-64 shrink-0 transform bg-white border-r border-gray-200 transition-all duration-300 ease-in-out sm:relative sm:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-[60] w-64 shrink-0 transform bg-white border-r border-gray-200 transition-all duration-300 ease-in-out sm:relative sm:translate-x-0 sm:z-0 ${
           sidebarOpen ? "translate-x-0 shadow-2xl sm:shadow-none sm:w-64" : "-translate-x-full sm:w-0"
         } ${!sidebarOpen ? "sm:hidden" : "sm:block"}`}
       >

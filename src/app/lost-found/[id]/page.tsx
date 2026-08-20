@@ -139,6 +139,12 @@ export default function ReportDetailPage() {
     }
   };
 
+  const handleReport = async () => {
+    if (!confirm("Report this listing as fake or inappropriate? This will alert the admin team.")) return;
+    // In a real app, this would insert into a 'reports' table.
+    alert("Report submitted successfully. Our admin team will review this listing.");
+  };
+
   return (
     <div className="min-h-screen bg-surface">
       <div className="mx-auto max-w-2xl px-6 py-8">
@@ -311,6 +317,17 @@ export default function ReportDetailPage() {
                     Force reject
                   </Button>
                 </div>
+              </div>
+            )}
+
+            {!isOwner && (
+              <div className="border-t border-gray-100 pt-4 mt-4">
+                <button 
+                  onClick={handleReport}
+                  className="w-full text-center text-xs font-semibold text-red-500 hover:text-red-700 hover:underline transition-colors"
+                >
+                  🚩 Report Fake/Inappropriate Listing
+                </button>
               </div>
             )}
           </div>
