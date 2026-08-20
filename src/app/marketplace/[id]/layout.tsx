@@ -32,14 +32,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title,
       description,
+      url: `https://iiml-connect.vercel.app/marketplace/${id}`,
       images: [
         {
           url: imageUrl,
-          width: 800,
-          height: 600,
+          width: 1200,
+          height: 630,
           alt: listing.title,
         },
       ],
+      siteName: 'IIML Connect',
       type: 'website',
     },
     twitter: {

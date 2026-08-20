@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ui/ThemeProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://iiml-connect.vercel.app'),
   title: "IIM L Connect - MVP",
   description: "A verified-identity ecosystem for the IIM Lucknow community.",
 };
