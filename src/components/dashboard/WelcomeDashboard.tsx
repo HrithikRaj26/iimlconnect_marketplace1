@@ -132,7 +132,7 @@ export default function WelcomeDashboard({ session }: { session: any }) {
             <ActionButton 
               icon={PlusCircle} 
               label="Register Venture" 
-              onClick={() => router.push("/ventures/new")}
+              onClick={() => router.push("/ventures?tab=my-ventures")}
               colorClass="text-orange-600"
             />
           </div>

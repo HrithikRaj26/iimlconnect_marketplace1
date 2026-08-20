@@ -38,7 +38,7 @@ export default function RootLayout({
         />
         <Script src="https://accounts.google.com/gsi/client" strategy="beforeInteractive" />
       </head>
-      <body className={`${inter.className} antialiased text-gray-900 bg-gray-50 min-h-screen`}>
+      <body className={`${inter.className} antialiased text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-950 min-h-screen`}>
         <ThemeProvider>
           {children}
         </ThemeProvider>

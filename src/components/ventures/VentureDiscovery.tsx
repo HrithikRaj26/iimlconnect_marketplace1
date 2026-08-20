@@ -53,6 +53,8 @@ export default function VentureDiscovery() {
   // Ref to scroll to details container when it opens
   const detailsRef = useRef<HTMLDivElement | null>(null);
 
+  const [userReviewedVentureIds, setUserReviewedVentureIds] = useState<string[]>([]);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
@@ -60,6 +62,20 @@ export default function VentureDiscovery() {
       }
     });
   }, []);
+
+  useEffect(() => {
+    if (currentUserId) {
+      supabase
+        .from("reviews")
+        .select("venture_id")
+        .eq("reviewer_id", currentUserId)
+        .then(({ data, error }) => {
+          if (data && !error) {
+            setUserReviewedVentureIds(data.map((r: any) => r.venture_id));
+          }
+        });
+    }
+  }, [currentUserId]);
 
   const loadData = async () => {
     setLoading(true);
@@ -153,6 +169,7 @@ export default function VentureDiscovery() {
 
       // Refresh listings
       loadData();
+      setUserReviewedVentureIds(prev => [...prev, activeVenture.id]);
       
       setReviewContent("");
       setRating(5);
@@ -334,6 +351,7 @@ export default function VentureDiscovery() {
             function activeVrientIdMatch(id: string) {
               return activeVenture?.id === id && showDetailModal;
             }
+            const hasReviewed = userReviewedVentureIds.includes(venture.id);
             return (
               <React.Fragment key={venture.id}>
                 {/* Venture Card */}
@@ -343,7 +361,7 @@ export default function VentureDiscovery() {
                     venture.is_featured 
                       ? "border-amber-400/80 dark:border-amber-500/80 shadow-md shadow-amber-500/5 hover:border-amber-500 ring-2 ring-amber-400/10 animate-pulse-subtle" 
                       : "border-gray-100 dark:border-gray-800 shadow-sm hover:border-orange-500/20 dark:hover:border-orange-500/30"
-                  } ${isExpanded ? "ring-2 ring-orange-500/50 scale-98 border-orange-500/50 dark:border-orange-500/50" : ""}`}
+                  } ${isExpanded ? "ring-2 ring-orange-500/50 scale-98 border-orange-500/50 dark:border-orange-500/50" : ""} ${hasReviewed ? "opacity-90 border-green-500/20 dark:border-green-500/15" : ""}`}
                 >
                   <div>
                     {/* Logo and Category */}
@@ -355,7 +373,12 @@ export default function VentureDiscovery() {
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                       </div>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                        {hasReviewed && (
+                          <span className="rounded-full bg-green-50 dark:bg-green-950/40 px-2 py-0.5 text-[9px] font-black text-green-700 dark:text-green-400 border border-green-200/50 dark:border-green-900/30 shadow-xs">
+                            ✓ Reviewed
+                          </span>
+                        )}
                         {venture.is_featured && (
                           <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[9px] font-black text-amber-700 animate-bounce">
                             ★ Featured
@@ -711,51 +734,67 @@ export default function VentureDiscovery() {
                           <h3 className="text-sm font-extrabold text-gray-900 uppercase tracking-wider">Reviews & Ratings</h3>
 
                           {/* Review submission Form */}
-                          {activeVenture.owner_id !== currentUserId && (
-                            <form onSubmit={handleReviewSubmit} className="bg-gray-50 p-4 rounded-xl border border-gray-150 space-y-4">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-gray-600">Rate this startup:</span>
-                                <div className="flex gap-1">
-                                  {[1, 2, 3, 4, 5].map((star) => (
-                                    <button
-                                      type="button"
-                                      key={star}
-                                      onClick={() => setRating(star)}
-                                      onMouseEnter={() => setHoverRating(star)}
-                                      onMouseLeave={() => setHoverRating(null)}
-                                      className={`text-2xl focus:outline-none transition-all duration-150 hover:scale-125 active:scale-95 ${
-                                        (hoverRating !== null ? hoverRating >= star : rating >= star)
-                                          ? "text-amber-500 scale-105 filter drop-shadow-[0_0_2px_rgba(245,158,11,0.4)]"
-                                          : "text-gray-300"
-                                      }`}
-                                    >
-                                      ★
-                                    </button>
-                                  ))}
+                          {activeVenture.owner_id !== currentUserId && (() => {
+                            const hasSubmittedReview = activeVenture.reviews.some(r => r.reviewer_id === currentUserId) || userReviewedVentureIds.includes(activeVenture.id);
+                            if (!hasSubmittedReview) {
+                              return (
+                                <form onSubmit={handleReviewSubmit} className="bg-gray-50 p-4 rounded-xl border border-gray-150 space-y-4">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-bold text-gray-600">Rate this startup:</span>
+                                    <div className="flex gap-1">
+                                      {[1, 2, 3, 4, 5].map((star) => (
+                                        <button
+                                          type="button"
+                                          key={star}
+                                          onClick={() => setRating(star)}
+                                          onMouseEnter={() => setHoverRating(star)}
+                                          onMouseLeave={() => setHoverRating(null)}
+                                          className={`text-2xl focus:outline-none transition-all duration-150 hover:scale-125 active:scale-95 ${
+                                            (hoverRating !== null ? hoverRating >= star : rating >= star)
+                                              ? "text-amber-500 scale-105 filter drop-shadow-[0_0_2px_rgba(245,158,11,0.4)]"
+                                              : "text-gray-300"
+                                          }`}
+                                        >
+                                          ★
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+
+                                  <TextArea
+                                    placeholder="Share your verified experience with this venture... (quality of service, delivery, product feedback)"
+                                    value={reviewContent}
+                                    onChange={(e) => setReviewContent(e.target.value)}
+                                    required
+                                    rows={3}
+                                  />
+
+                                  {reviewError && (
+                                    <p className="text-xs font-bold text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-100">
+                                      ⚠️ {reviewError}
+                                    </p>
+                                  )}
+
+                                  <div className="flex justify-end">
+                                    <Button type="submit" loading={reviewSubmitting}>
+                                      Submit Review
+                                    </Button>
+                                  </div>
+                                </form>
+                              );
+                            } else {
+                              return (
+                                <div className="bg-green-50/50 dark:bg-green-950/10 border border-green-150 dark:border-green-900/50 p-4 rounded-xl text-center space-y-1">
+                                  <p className="text-xs font-bold text-green-800 dark:text-green-400">
+                                    ✅ You have already submitted a review for this venture.
+                                  </p>
+                                  <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500">
+                                    Only one review per student is allowed.
+                                  </p>
                                 </div>
-                              </div>
-
-                              <TextArea
-                                placeholder="Share your verified experience with this venture... (quality of service, delivery, product feedback)"
-                                value={reviewContent}
-                                onChange={(e) => setReviewContent(e.target.value)}
-                                required
-                                rows={3}
-                              />
-
-                              {reviewError && (
-                                <p className="text-xs font-bold text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-100">
-                                  ⚠️ {reviewError}
-                                </p>
-                              )}
-
-                              <div className="flex justify-end">
-                                <Button type="submit" loading={reviewSubmitting}>
-                                  Submit Review
-                                </Button>
-                              </div>
-                            </form>
-                          )}
+                              );
+                            }
+                          })()}
 
                           {/* Reviews List */}
                           <div className="space-y-4">

@@ -1,22 +1,39 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import VentureDiscovery from "@/components/ventures/VentureDiscovery";
 import CommunityFeed from "@/components/ventures/CommunityFeed";
 import ReputationLeaderboard from "@/components/ventures/ReputationLeaderboard";
 import MyVentures from "@/components/ventures/MyVentures";
 import AdminPanel from "@/components/ventures/AdminPanel";
-import { useTheme } from "@/components/ui/ThemeProvider";
 
 type TabId = "discover" | "feed" | "reputation" | "my-ventures" | "admin";
 
 export default function VenturesPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950 text-gray-500 dark:text-gray-400">
+        <div className="flex flex-col items-center gap-2">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
+          <p className="text-sm font-medium">Entering Venture Hub...</p>
+        </div>
+      </div>
+    }>
+      <VenturesPageInner />
+    </Suspense>
+  );
+}
+
+function VenturesPageInner() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabId>("discover");
+  
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get("tab") as TabId) || "discover";
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
   const [isAdmin, setIsAdmin] = useState(false);
-  const { theme, toggle: toggleTheme } = useTheme();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -41,9 +58,17 @@ export default function VenturesPage() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Sync tab state if URL query parameter changes
+  useEffect(() => {
+    const urlTab = searchParams.get("tab") as TabId;
+    if (urlTab && ["discover", "feed", "reputation", "my-ventures", "admin"].includes(urlTab) && urlTab !== activeTab) {
+      setActiveTab(urlTab);
+    }
+  }, [searchParams, activeTab]);
+
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 text-gray-500">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950 text-gray-500 dark:text-gray-400">
         <div className="flex flex-col items-center gap-2">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
           <p className="text-sm font-medium">Entering Venture Hub...</p>
@@ -54,11 +79,11 @@ export default function VenturesPage() {
 
   if (!session) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 p-6 text-center">
-        <div className="max-w-md rounded-2xl bg-white p-8 shadow-sm border border-gray-200">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950 p-6 text-center">
+        <div className="max-w-md rounded-2xl bg-white dark:bg-gray-900 p-8 shadow-sm border border-gray-200 dark:border-gray-800">
           <span className="text-4xl">🔒</span>
-          <h2 className="mt-4 text-xl font-bold text-gray-900">Access Denied</h2>
-          <p className="mt-2 text-sm text-gray-500">
+          <h2 className="mt-4 text-xl font-bold text-gray-900 dark:text-white">Access Denied</h2>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             Please log in from the main portal to access the Student Venture Hub & Community.
           </p>
         </div>
@@ -89,14 +114,6 @@ export default function VenturesPage() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={toggleTheme}
-                  className="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-250 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-700"
-                  title={theme === "light" ? "Switch to Night Mode 🌙" : "Switch to Day Mode ☀️"}
-                >
-                  <span className="text-sm">{theme === "light" ? "🌙" : "☀️"}</span>
-                </button>
                 {activeTab !== "my-ventures" && (
                   <button
                     onClick={() => setActiveTab("my-ventures")}

@@ -149,10 +149,14 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
       </div>
 
       <div className="flex items-center gap-4">
-        <Link href="/messages" className="relative hidden md:flex items-center justify-center h-10 w-10 rounded-full hover:bg-gray-100 transition-colors mr-2 text-gray-500 hover:text-gray-900" title="Messages">
-          <MessageSquare size={20} />
+        <Link 
+          href="/messages" 
+          className="relative flex items-center justify-center h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950/60 border border-blue-100/80 dark:border-blue-900/40 shadow-xs hover:shadow-sm hover:scale-105 active:scale-95 transition-all duration-200 mr-2" 
+          title="Messages"
+        >
+          <MessageSquare size={18} strokeWidth={2.2} />
           {unreadChats > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-orange-600 text-[9px] font-black text-white ring-2 ring-white">
+            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[8px] font-black text-white ring-2 ring-white dark:ring-gray-900 animate-bounce shadow-md">
               {unreadChats}
             </span>
           )}

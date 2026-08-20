@@ -121,7 +121,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Block render until session check resolves (prevents flash of protected content)
   if (!sessionChecked) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 text-gray-500 dark:text-gray-400">
         <div className="flex flex-col items-center gap-3">
           <svg className="animate-spin h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -137,67 +137,67 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
       {/* Sidebar - Desktop Push / Mobile Overlay */}
       <div 
-        className={`fixed inset-y-0 left-0 z-50 w-64 shrink-0 transform bg-white border-r border-gray-200 transition-all duration-300 ease-in-out sm:relative sm:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 shrink-0 transform bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ease-in-out sm:relative sm:translate-x-0 ${
           sidebarOpen ? "translate-x-0 shadow-2xl sm:shadow-none sm:w-64" : "-translate-x-full sm:w-0"
         } ${!sidebarOpen ? "sm:hidden" : "sm:block"}`}
       >
-        <div className="flex h-full flex-col overflow-y-auto overflow-x-hidden w-64">
+        <div className="flex h-full flex-col overflow-y-auto overflow-x-hidden w-64 bg-white dark:bg-gray-900">
           {/* Sidebar Header with Profile */}
-          <div className="flex flex-col items-center p-6 border-b border-gray-100 bg-gray-50/50">
+          <div className="flex flex-col items-center p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-950/20">
             {profile?.avatar ? (
-              <img src={profile.avatar} alt="Profile" className="h-20 w-20 rounded-full object-cover shadow-sm mb-3 border-2 border-white" />
+              <img src={profile.avatar} alt="Profile" className="h-20 w-20 rounded-full object-cover shadow-sm mb-3 border-2 border-white dark:border-gray-800" />
             ) : (
-              <div className="h-20 w-20 rounded-full bg-gradient-to-r from-orange-500 to-amber-600 flex items-center justify-center text-white text-2xl font-bold shadow-sm mb-3 border-2 border-white">
+              <div className="h-20 w-20 rounded-full bg-gradient-to-r from-orange-500 to-amber-600 flex items-center justify-center text-white text-2xl font-bold shadow-sm mb-3 border-2 border-white dark:border-gray-800">
                 {profile?.name ? profile.name[0].toUpperCase() : "👤"}
               </div>
             )}
-            <h2 className="text-lg font-bold text-gray-900 text-center leading-tight truncate w-full px-2">{profile?.name || "Welcome"}</h2>
-            <p className="text-xs text-gray-500 mt-1">Verified Student</p>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 text-center leading-tight truncate w-full px-2">{profile?.name || "Welcome"}</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Verified Student</p>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-1 px-3 py-4">
+          <nav className="flex-1 space-y-1 px-3 py-4 bg-white dark:bg-gray-900">
             <Link 
               href="/" 
               onClick={() => setSidebarOpen(false)}
-              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname === "/" ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`}
+              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname === "/" ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"}`}
             >
               🏠 Dashboard
             </Link>
             <Link 
               href="/profile" 
               onClick={() => setSidebarOpen(false)}
-              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/profile") ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`}
+              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/profile") ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"}`}
             >
               👤 My Profile
             </Link>
             <Link 
               href="/marketplace" 
               onClick={() => setSidebarOpen(false)}
-              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/marketplace") ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`}
+              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/marketplace") ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"}`}
             >
               🛒 Buy and Sell
             </Link>
             <Link
               href="/lost-found"
               onClick={() => setSidebarOpen(false)}
-              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/lost-found") ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`}
+              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/lost-found") ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"}`}
             >
               🔍 Lost and Found
             </Link>
             <Link 
               href="/ventures" 
-              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/ventures") ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`}
+              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/ventures") ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"}`}
             >
               🚀 Venture Hub
             </Link>
           </nav>
 
           {/* Logout */}
-          <div className="p-4 border-t border-gray-200 mt-auto">
+          <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 mt-auto">
             <button 
               onClick={handleLogout}
-              className="w-full flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="w-full flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
               Sign out
@@ -224,7 +224,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
           
           {/* Beautiful Platform Footer */}
-          <footer className="w-full bg-white border-t border-gray-150 px-6 py-10 mt-12 bg-gradient-to-b from-transparent to-gray-50/40">
+          <footer className="w-full bg-white dark:bg-gray-900 border-t border-gray-150 dark:border-gray-800 px-6 py-10 mt-12 bg-gradient-to-b from-transparent to-gray-50/40 dark:to-gray-950/40">
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
               {/* Brand and Info */}
               <div className="space-y-3 col-span-1 md:col-span-2">
@@ -238,49 +238,49 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </p>
                   </div>
                 </div>
-                <p className="text-xs font-semibold text-gray-500 leading-relaxed max-w-sm">
+                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 leading-relaxed max-w-sm">
                   The unified hub for IIM Lucknow. Rent or buy listings, submit startup pitches, coordinate late-night items, and connect with peer student founders securely.
                 </p>
               </div>
 
               {/* Quick Links */}
               <div className="space-y-3">
-                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Platform Map</h4>
-                <ul className="space-y-2 text-xs font-bold text-gray-600">
+                <h4 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Platform Map</h4>
+                <ul className="space-y-2 text-xs font-bold text-gray-600 dark:text-gray-300">
                   <li>
-                    <Link href="/" className="hover:text-orange-600 transition-colors">🏠 Dashboard</Link>
+                    <Link href="/" className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">🏠 Dashboard</Link>
                   </li>
                   <li>
-                    <Link href="/marketplace" className="hover:text-orange-600 transition-colors">🛒 Marketplace</Link>
+                    <Link href="/marketplace" className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">🛒 Marketplace</Link>
                   </li>
                   <li>
-                    <Link href="/lost-found" className="hover:text-orange-600 transition-colors">🔍 Lost & Found</Link>
+                    <Link href="/lost-found" className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">🔍 Lost & Found</Link>
                   </li>
                 </ul>
               </div>
 
               {/* Support & Tech Column */}
               <div className="space-y-3">
-                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Support & SLA</h4>
-                <ul className="space-y-2 text-xs font-bold text-gray-600">
+                <h4 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Support & SLA</h4>
+                <ul className="space-y-2 text-xs font-bold text-gray-600 dark:text-gray-300">
                   <li>
-                    <a href="mailto:support@iiml.ac.in" className="hover:text-orange-600 transition-colors">✉️ Helpdesk Email</a>
+                    <a href="mailto:support@iiml.ac.in" className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">✉️ Helpdesk Email</a>
                   </li>
                   <li>
-                    <span className="text-gray-500">📄 Version 1.4.2</span>
+                    <span className="text-gray-500 dark:text-gray-400">📄 Version 1.4.2</span>
                   </li>
                   <li>
-                    <span className="text-gray-450 text-[10px]">L-Campus Connect</span>
+                    <span className="text-gray-450 dark:text-gray-500 text-[10px]">L-Campus Connect</span>
                   </li>
                 </ul>
               </div>
             </div>
 
-            <div className="max-w-7xl mx-auto border-t border-gray-100 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-              <p className="text-[10px] font-semibold text-gray-400">
+            <div className="max-w-7xl mx-auto border-t border-gray-100 dark:border-gray-800 mt-8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+              <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500">
                 &copy; {new Date().getFullYear()} IIM Lucknow Connect. All rights reserved.
               </p>
-              <p className="text-[10px] font-bold text-gray-400">
+              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500">
                 Built with ❤️ by Student Founders for the IIML Ecosystem
               </p>
             </div>
