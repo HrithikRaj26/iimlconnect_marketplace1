@@ -157,7 +157,7 @@ export default function ReportDetailPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${typeLabel} Item`,
+          title: `${isLost ? 'Lost' : 'Found'} Item`,
           text: text,
           url: url,
         });
