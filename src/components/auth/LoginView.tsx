@@ -44,12 +44,23 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
   };
 
   const sendOtp = async () => {
-    if (phone.length < 10) {
-      alert("Please enter a valid phone number (e.g. +91...).");
+    let cleaned = phone.trim().replace(/[\s\-()]/g, "");
+    if (cleaned.length < 10) {
+      alert("Please enter a valid phone number.");
       return;
     }
+    
+    // Prepends +91 for 10-digit numbers or + if country code exists but lacks '+' prefix
+    if (cleaned.length === 10 && !cleaned.startsWith("+")) {
+      cleaned = "+91" + cleaned;
+    } else if (!cleaned.startsWith("+")) {
+      cleaned = "+" + cleaned;
+    }
+    
+    setPhone(cleaned);
+
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({ phone });
+    const { error } = await supabase.auth.signInWithOtp({ phone: cleaned });
     setLoading(false);
     if (error) {
       alert('Error sending OTP: ' + error.message);
