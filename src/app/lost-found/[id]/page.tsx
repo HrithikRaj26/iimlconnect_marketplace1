@@ -147,8 +147,10 @@ export default function ReportDetailPage() {
 
   const handleShare = async () => {
     const url = window.location.href;
-    const typeLabel = report?.type === 'lost' ? 'Lost' : 'Found';
-    const text = `${typeLabel}: ${report?.category} on IIML Connect!`;
+    const isLost = report?.type === 'lost';
+    const location = isLost ? report?.last_seen_location : report?.found_location;
+    const locationText = location ? ` at "${location}"` : '';
+    const text = `${isLost ? 'Lost' : 'Found'} "${report?.category}"${locationText} on IIML Campus. Check it out on IIML Connect!`;
     
     if (navigator.share) {
       try {
