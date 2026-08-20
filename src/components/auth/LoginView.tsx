@@ -9,7 +9,9 @@ import { Phone, Lock, Sparkles, LogIn, ArrowLeft } from "lucide-react";
 export default function LoginView({ onLogin }: { onLogin: (session: any) => void }) {
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
-  const [step, setStep] = useState<"phone" | "otp">("phone");
+  const [step, setStep] = useState<"phone" | "otp" | "name">("phone");
+  const [guestName, setGuestName] = useState("");
+  const [savedSession, setSavedSession] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -64,7 +66,43 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
     if (error) {
       alert('Invalid OTP: ' + error.message);
     } else {
-      onLogin(data.session);
+      const user = data.user;
+      const metadata = user?.user_metadata || {};
+      const hasName = metadata.full_name || metadata.name || metadata.given_name;
+      
+      if (!hasName) {
+        setSavedSession(data.session);
+        setStep("name");
+      } else {
+        onLogin(data.session);
+      }
+    }
+  };
+
+  const saveGuestName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!guestName.trim()) {
+      alert("Please enter your name.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          full_name: guestName.trim(),
+          is_guest: true,
+          batch: "External Guest"
+        }
+      });
+      if (error) throw error;
+      
+      // Fetch updated session details
+      const { data: { session } } = await supabase.auth.getSession();
+      onLogin(session || savedSession);
+    } catch (err: any) {
+      alert("Failed to save name: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -145,7 +183,7 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
           {/* Form container */}
           <div className="relative overflow-hidden min-h-[170px]">
             <AnimatePresence mode="wait">
-              {step === "phone" ? (
+              {step === "phone" && (
                 <motion.div
                   key="phone-step"
                   initial={{ opacity: 0, x: -20 }}
@@ -193,7 +231,9 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
                     )}
                   </button>
                 </motion.div>
-              ) : (
+              )}
+
+              {step === "otp" && (
                 <motion.form
                   key="otp-step"
                   onSubmit={verifyOtp}
@@ -250,6 +290,66 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
                   >
                     <ArrowLeft size={12} />
                     Change Phone Number
+                  </button>
+                </motion.form>
+              )}
+
+              {step === "name" && (
+                <motion.form
+                  key="name-step"
+                  onSubmit={saveGuestName}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-5"
+                >
+                  <div className="text-center pb-2">
+                    <p className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                      🎉 Verification successful!
+                    </p>
+                    <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+                      Please enter your name to complete guest registration.
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 pl-1">
+                      Your Full Name
+                    </label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 dark:text-gray-600">
+                        <Sparkles size={16} />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="John Doe"
+                        value={guestName}
+                        onChange={(e) => setGuestName(e.target.value)}
+                        required
+                        className="block w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-850/50 py-2.5 pl-10 pr-4 text-sm font-semibold outline-none focus:border-blue-500 focus:bg-white dark:focus:bg-gray-900 transition-all text-gray-800 dark:text-gray-100"
+                      />
+                    </div>
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    disabled={loading || !guestName.trim()} 
+                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold text-xs shadow-md shadow-blue-500/10 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1.5"
+                  >
+                    {loading ? (
+                      <span className="flex items-center gap-1.5">
+                        <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Completing Setup...
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5">
+                        <LogIn size={14} />
+                        Complete Setup & Enter
+                      </span>
+                    )}
                   </button>
                 </motion.form>
               )}
