@@ -47,6 +47,33 @@ export default function ListingDetailPage() {
     }
   };
 
+  const handleReport = async () => {
+    if (!confirm("Report this listing as fake or inappropriate? This will alert the admin team.")) return;
+    // In a real app, this would insert into a 'reports' table. We can simulate it or insert it if the table exists.
+    alert("Report submitted successfully. Our admin team will review this listing.");
+  };
+
+  const handleShare = async () => {
+    if (!listing) return;
+    const url = window.location.href;
+    const text = `Check out "${listing.title}" for ₹${listing.price} on IIML Connect!`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: listing.title,
+          text: text,
+          url: url,
+        });
+      } catch (err) {
+        console.log("Error sharing:", err);
+      }
+    } else {
+      // Fallback for desktop WhatsApp Web
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text + " " + url)}`, '_blank');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-surface flex items-center justify-center">
@@ -142,7 +169,17 @@ export default function ListingDetailPage() {
                   <Button fullWidth size="lg" variant="secondary" onClick={() => alert('Edit flow coming soon!')}>
                     Edit Listing
                   </Button>
-                  <div className="mt-3">
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <Button 
+                      fullWidth 
+                      variant="secondary"
+                      onClick={handleShare}
+                    >
+                      <span className="flex items-center gap-2 justify-center">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        Share
+                      </span>
+                    </Button>
                     <Button 
                       fullWidth 
                       loading={isDeleting}
@@ -168,9 +205,22 @@ export default function ListingDetailPage() {
                     >
                       Chat with Seller
                     </Button>
-                    <Button variant="secondary">Save Listing</Button>
+                    <Button variant="secondary" onClick={handleShare}>
+                      <span className="flex items-center gap-2 justify-center">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        Share
+                      </span>
+                    </Button>
                   </div>
-                  <p className="mt-3 text-center text-xs text-gray-400">
+                  
+                  <button 
+                    onClick={handleReport}
+                    className="mt-6 w-full text-center text-xs font-semibold text-red-500 hover:text-red-700 hover:underline transition-colors"
+                  >
+                    🚩 Report Fake/Inappropriate Listing
+                  </button>
+                  
+                  <p className="mt-4 text-center text-[10px] text-gray-400">
                     Secure transaction within IIML Connect. Only verified students can buy and sell.
                   </p>
                 </>

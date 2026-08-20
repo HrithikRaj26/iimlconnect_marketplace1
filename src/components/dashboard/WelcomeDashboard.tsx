@@ -49,10 +49,10 @@ export default function WelcomeDashboard({ session }: { session: any }) {
       onClick={onClick}
       className="flex flex-col items-center justify-start group cursor-pointer w-24 mx-2"
     >
-      <div className={`flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-sm border border-gray-100 group-hover:shadow-md group-hover:-translate-y-1 transition-all duration-200 mb-3 ${colorClass}`}>
+      <div className={`flex items-center justify-center w-14 h-14 rounded-2xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 group-hover:shadow-md group-hover:-translate-y-1 transition-all duration-200 mb-3 ${colorClass}`}>
         <Icon strokeWidth={1.5} size={28} />
       </div>
-      <span className="text-[13px] font-medium text-gray-600 text-center leading-tight mb-1 group-hover:text-gray-900">
+      <span className="text-[13px] font-medium text-gray-600 dark:text-gray-300 text-center leading-tight mb-1 group-hover:text-gray-900 dark:group-hover:text-white">
         {label}
       </span>
       {isNew && (
@@ -64,10 +64,10 @@ export default function WelcomeDashboard({ session }: { session: any }) {
   );
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col items-center pt-8 md:pt-16 px-4">
+    <div className="min-h-screen bg-[#FAFAFA] dark:bg-gray-950 flex flex-col items-center pt-8 md:pt-16 px-4 transition-colors">
       <GlobalSearchBar firstName={firstName} />
 
-      <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row items-stretch justify-center bg-white rounded-3xl p-8 shadow-sm border border-gray-100 gap-8 md:gap-0">
+      <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row items-stretch justify-center bg-white dark:bg-gray-900 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-800 gap-8 md:gap-0 transition-colors">
         
         {/* MARKETPLACE SUITE */}
         <div className="flex-1 flex flex-col items-center border-b md:border-b-0 md:border-r border-gray-100 pb-8 md:pb-0 relative">

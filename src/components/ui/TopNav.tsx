@@ -127,7 +127,7 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
     key === active ? "text-brand" : "text-gray-500 hover:text-gray-800";
 
   return (
-    <header className="flex h-16 w-full items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 shrink-0">
+    <header className="flex h-16 w-full items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 md:px-6 shrink-0">
       <div className="flex items-center gap-4">
         {onMenuClick && (
           <button onClick={onMenuClick} className="text-gray-500 hover:text-gray-900 focus:outline-none">

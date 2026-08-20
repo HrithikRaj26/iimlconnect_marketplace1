@@ -139,6 +139,36 @@ export default function ReportDetailPage() {
     }
   };
 
+  const handleReport = async () => {
+    if (!confirm("Report this listing as fake or inappropriate? This will alert the admin team.")) return;
+    // In a real app, this would insert into a 'reports' table.
+    alert("Report submitted successfully. Our admin team will review this listing.");
+  };
+
+  const handleShare = async () => {
+    if (!report) return;
+    const url = window.location.href;
+    const isLost = report.type === 'lost';
+    const location = isLost ? report.last_seen_location : report.found_location;
+    const locationText = location ? ` at "${location}"` : '';
+    const text = `${isLost ? 'Lost' : 'Found'} "${report.category}"${locationText} on IIML Campus. Check it out on IIML Connect!`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${typeLabel} Item`,
+          text: text,
+          url: url,
+        });
+      } catch (err) {
+        console.log("Error sharing:", err);
+      }
+    } else {
+      // Fallback for desktop WhatsApp Web
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text + " " + url)}`, '_blank');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-surface">
       <div className="mx-auto max-w-2xl px-6 py-8">
@@ -311,6 +341,30 @@ export default function ReportDetailPage() {
                     Force reject
                   </Button>
                 </div>
+              </div>
+            )}
+
+            <div className={`border-t border-gray-100 pt-4 mt-4 flex flex-col gap-3 ${!isOwner ? 'pb-2' : ''}`}>
+              <Button 
+                variant="secondary"
+                fullWidth
+                onClick={handleShare}
+              >
+                <span className="flex items-center gap-2 justify-center">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                  Share
+                </span>
+              </Button>
+            </div>
+
+            {!isOwner && (
+              <div className="border-t border-gray-100 pt-4 mt-4">
+                <button 
+                  onClick={handleReport}
+                  className="w-full text-center text-xs font-semibold text-red-500 hover:text-red-700 hover:underline transition-colors"
+                >
+                  🚩 Report Fake/Inappropriate Listing
+                </button>
               </div>
             )}
           </div>

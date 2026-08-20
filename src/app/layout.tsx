@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ui/ThemeProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://iiml-connect.vercel.app'),
   title: "IIM L Connect - MVP",
   description: "A verified-identity ecosystem for the IIM Lucknow community.",
 };
@@ -28,8 +29,8 @@ export default function RootLayout({
                   var stored = localStorage.getItem('iiml-theme');
                   if (stored === 'dark') {
                     document.documentElement.classList.add('dark');
-                  } else if (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
                   }
                 } catch(e) {}
               })();
