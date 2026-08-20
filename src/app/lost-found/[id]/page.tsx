@@ -149,6 +149,7 @@ export default function ReportDetailPage() {
     if (!report) return;
     const url = window.location.href;
     const isLost = report.type === 'lost';
+    const typeLabel = isLost ? 'Lost' : 'Found';
     const location = isLost ? report.last_seen_location : report.found_location;
     const locationText = location ? ` at "${location}"` : '';
     const text = `${isLost ? 'Lost' : 'Found'} "${report.category}"${locationText} on IIML Campus. Check it out on IIML Connect!`;

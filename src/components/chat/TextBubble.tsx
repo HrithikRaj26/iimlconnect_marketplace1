@@ -11,6 +11,7 @@ interface TextBubbleProps {
 
 export function TextBubble({ message, time, onRetry }: TextBubbleProps) {
   const isMine = message.authorId === CURRENT_USER_ID;
+  const msgText = message.text || "";
 
   return (
     <div className={["flex", isMine ? "justify-end" : "justify-start"].join(" ")}>
@@ -23,7 +24,27 @@ export function TextBubble({ message, time, onRetry }: TextBubbleProps) {
               : "rounded-bl-md border border-gray-200 bg-white text-gray-800",
           ].join(" ")}
         >
-          {message.text}
+          {msgText.startsWith("data:image/") || (msgText.startsWith("http") && (msgText.match(/\.(jpeg|jpg|gif|png|webp)/i))) ? (
+            <div className="overflow-hidden rounded-lg max-w-full">
+              <img src={msgText} alt="Attachment" className="max-h-60 max-w-full rounded-lg object-cover" />
+            </div>
+          ) : msgText.startsWith("data:") ? (
+            <div className="flex items-center gap-2 py-1">
+              <span className="text-2xl">📁</span>
+              <div className="flex flex-col">
+                <span className="text-xs font-bold truncate max-w-[150px]">Attachment File</span>
+                <a
+                  href={msgText}
+                  download="attachment"
+                  className={["text-xs underline font-black", isMine ? "text-blue-100 hover:text-white" : "text-brand hover:text-brand-dark"].join(" ")}
+                >
+                  Download
+                </a>
+              </div>
+            </div>
+          ) : (
+            msgText
+          )}
         </div>
         <div
           className={[

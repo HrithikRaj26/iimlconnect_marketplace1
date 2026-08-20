@@ -48,6 +48,34 @@ function ChatWorkspaceWrapper() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserProfile, setCurrentUserProfile] = useState<{ name: string; batch: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!currentUserId) return;
+    
+    const presenceChannel = supabase.channel('global-presence', {
+      config: {
+        presence: {
+          key: currentUserId,
+        },
+      },
+    });
+
+    presenceChannel
+      .on('presence', { event: 'sync' }, () => {
+        const state = presenceChannel.presenceState();
+        setOnlineUserIds(Object.keys(state));
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await presenceChannel.track({ online_at: new Date().toISOString() });
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(presenceChannel);
+    };
+  }, [currentUserId]);
 
   // Load user session
   useEffect(() => {
@@ -232,9 +260,22 @@ function ChatWorkspaceWrapper() {
     initRedirectChat();
   }, [currentUserId, currentUserProfile, ownerId, ownerName, ventureName, logoUrl, askingPrice, listingId, listingType, initialOfferAmount, initialOfferNote, loading, conversations]);
 
+  const conversationsWithPresence = useMemo(() => {
+    return conversations.map((c) => {
+      const isOnline = onlineUserIds.includes(c.participant.id) || c.participant.id === currentUserId;
+      return {
+        ...c,
+        participant: {
+          ...c.participant,
+          online: isOnline
+        }
+      };
+    });
+  }, [conversations, onlineUserIds, currentUserId]);
+
   const activeConversation = useMemo(() => {
-    return conversations.find((c) => c.id === activeId) || conversations[0] || null;
-  }, [activeId, conversations]);
+    return conversationsWithPresence.find((c) => c.id === activeId) || conversationsWithPresence[0] || null;
+  }, [activeId, conversationsWithPresence]);
 
   if (loading) {
     return (
@@ -265,7 +306,7 @@ function ChatWorkspaceWrapper() {
     <ChatWorkspace
       key={activeId}
       initialConversation={activeConversation}
-      conversations={conversations}
+      conversations={conversationsWithPresence}
       activeId={activeId || activeConversation.id}
       onSelect={setActiveId}
       offerModalOpen={offerModalOpen}
@@ -316,7 +357,10 @@ function ChatWorkspace({
       {/* Active conversation */}
       <div className="flex min-w-0 flex-1 flex-col bg-gray-50 dark:bg-gray-900">
         <ChatHeader
-          participant={conversation.participant}
+          participant={{
+            ...conversation.participant,
+            online: conversations.find((c) => c.id === activeId)?.participant.online || false
+          }}
           listing={conversation.listing}
           transaction={transaction}
           onMakeOffer={() => setOfferModalOpen(true)}

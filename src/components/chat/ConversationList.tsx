@@ -67,11 +67,11 @@ export function ConversationList({ conversations, activeId, onSelect }: Conversa
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between">
-                    <p className="truncate text-sm font-semibold text-gray-900">{c.participant.name}</p>
+                    <p className={`truncate text-sm ${c.unreadCount > 0 ? "font-extrabold text-gray-950 dark:text-white" : "font-semibold text-gray-900 dark:text-gray-200"}`}>{c.participant.name}</p>
                     <span className="shrink-0 text-[11px] text-gray-400">{c.lastMessageAt}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <p className="truncate text-xs text-gray-500">{c.lastMessagePreview}</p>
+                    <p className={`truncate text-xs ${c.unreadCount > 0 ? "font-bold text-gray-950 dark:text-white" : "text-gray-500 dark:text-gray-400"}`}>{c.lastMessagePreview}</p>
                     {c.unreadCount > 0 && (
                       <span className="ml-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand px-1.5 text-[10px] font-bold text-white">
                         {c.unreadCount}

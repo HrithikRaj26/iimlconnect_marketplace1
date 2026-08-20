@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 
 interface ChatInputProps {
   onSend: (text: string) => void;
@@ -9,6 +9,7 @@ interface ChatInputProps {
 
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [value, setValue] = useState("");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const submit = () => {
     const trimmed = value.trim();
@@ -17,13 +18,36 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     setValue("");
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string" && !disabled) {
+        onSend(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+    // Clear input
+    e.target.value = "";
+  };
+
   return (
     <div className="flex items-center gap-2 border-t border-gray-100 bg-white px-4 py-3">
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        style={{ display: "none" }}
+        accept="image/*,application/pdf"
+      />
       <button
         type="button"
-        aria-label="Attach image (coming soon)"
-        title="Image attachment coming soon"
-        className="flex h-9 w-9 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100"
+        onClick={() => !disabled && fileInputRef.current?.click()}
+        disabled={disabled}
+        aria-label="Attach file"
+        title="Attach file or image"
+        className="flex h-9 w-9 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 disabled:opacity-50"
       >
         <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
           <path

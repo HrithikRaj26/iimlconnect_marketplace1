@@ -9,6 +9,46 @@ import { TopNav } from "@/components/ui/TopNav";
 import { checkAndUpdateLoginStreak } from "@/services/streakService";
 import { motion, AnimatePresence } from "framer-motion";
 
+function playWelcomeSound() {
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    
+    // Play first note (chime 1)
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+    gain1.gain.setValueAtTime(0, ctx.currentTime);
+    gain1.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 0.05);
+    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    
+    osc1.start(ctx.currentTime);
+    osc1.stop(ctx.currentTime + 0.36);
+    
+    // Play second note slightly later (chime 2)
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(880.00, ctx.currentTime + 0.12); // A5 (higher)
+    gain2.gain.setValueAtTime(0, ctx.currentTime + 0.12);
+    gain2.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.17);
+    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+    
+    osc2.start(ctx.currentTime + 0.12);
+    osc2.stop(ctx.currentTime + 0.51);
+  } catch (e) {
+    console.error("Audio synthesis failed:", e);
+  }
+}
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profile, setProfile] = useState<{ name: string; avatar: string } | null>(null);
@@ -79,6 +119,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         updateProfile(session);
+        const welcomeKey = "iiml-welcome-chime-played";
+        const hasPlayed = sessionStorage.getItem(welcomeKey);
+        if (!hasPlayed) {
+          playWelcomeSound();
+          sessionStorage.setItem(welcomeKey, "true");
+        }
         // Fire-and-forget: update daily login streak
         checkAndUpdateLoginStreak(session.user.id);
       } else {
@@ -91,8 +137,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) updateProfile(session);
-      else {
+      if (session) {
+        updateProfile(session);
+        const welcomeKey = "iiml-welcome-chime-played";
+        const hasPlayed = sessionStorage.getItem(welcomeKey);
+        if (!hasPlayed) {
+          playWelcomeSound();
+          sessionStorage.setItem(welcomeKey, "true");
+        }
+      } else {
         setProfile(null);
         router.replace('/');
       }
