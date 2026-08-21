@@ -104,6 +104,14 @@ export interface IChatService {
     listingImage: string;
     listingAskingPrice: number;
   }): Promise<Conversation>;
+  createOrGetDmConversation(params: {
+    targetUserId: string;
+    targetUserName: string;
+    targetUserBatch: string;
+    currentUserId: string;
+    currentUserName: string;
+    currentUserBatch: string;
+  }): Promise<Conversation>;
   markAsRead(conversationId: string): Promise<void>;
   editMessage(messageId: string, newText: string): Promise<void>;
   deleteMessage(messageId: string): Promise<void>;
@@ -482,6 +490,62 @@ class SupabaseChatService implements IChatService {
     const found = conversationsList.find(c => c.id === params.id);
     if (found) return found;
     throw new Error("Failed to initialize conversation channel.");
+  }
+
+  async createOrGetDmConversation(params: {
+    targetUserId: string;
+    targetUserName: string;
+    targetUserBatch: string;
+    currentUserId: string;
+    currentUserName: string;
+    currentUserBatch: string;
+  }): Promise<Conversation> {
+    // Canonical ID: sort the two user IDs so dm_A_B === dm_B_A
+    const [u1, u2] = [params.currentUserId, params.targetUserId].sort();
+    const dmId = `dm_${u1}_${u2}`;
+
+    // Check if already exists
+    const { data: existing } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("id", dmId)
+      .single();
+
+    if (existing) {
+      // Un-suppress if previously deleted
+      removeFromDeletedMap(dmId);
+      const list = await this.getConversations();
+      const found = list.find((c) => c.id === dmId);
+      if (found) return found;
+    }
+
+    // Create new DM conversation
+    const nowStr = new Date().toISOString();
+    const { error } = await supabase.from("conversations").insert({
+      id: dmId,
+      created_at: nowStr,
+      buyer_id: params.currentUserId,
+      buyer_name: params.currentUserName,
+      buyer_batch: params.currentUserBatch,
+      seller_id: params.targetUserId,
+      seller_name: params.targetUserName,
+      seller_batch: params.targetUserBatch,
+      listing_id: dmId,
+      listing_type: "item",
+      listing_title: "Direct Message",
+      listing_image: "",
+      listing_asking_price: 0,
+      status: "negotiating",
+      last_message_preview: "Say hi! 👋",
+      last_message_at: nowStr,
+    });
+
+    if (error) throw error;
+
+    const list = await this.getConversations();
+    const found = list.find((c) => c.id === dmId);
+    if (found) return found;
+    throw new Error("Failed to create DM conversation.");
   }
 
   private async ensureConversationExists(conversationId: string): Promise<void> {

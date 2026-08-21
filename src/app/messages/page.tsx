@@ -14,6 +14,7 @@ import { chatService } from "@/services/chatService";
 import { supabase } from "@/lib/supabase";
 import { Conversation } from "@/types";
 import { useToast } from "@/context/ToastContext";
+import { NewChatModal, PlatformUser } from "@/components/chat/NewChatModal";
 
 export default function MessagesPage() {
   return (
@@ -48,6 +49,7 @@ function ChatWorkspaceWrapper() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [offerModalOpen, setOfferModalOpen] = useState(false);
+  const [newChatOpen, setNewChatOpen] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentUserProfile, setCurrentUserProfile] = useState<{ name: string; batch: string } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -303,6 +305,25 @@ function ChatWorkspaceWrapper() {
     return conversationsWithPresence.find((c) => c.id === activeId) || conversationsWithPresence[0] || null;
   }, [activeId, conversationsWithPresence]);
 
+  // Start a direct-message conversation from the new chat modal
+  const handleStartDm = async (user: PlatformUser) => {
+    if (!currentUserId || !currentUserProfile) return;
+    try {
+      const conv = await chatService.createOrGetDmConversation({
+        targetUserId: user.id,
+        targetUserName: user.name,
+        targetUserBatch: user.batch,
+        currentUserId,
+        currentUserName: currentUserProfile.name,
+        currentUserBatch: currentUserProfile.batch,
+      });
+      await loadConversations();
+      setActiveId(conv.id);
+    } catch (err) {
+      console.error("Failed to start DM:", err);
+    }
+  };
+
   const handleDeleteConversation = async (conversationId: string) => {
     confirmAction(
       "Are you sure you want to delete this entire chat thread? This action cannot be undone.",
@@ -332,29 +353,64 @@ function ChatWorkspaceWrapper() {
 
   if (conversations.length === 0 && !activeId) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-8 text-center">
-        <span className="text-5xl">💬</span>
-        <h3 className="mt-4 text-base font-bold text-gray-900 dark:text-gray-100">No Conversations Yet</h3>
-        <p className="mt-2 text-xs font-semibold text-gray-400 max-w-xs leading-relaxed">
-          Start a conversation by clicking "Contact Founder" on any venture page or "Chat with Seller" on listing details!
-        </p>
-      </div>
+      <>
+        <div className="flex flex-1 flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-8 text-center gap-4">
+          <span className="text-5xl">💬</span>
+          <div>
+            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">No Conversations Yet</h3>
+            <p className="mt-2 text-xs font-semibold text-gray-400 max-w-xs leading-relaxed">
+              Search for anyone on IIML Connect and start a conversation!
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setNewChatOpen(true)}
+            className="flex items-center gap-2 rounded-xl bg-brand px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-brand/20 hover:bg-brand/90 active:scale-95 transition-all"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Start New Chat
+          </button>
+        </div>
+        {currentUserId && currentUserProfile && (
+          <NewChatModal
+            open={newChatOpen}
+            onClose={() => setNewChatOpen(false)}
+            currentUserId={currentUserId}
+            currentUserProfile={currentUserProfile}
+            onStartChat={handleStartDm}
+          />
+        )}
+      </>
     );
   }
 
   if (!activeConversation) return null;
 
   return (
-    <ChatWorkspace
-      key={activeId}
-      initialConversation={activeConversation}
-      conversations={conversationsWithPresence}
-      activeId={activeId || activeConversation.id}
-      onSelect={setActiveId}
-      offerModalOpen={offerModalOpen}
-      setOfferModalOpen={setOfferModalOpen}
-      onDeleteConversation={handleDeleteConversation}
-    />
+    <>
+      <ChatWorkspace
+        key={activeId}
+        initialConversation={activeConversation}
+        conversations={conversationsWithPresence}
+        activeId={activeId || activeConversation.id}
+        onSelect={setActiveId}
+        offerModalOpen={offerModalOpen}
+        setOfferModalOpen={setOfferModalOpen}
+        onDeleteConversation={handleDeleteConversation}
+        onNewChat={() => setNewChatOpen(true)}
+      />
+      {currentUserId && currentUserProfile && (
+        <NewChatModal
+          open={newChatOpen}
+          onClose={() => setNewChatOpen(false)}
+          currentUserId={currentUserId}
+          currentUserProfile={currentUserProfile}
+          onStartChat={handleStartDm}
+        />
+      )}
+    </>
   );
 }
 
@@ -366,6 +422,7 @@ interface ChatWorkspaceProps {
   offerModalOpen: boolean;
   setOfferModalOpen: (open: boolean) => void;
   onDeleteConversation: (id: string) => void;
+  onNewChat: () => void;
 }
 
 function ChatWorkspace({
@@ -376,6 +433,7 @@ function ChatWorkspace({
   offerModalOpen,
   setOfferModalOpen,
   onDeleteConversation,
+  onNewChat,
 }: ChatWorkspaceProps) {
   const {
     conversation,
@@ -414,6 +472,7 @@ function ChatWorkspace({
             onSelect(id);
             setMobileView("thread");
           }}
+          onNewChat={onNewChat}
         />
       </div>
 

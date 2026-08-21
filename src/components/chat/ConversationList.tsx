@@ -5,6 +5,7 @@ interface ConversationListProps {
   conversations: Conversation[];
   activeId: string;
   onSelect: (id: string) => void;
+  onNewChat: () => void;
 }
 
 function Avatar({ color, name, size = "md" }: { color: string; name: string; size?: "sm" | "md" | "lg" }) {
@@ -24,7 +25,7 @@ function Avatar({ color, name, size = "md" }: { color: string; name: string; siz
   );
 }
 
-export function ConversationList({ conversations, activeId, onSelect }: ConversationListProps) {
+export function ConversationList({ conversations, activeId, onSelect, onNewChat }: ConversationListProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "unread" | "active">("all");
 
@@ -67,8 +68,10 @@ export function ConversationList({ conversations, activeId, onSelect }: Conversa
         </div>
         <button
           type="button"
+          onClick={onNewChat}
           className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-brand-light hover:text-brand transition-all text-xs font-bold"
-          title="New conversation"
+          title="Start a new conversation"
+          aria-label="Start a new conversation"
         >
           ✏️
         </button>
