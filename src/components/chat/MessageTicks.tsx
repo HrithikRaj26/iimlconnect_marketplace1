@@ -14,7 +14,7 @@ export function MessageTicks({ status }: { status: MessageStatus }) {
 
   return (
     <span
-      className={["inline-flex items-center", isRead ? "text-sky-200" : "text-white/70"].join(" ")}
+      className={["inline-flex items-center", isRead ? "text-sky-400" : "text-white/50"].join(" ")}
       aria-label={status}
     >
       <svg viewBox="0 0 20 16" fill="none" className="h-3.5 w-4">
