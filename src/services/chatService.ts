@@ -26,6 +26,9 @@ export interface IChatService {
     listingAskingPrice: number;
   }): Promise<Conversation>;
   markAsRead(conversationId: string): Promise<void>;
+  editMessage(messageId: string, newText: string): Promise<void>;
+  deleteMessage(messageId: string): Promise<void>;
+  deleteConversation(conversationId: string): Promise<void>;
 }
 
 class SupabaseChatService implements IChatService {
@@ -469,6 +472,38 @@ class SupabaseChatService implements IChatService {
     } catch (e) {
       console.warn("Could not mark messages as read (is_read column may be missing):", e);
     }
+  }
+
+  async editMessage(messageId: string, newText: string): Promise<void> {
+    const { error } = await supabase
+      .from("messages")
+      .update({ text_content: newText })
+      .eq("id", messageId);
+    if (error) throw error;
+  }
+
+  async deleteMessage(messageId: string): Promise<void> {
+    const { error } = await supabase
+      .from("messages")
+      .delete()
+      .eq("id", messageId);
+    if (error) throw error;
+  }
+
+  async deleteConversation(conversationId: string): Promise<void> {
+    // Delete all messages in this conversation first (safety backup)
+    const { error: msgErr } = await supabase
+      .from("messages")
+      .delete()
+      .eq("conversation_id", conversationId);
+    if (msgErr) console.warn("Failed to delete messages in conversation:", msgErr);
+
+    // Delete the conversation row
+    const { error: convErr } = await supabase
+      .from("conversations")
+      .delete()
+      .eq("id", conversationId);
+    if (convErr) throw convErr;
   }
 }
 

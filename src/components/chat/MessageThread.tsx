@@ -13,6 +13,8 @@ interface MessageThreadProps {
   onAcceptOffer: (id: string) => void;
   onDeclineOffer: (id: string) => void;
   onCounterOffer: (id: string) => void;
+  onEditMessage?: (id: string, text: string) => void;
+  onDeleteMessage?: (id: string) => void;
 }
 
 export function MessageThread({
@@ -21,6 +23,8 @@ export function MessageThread({
   onAcceptOffer,
   onDeclineOffer,
   onCounterOffer,
+  onEditMessage,
+  onDeleteMessage,
 }: MessageThreadProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const dealClosed =
@@ -74,7 +78,14 @@ export function MessageThread({
           );
         }
         return (
-          <TextBubble key={message.id} message={message} time={time} onRetry={onRetryMessage} />
+          <TextBubble 
+            key={message.id} 
+            message={message} 
+            time={time} 
+            onRetry={onRetryMessage} 
+            onEdit={onEditMessage}
+            onDelete={onDeleteMessage}
+          />
         );
       })}
 

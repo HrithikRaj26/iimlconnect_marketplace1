@@ -22,6 +22,8 @@ interface UseConversationResult {
     action: "accept" | "decline"
   ) => Promise<void>;
   transaction: Transaction;
+  editMessage: (messageId: string, newText: string) => Promise<void>;
+  deleteMessage: (messageId: string) => Promise<void>;
 }
 
 export function useConversation(initial: Conversation): UseConversationResult {
@@ -171,6 +173,40 @@ export function useConversation(initial: Conversation): UseConversationResult {
     [conversation.id, conversation.messages, setOfferStatus]
   );
 
+  const editMessage = useCallback(
+    async (messageId: string, newText: string) => {
+      setConversation((prev) => ({
+        ...prev,
+        messages: prev.messages.map((m) =>
+          m.id === messageId ? { ...m, text: newText } : m
+        ),
+      }));
+
+      try {
+        await chatService.editMessage(messageId, newText);
+      } catch (err) {
+        console.error("Failed to edit message:", err);
+      }
+    },
+    []
+  );
+
+  const deleteMessage = useCallback(
+    async (messageId: string) => {
+      setConversation((prev) => ({
+        ...prev,
+        messages: prev.messages.filter((m) => m.id !== messageId),
+      }));
+
+      try {
+        await chatService.deleteMessage(messageId);
+      } catch (err) {
+        console.error("Failed to delete message:", err);
+      }
+    },
+    []
+  );
+
   const transaction = useMemo(() => conversation.transaction, [conversation.transaction]);
 
   return {
@@ -180,5 +216,7 @@ export function useConversation(initial: Conversation): UseConversationResult {
     sendOffer,
     respondToOffer,
     transaction,
+    editMessage,
+    deleteMessage,
   };
 }

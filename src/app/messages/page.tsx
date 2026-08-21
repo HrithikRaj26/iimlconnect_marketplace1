@@ -277,6 +277,24 @@ function ChatWorkspaceWrapper() {
     return conversationsWithPresence.find((c) => c.id === activeId) || conversationsWithPresence[0] || null;
   }, [activeId, conversationsWithPresence]);
 
+  const handleDeleteConversation = async (conversationId: string) => {
+    if (confirm("Are you sure you want to delete this entire chat thread? This action cannot be undone.")) {
+      try {
+        await chatService.deleteConversation(conversationId);
+        // Clear active selection and reload
+        setActiveId(null);
+        const remaining = conversations.filter(c => c.id !== conversationId);
+        setConversations(remaining);
+        if (remaining.length > 0) {
+          setActiveId(remaining[0].id);
+        }
+      } catch (err) {
+        console.error("Failed to delete conversation:", err);
+        alert("Failed to delete chat thread.");
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-1 items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-500">
@@ -311,6 +329,7 @@ function ChatWorkspaceWrapper() {
       onSelect={setActiveId}
       offerModalOpen={offerModalOpen}
       setOfferModalOpen={setOfferModalOpen}
+      onDeleteConversation={handleDeleteConversation}
     />
   );
 }
@@ -322,6 +341,7 @@ interface ChatWorkspaceProps {
   onSelect: (id: string) => void;
   offerModalOpen: boolean;
   setOfferModalOpen: (open: boolean) => void;
+  onDeleteConversation: (id: string) => void;
 }
 
 function ChatWorkspace({
@@ -331,6 +351,7 @@ function ChatWorkspace({
   onSelect,
   offerModalOpen,
   setOfferModalOpen,
+  onDeleteConversation,
 }: ChatWorkspaceProps) {
   const {
     conversation,
@@ -339,6 +360,8 @@ function ChatWorkspace({
     sendOffer,
     respondToOffer,
     transaction,
+    editMessage,
+    deleteMessage,
   } = useConversation(initialConversation);
 
   const dealClosed = transaction.status === "agreed" || transaction.status === "completed";
@@ -364,6 +387,7 @@ function ChatWorkspace({
           listing={conversation.listing}
           transaction={transaction}
           onMakeOffer={() => setOfferModalOpen(true)}
+          onDeleteThread={() => onDeleteConversation(conversation.id)}
         />
 
         <MessageThread
@@ -372,6 +396,8 @@ function ChatWorkspace({
           onAcceptOffer={(id) => respondToOffer(id, "accept")}
           onDeclineOffer={(id) => respondToOffer(id, "decline")}
           onCounterOffer={() => setOfferModalOpen(true)}
+          onEditMessage={editMessage}
+          onDeleteMessage={deleteMessage}
         />
 
         <ChatInput onSend={sendText} disabled={dealClosed} />

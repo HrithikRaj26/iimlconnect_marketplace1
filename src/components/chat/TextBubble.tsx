@@ -7,25 +7,100 @@ interface TextBubbleProps {
   message: ChatMessage;
   time: string;
   onRetry: (id: string) => void;
+  onEdit?: (id: string, text: string) => void;
+  onDelete?: (id: string) => void;
 }
 
-export function TextBubble({ message, time, onRetry }: TextBubbleProps) {
+export function TextBubble({ message, time, onRetry, onEdit, onDelete }: TextBubbleProps) {
   const isMine = message.authorId === CURRENT_USER_ID;
   const msgText = message.text || "";
   const [showPreview, setShowPreview] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(msgText);
+
+  // Sync state if text changes (e.g. edited by another client)
+  React.useEffect(() => {
+    setEditText(msgText);
+  }, [msgText]);
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editText.trim()) return;
+    if (onEdit) {
+      onEdit(message.id, editText.trim());
+    }
+    setIsEditing(false);
+  };
+
+  const handleDeleteClick = () => {
+    if (confirm("Are you sure you want to delete this message?")) {
+      if (onDelete) {
+        onDelete(message.id);
+      }
+    }
+  };
 
   return (
-    <div className={["flex", isMine ? "justify-end" : "justify-start"].join(" ")}>
+    <div className={["flex group items-center gap-2", isMine ? "justify-end" : "justify-start"].join(" ")}>
+      {isMine && !isEditing && message.status !== "failed" && (
+        <div className="flex gap-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 shrink-0">
+          {message.kind === "text" && !msgText.startsWith("data:") && (
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="text-[10px] font-extrabold text-gray-400 dark:text-gray-500 hover:text-blue-500 transition-colors cursor-pointer"
+            >
+              Edit
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleDeleteClick}
+            className="text-[10px] font-extrabold text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors cursor-pointer"
+          >
+            Delete
+          </button>
+        </div>
+      )}
+
       <div className={["max-w-[75%]", isMine ? "items-end" : "items-start"].join(" ")}>
         <div
           className={[
-            "rounded-2xl px-4 py-2.5 text-sm",
+            "rounded-2xl px-4 py-2.5 text-sm min-w-[140px]",
             isMine
               ? "rounded-br-md bg-brand text-white"
               : "rounded-bl-md border border-gray-200 bg-white text-gray-800",
           ].join(" ")}
         >
-          {msgText.startsWith("data:image/") || (msgText.startsWith("http") && (msgText.match(/\.(jpeg|jpg|gif|png|webp)/i))) ? (
+          {isEditing ? (
+            <form onSubmit={handleEditSubmit} className="flex flex-col gap-1.5 min-w-[150px] w-full">
+              <input
+                type="text"
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                className="w-full bg-white/10 text-white rounded-lg px-2.5 py-1.5 outline-none text-xs border border-white/20 focus:border-white/40 font-medium"
+                autoFocus
+              />
+              <div className="flex gap-2 justify-end text-[10px]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditText(msgText);
+                    setIsEditing(false);
+                  }}
+                  className="text-white/60 hover:text-white font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="text-sky-300 font-extrabold hover:text-white"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
+          ) : msgText.startsWith("data:image/") || (msgText.startsWith("http") && (msgText.match(/\.(jpeg|jpg|gif|png|webp)/i))) ? (
             <div className="overflow-hidden rounded-lg max-w-full cursor-zoom-in" onClick={() => setShowPreview(true)}>
               <img src={msgText} alt="Attachment" className="max-h-60 max-w-full rounded-lg object-cover hover:brightness-95 transition-all" />
             </div>
