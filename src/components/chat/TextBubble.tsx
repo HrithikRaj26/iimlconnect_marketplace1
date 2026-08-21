@@ -64,24 +64,24 @@ export function TextBubble({ message, time, onRetry, onEdit, onDelete }: TextBub
   };
 
   return (
-    <div className={["flex group items-center gap-2", isMine ? "justify-end" : "justify-start"].join(" ")}>
+    <div className={["flex group items-end gap-2", isMine ? "justify-end" : "justify-start"].join(" ")}>
       {isMine && !isEditing && message.status !== "failed" && (
-        <div className="flex gap-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 shrink-0">
+        <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-150 shrink-0 items-center mb-1">
           {message.kind === "text" && !msgText.startsWith("data:") && (
             <button
               type="button"
               onClick={() => setIsEditing(true)}
-              className="text-[10px] font-extrabold text-gray-400 dark:text-gray-500 hover:text-blue-500 transition-colors cursor-pointer"
+              className="flex items-center gap-0.5 rounded-lg px-2 py-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-500 transition-all cursor-pointer"
             >
-              Edit
+              ✏️ Edit
             </button>
           )}
           <button
             type="button"
             onClick={handleDeleteClick}
-            className="text-[10px] font-extrabold text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors cursor-pointer"
+            className="flex items-center gap-0.5 rounded-lg px-2 py-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 transition-all cursor-pointer"
           >
-            Delete
+            🗑️ Delete
           </button>
         </div>
       )}
@@ -91,8 +91,8 @@ export function TextBubble({ message, time, onRetry, onEdit, onDelete }: TextBub
           className={[
             "rounded-2xl px-4 py-2.5 text-sm min-w-[140px]",
             isMine
-              ? "rounded-br-md bg-brand text-white"
-              : "rounded-bl-md border border-gray-200 bg-white text-gray-800",
+              ? "rounded-br-sm bg-brand text-white shadow-md shadow-brand/20"
+              : "rounded-bl-sm border border-gray-100 dark:border-gray-700/60 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 shadow-sm",
           ].join(" ")}
         >
           {isEditing ? (

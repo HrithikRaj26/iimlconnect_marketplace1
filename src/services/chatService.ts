@@ -27,6 +27,59 @@ function formatLastMessageAt(dateStr: string): string {
   }
 }
 
+// --------------------------------------------------------------------------
+// Deletion Store: { id -> deletedAtMs }
+// A conversation is suppressed only until the other party sends a new message
+// (i.e. db last_message_at > our deletedAtMs). This mirrors WhatsApp behaviour.
+// --------------------------------------------------------------------------
+interface DeletedEntry { deletedAt: number }
+
+function getDeletedMap(): Record<string, DeletedEntry> {
+  if (typeof window === "undefined") return {};
+  try {
+    const stored = localStorage.getItem("iiml-deleted-conversations-v2");
+    return stored ? JSON.parse(stored) : {};
+  } catch { return {}; }
+}
+
+function saveDeletedMap(map: Record<string, DeletedEntry>) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem("iiml-deleted-conversations-v2", JSON.stringify(map));
+  } catch {}
+}
+
+function addToDeletedMap(conversationId: string) {
+  const map = getDeletedMap();
+  map[conversationId] = { deletedAt: Date.now() };
+  saveDeletedMap(map);
+}
+
+function removeFromDeletedMap(conversationId: string) {
+  const map = getDeletedMap();
+  delete map[conversationId];
+  saveDeletedMap(map);
+}
+
+/**
+ * Returns true if this conversation row should be hidden.
+ * A conversation is hidden only if it was deleted AND no new messages have
+ * arrived since deletion (last_message_at <= deletedAt).
+ */
+function isConversationSuppressed(row: { id: string; last_message_at: string }): boolean {
+  const map = getDeletedMap();
+  const entry = map[row.id];
+  if (!entry) return false; // not deleted at all
+
+  const lastMsgMs = new Date(row.last_message_at).getTime();
+  if (lastMsgMs > entry.deletedAt) {
+    // New activity! Automatically un-suppress (like WhatsApp)
+    removeFromDeletedMap(row.id);
+    return false;
+  }
+  return true; // still suppressed
+}
+
 export interface IChatService {
   getConversations(): Promise<Conversation[]>;
   getMessages(conversationId: string): Promise<ChatMessage[]>;
@@ -79,15 +132,8 @@ class SupabaseChatService implements IChatService {
       throw error;
     }
 
-    // Filter out locally deleted conversations
-    let deletedConvIds: string[] = [];
-    if (typeof window !== "undefined") {
-      try {
-        const stored = localStorage.getItem("iiml-deleted-conversations");
-        deletedConvIds = stored ? JSON.parse(stored) : [];
-      } catch {}
-    }
-    const activeRows = (data || []).filter(row => !deletedConvIds.includes(row.id));
+    // Filter using the v2 deletion map (respects new-message resurrection)
+    const activeRows = (data || []).filter(row => !isConversationSuppressed(row));
 
     const items: Conversation[] = [];
 
@@ -401,6 +447,8 @@ class SupabaseChatService implements IChatService {
       .single();
 
     if (existing) {
+      // If it was deleted but re-visited intentionally, un-suppress it
+      removeFromDeletedMap(params.id);
       const conversationsList = await this.getConversations();
       const found = conversationsList.find(c => c.id === params.id);
       if (found) return found;
@@ -587,15 +635,9 @@ class SupabaseChatService implements IChatService {
   }
 
   async deleteConversation(conversationId: string): Promise<void> {
-    if (typeof window !== "undefined") {
-      try {
-        const stored = localStorage.getItem("iiml-deleted-conversations");
-        const list = stored ? JSON.parse(stored) : [];
-        if (!list.includes(conversationId)) {
-          localStorage.setItem("iiml-deleted-conversations", JSON.stringify([...list, conversationId]));
-        }
-      } catch {}
-    }
+    // Store with timestamp so new messages can resurrect this conversation
+    addToDeletedMap(conversationId);
+
     try {
       await supabase
         .from("messages")
