@@ -15,7 +15,7 @@ import { useToast } from "@/context/ToastContext";
 
 interface UseConversationResult {
   conversation: Conversation;
-  sendText: (text: string) => Promise<void>;
+  sendText: (text: string) => Promise<boolean>;
   retryMessage: (messageId: string) => Promise<void>;
   sendOffer: (amount: number, note?: string) => Promise<void>;
   respondToOffer: (
@@ -75,7 +75,7 @@ export function useConversation(initial: Conversation): UseConversationResult {
   const sendText = useCallback(
     async (text: string) => {
       const trimmed = text.trim();
-      if (!trimmed) return;
+      if (!trimmed) return false;
 
       // AI Content Moderation Check
       try {
@@ -87,7 +87,7 @@ export function useConversation(initial: Conversation): UseConversationResult {
         const data = await res.json();
         if (data.isHarmful) {
           showToast(`Blocked: ${data.reason || "Inappropriate language detected."}`, "warning");
-          return;
+          return false;
         }
       } catch (err) {
         console.error("AI Moderation API failed:", err);
@@ -103,6 +103,7 @@ export function useConversation(initial: Conversation): UseConversationResult {
       };
       appendMessage(optimistic);
       await deliverText(optimistic);
+      return true;
     },
     [appendMessage, deliverText, showToast]
   );

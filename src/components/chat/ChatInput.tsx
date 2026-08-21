@@ -3,19 +3,31 @@
 import React, { useState, useRef } from "react";
 
 interface ChatInputProps {
-  onSend: (text: string) => void;
+  onSend: (text: string) => Promise<boolean> | boolean | void;
   disabled?: boolean;
 }
 
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [value, setValue] = useState("");
+  const [shake, setShake] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const submit = () => {
+  const submit = async () => {
     const trimmed = value.trim();
     if (!trimmed || disabled) return;
-    onSend(trimmed);
-    setValue("");
+    try {
+      const res = await onSend(trimmed);
+      if (res !== false) {
+        setValue("");
+      } else {
+        setShake(true);
+        setTimeout(() => setShake(false), 450);
+      }
+    } catch (err) {
+      console.error(err);
+      setShake(true);
+      setTimeout(() => setShake(false), 450);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +45,9 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   };
 
   return (
-    <div className="flex items-center gap-2 border-t border-gray-100 bg-white px-4 py-3">
+    <div className={`flex items-center gap-2 border-t border-gray-100 bg-white px-4 py-3 transition-all duration-200 ${
+      shake ? "animate-shake ring-2 ring-red-500/30 rounded-t-xl bg-red-50/10" : ""
+    }`}>
       <input
         type="file"
         ref={fileInputRef}
@@ -73,7 +87,9 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         placeholder={disabled ? "This deal is closed" : "Type a message..."}
         disabled={disabled}
         aria-label="Message"
-        className="h-11 flex-1 rounded-full bg-gray-100 px-4 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-brand/20 disabled:opacity-60"
+        className={`h-11 flex-1 rounded-full px-4 text-sm text-gray-900 outline-none placeholder:text-gray-400 transition-all duration-200 ${
+          shake ? "bg-red-50/30 border-red-300 focus:ring-red-500/20" : "bg-gray-100 focus:ring-brand/20"
+        } focus:ring-2 disabled:opacity-60`}
       />
 
       <button
@@ -81,7 +97,9 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         onClick={submit}
         disabled={disabled || !value.trim()}
         aria-label="Send message"
-        className="flex h-11 w-11 items-center justify-center rounded-full bg-brand text-white transition-colors hover:bg-brand-dark disabled:bg-brand/40"
+        className={`flex h-11 w-11 items-center justify-center rounded-full text-white transition-all duration-200 ${
+          shake ? "bg-red-500 hover:bg-red-600 shadow-red-500/10" : "bg-brand hover:bg-brand-dark disabled:bg-brand/40"
+        }`}
       >
         <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
           <path
