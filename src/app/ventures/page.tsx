@@ -9,18 +9,13 @@ import ReputationLeaderboard from "@/components/ventures/ReputationLeaderboard";
 import MyVentures from "@/components/ventures/MyVentures";
 import AdminPanel from "@/components/ventures/AdminPanel";
 
+import { Loader } from "@/components/ui/Loader";
+
 type TabId = "discover" | "feed" | "reputation" | "my-ventures" | "admin";
 
 export default function VenturesPage() {
   return (
-    <Suspense fallback={
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950 text-gray-500 dark:text-gray-400">
-        <div className="flex flex-col items-center gap-2">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
-          <p className="text-sm font-medium">Entering Venture Hub...</p>
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<Loader fullscreen message="Entering Venture Hub..." />}>
       <VenturesPageInner />
     </Suspense>
   );
@@ -67,14 +62,7 @@ function VenturesPageInner() {
   }, [searchParams, activeTab]);
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950 text-gray-500 dark:text-gray-400">
-        <div className="flex flex-col items-center gap-2">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
-          <p className="text-sm font-medium">Entering Venture Hub...</p>
-        </div>
-      </div>
-    );
+    return <Loader fullscreen message="Entering Venture Hub..." />;
   }
 
   if (!session) {

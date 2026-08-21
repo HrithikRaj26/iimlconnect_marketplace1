@@ -3,6 +3,7 @@
 import React, { useMemo, useState, useEffect, Suspense, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { TopNav } from "@/components/ui/TopNav";
+import { Loader } from "@/components/ui/Loader";
 import { ConversationList } from "@/components/chat/ConversationList";
 import { ChatHeader } from "@/components/chat/ChatHeader";
 import { MessageThread } from "@/components/chat/MessageThread";
@@ -328,14 +329,7 @@ function ChatWorkspaceWrapper() {
   };
 
   if (loading) {
-    return (
-      <div className="flex flex-1 items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-500">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
-          <span className="text-sm font-semibold">Loading your conversations...</span>
-        </div>
-      </div>
-    );
+    return <Loader fullscreen message="Loading your conversations..." />;
   }
 
   if (conversations.length === 0 && !activeId) {

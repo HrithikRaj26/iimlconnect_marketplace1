@@ -13,6 +13,7 @@ function getHandoverPin(reportId: string): string {
   return pin;
 }
 import { Button } from "@/components/ui/Button";
+import { Loader } from "@/components/ui/Loader";
 import { TextInput } from "@/components/ui/TextInput";
 import { useLostFoundAuth } from "@/hooks/useLostFoundAuth";
 import { lostFoundService, ApiError } from "@/services/lostFoundService";
@@ -88,7 +89,7 @@ export default function ReportDetailPage() {
       .catch(() => setMatches([]));
   }, [userId]);
 
-  if (loading) return <div className="p-10 text-center text-sm text-gray-500">Loading…</div>;
+  if (loading) return <Loader fullscreen message="Loading report details..." />;
   if (error || !report) return <div className="p-10 text-center text-sm font-medium text-red-500">{error ?? "Report not found"}</div>;
 
   const isOwner = userId === report.reporter_id;

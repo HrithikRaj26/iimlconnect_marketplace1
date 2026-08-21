@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { TextInput } from "@/components/ui/TextInput";
 import { Button } from "@/components/ui/Button";
 import { ReportCard } from "@/components/lost-found/ReportCard";
+import { Loader } from "@/components/ui/Loader";
 import { useLostFoundAuth } from "@/hooks/useLostFoundAuth";
 import { lostFoundService } from "@/services/lostFoundService";
 import { CATEGORIES, InstantMatch, ReportSummary } from "@/types/lostFound";
@@ -418,7 +419,7 @@ function LostFoundBrowsePageInner() {
         </aside>
 
         <div className="min-w-0 flex-1">
-          {loading && tabResults.length === 0 && <p className="py-16 text-center text-sm text-gray-500">Loading…</p>}
+          {loading && tabResults.length === 0 && <Loader message="Loading reports..." />}
           {error && <p className="py-4 text-sm font-medium text-red-500">{error}</p>}
           {!loading && tabResults.length === 0 && !error && (
             <p className="py-16 text-center text-sm text-gray-500">

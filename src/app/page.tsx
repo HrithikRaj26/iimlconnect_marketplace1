@@ -6,6 +6,8 @@ import LoginView from "@/components/auth/LoginView";
 import WelcomeDashboard from "@/components/dashboard/WelcomeDashboard";
 import AppLayout from "@/components/layout/AppLayout";
 
+import { Loader } from "@/components/ui/Loader";
+
 export default function RootPage() {
   const [session, setSession] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -26,11 +28,7 @@ export default function RootPage() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-white">
-        Loading...
-      </div>
-    );
+    return <Loader fullscreen message="Verifying session..." />;
   }
 
   if (!session) {

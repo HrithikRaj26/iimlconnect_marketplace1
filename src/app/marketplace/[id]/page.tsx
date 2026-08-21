@@ -10,6 +10,7 @@ import { formatINR } from "@/utils/format";
 import { FILTER_CATEGORY_OPTIONS, FILTER_CONDITION_OPTIONS } from "@/constants/marketplace";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/context/ToastContext";
+import { Loader } from "@/components/ui/Loader";
 
 export default function ListingDetailPage() {
   const params = useParams();
@@ -88,11 +89,7 @@ export default function ListingDetailPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-surface flex items-center justify-center">
-        <p className="text-gray-500">Loading details...</p>
-      </div>
-    );
+    return <Loader fullscreen message="Loading details..." />;
   }
 
   if (!listing) {

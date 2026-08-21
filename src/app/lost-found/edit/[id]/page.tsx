@@ -11,6 +11,7 @@ import { CategoryPicker } from "@/components/lost-found/CategoryPicker";
 import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
 import { lostFoundService, ApiError } from "@/services/lostFoundService";
 import { useToast } from "@/context/ToastContext";
+import { Loader } from "@/components/ui/Loader";
 import { isSensitiveCategory, PGP_OFFICE_LOCATION } from "@/types/lostFound";
 
 interface Detail {
@@ -73,7 +74,7 @@ export default function EditReportPage() {
     load();
   }, [load]);
 
-  if (loading) return <div className="p-10 text-center text-sm text-gray-500">Loading…</div>;
+  if (loading) return <Loader fullscreen message="Loading report details..." />;
   if (error && !report) return <div className="p-10 text-center text-sm font-medium text-red-500">{error}</div>;
   if (!report) return null;
 
