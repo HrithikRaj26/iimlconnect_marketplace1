@@ -7,16 +7,16 @@ interface ChipProps {
 }
 
 const toneClasses: Record<NonNullable<ChipProps["tone"]>, string> = {
-  neutral: "bg-gray-100 text-gray-700",
-  brand: "bg-brand-light text-brand-dark",
-  success: "bg-success-light text-success",
+  neutral: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-gray-700/50",
+  brand: "bg-brand-light/35 dark:bg-brand/10 text-brand-dark dark:text-brand-light border border-brand/10 dark:border-brand-light/10",
+  success: "bg-success-light/35 dark:bg-success/10 text-success dark:text-success border border-success/10 dark:border-success-light/10",
 };
 
 export function Chip({ label, onRemove, tone = "neutral" }: ChipProps) {
   return (
     <span
       className={[
-        "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium",
+        "inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold select-none",
         toneClasses[tone],
       ].join(" ")}
     >

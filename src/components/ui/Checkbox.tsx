@@ -10,12 +10,12 @@ interface CheckboxProps {
 
 export function Checkbox({ checked, onChange, label, count, dotColor }: CheckboxProps) {
   return (
-    <label className="flex cursor-pointer items-center justify-between py-1.5">
+    <label className="flex cursor-pointer items-center justify-between py-1.5 select-none hover:opacity-95">
       <span className="flex items-center gap-2">
         <span
           className={[
-            "flex h-4 w-4 items-center justify-center rounded border transition-colors",
-            checked ? "border-brand bg-brand" : "border-gray-300 bg-white",
+            "flex h-4 w-4 items-center justify-center rounded border transition-all duration-200",
+            checked ? "border-brand bg-brand" : "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900",
           ].join(" ")}
         >
           {checked && (
@@ -41,10 +41,10 @@ export function Checkbox({ checked, onChange, label, count, dotColor }: Checkbox
             aria-hidden="true"
           />
         )}
-        <span className="text-sm text-gray-700">{label}</span>
+        <span className="text-sm text-gray-700 dark:text-gray-300 font-semibold">{label}</span>
       </span>
       {typeof count === "number" && (
-        <span className="text-xs text-gray-400">({count})</span>
+        <span className="text-xs text-gray-400 dark:text-gray-500">({count})</span>
       )}
     </label>
   );

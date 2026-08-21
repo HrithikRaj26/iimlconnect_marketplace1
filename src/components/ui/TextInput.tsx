@@ -25,7 +25,7 @@ export function TextInput({
   return (
     <div className="w-full">
       {label && (
-        <label htmlFor={inputId} className="mb-1.5 block text-sm font-medium text-gray-800">
+        <label htmlFor={inputId} className="mb-1.5 block text-sm font-medium text-gray-800 dark:text-gray-200">
           {label}
           {required && <span className="ml-0.5 text-red-500">*</span>}
         </label>
@@ -39,12 +39,12 @@ export function TextInput({
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : undefined}
           className={[
-            "h-11 w-full rounded-lg border bg-white text-sm text-gray-900 outline-none transition-colors",
-            "placeholder:text-gray-400",
-            "focus:border-brand focus:ring-2 focus:ring-brand/20",
+            "h-11 w-full rounded-lg border bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 outline-none transition-all duration-200",
+            "placeholder:text-gray-400 dark:placeholder:text-gray-500",
+            "focus:border-brand focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10",
             prefix ? "pl-8" : "pl-3",
             actionButton ? "pr-10" : "pr-3",
-            error ? "border-red-400" : "border-gray-300",
+            error ? "border-red-400" : "border-gray-300 dark:border-gray-800",
             className,
           ].join(" ")}
           {...rest}
@@ -60,7 +60,7 @@ export function TextInput({
           {error}
         </p>
       ) : helperText ? (
-        <p className="mt-1.5 text-xs text-gray-500">{helperText}</p>
+        <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">{helperText}</p>
       ) : null}
     </div>
   );
