@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect, Suspense } from "react";
+import React, { useMemo, useState, useEffect, Suspense, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { TopNav } from "@/components/ui/TopNav";
 import { ConversationList } from "@/components/chat/ConversationList";
@@ -94,6 +94,31 @@ function ChatWorkspaceWrapper() {
     });
   }, []);
 
+  // Trigger markAsRead helper
+  const handleMarkAsRead = useCallback((id: string) => {
+    // Only mark as read if the tab/window is active and in focus!
+    if (typeof document !== "undefined" && document.visibilityState === "visible" && document.hasFocus()) {
+      chatService.markAsRead(id);
+    }
+  }, []);
+
+  // Listen for tab focus/visibility changes to mark active conversation as read
+  useEffect(() => {
+    if (!activeId) return;
+
+    const onFocusOrVisible = () => {
+      handleMarkAsRead(activeId);
+    };
+
+    window.addEventListener("focus", onFocusOrVisible);
+    document.addEventListener("visibilitychange", onFocusOrVisible);
+
+    return () => {
+      window.removeEventListener("focus", onFocusOrVisible);
+      document.removeEventListener("visibilitychange", onFocusOrVisible);
+    };
+  }, [activeId, handleMarkAsRead]);
+
   // Fetch conversations list
   const loadConversations = async () => {
     try {
@@ -103,7 +128,7 @@ function ChatWorkspaceWrapper() {
         setActiveId(data[0].id);
       }
       if (activeId) {
-        await chatService.markAsRead(activeId);
+        handleMarkAsRead(activeId);
       }
     } catch (e) {
       console.error("Failed to load conversations:", e);
@@ -120,9 +145,9 @@ function ChatWorkspaceWrapper() {
 
   useEffect(() => {
     if (activeId) {
-      chatService.markAsRead(activeId);
+      handleMarkAsRead(activeId);
     }
-  }, [activeId]);
+  }, [activeId, handleMarkAsRead]);
 
   // Load single active conversation thread (e.g. on realtime update)
   const loadActiveConversation = async (id: string) => {
@@ -130,7 +155,7 @@ function ChatWorkspaceWrapper() {
       const list = await chatService.getConversations();
       setConversations(list);
       if (id === activeId) {
-        await chatService.markAsRead(id);
+        handleMarkAsRead(id);
       }
     } catch (e) {
       console.error(e);
