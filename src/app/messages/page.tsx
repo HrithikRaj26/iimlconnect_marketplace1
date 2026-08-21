@@ -12,6 +12,7 @@ import { useConversation } from "@/hooks/useConversation";
 import { chatService } from "@/services/chatService";
 import { supabase } from "@/lib/supabase";
 import { Conversation } from "@/types";
+import { useToast } from "@/context/ToastContext";
 
 export default function MessagesPage() {
   return (
@@ -31,6 +32,7 @@ export default function MessagesPage() {
 function ChatWorkspaceWrapper() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { confirmAction } = useToast();
 
   const ownerId = searchParams.get("ownerId");
   const ownerName = searchParams.get("ownerName");
@@ -278,21 +280,26 @@ function ChatWorkspaceWrapper() {
   }, [activeId, conversationsWithPresence]);
 
   const handleDeleteConversation = async (conversationId: string) => {
-    if (confirm("Are you sure you want to delete this entire chat thread? This action cannot be undone.")) {
-      try {
-        await chatService.deleteConversation(conversationId);
-        // Clear active selection and reload
-        setActiveId(null);
-        const remaining = conversations.filter(c => c.id !== conversationId);
-        setConversations(remaining);
-        if (remaining.length > 0) {
-          setActiveId(remaining[0].id);
+    confirmAction(
+      "Are you sure you want to delete this entire chat thread? This action cannot be undone.",
+      async () => {
+        try {
+          await chatService.deleteConversation(conversationId);
+          // Clear active selection and reload
+          setActiveId(null);
+          const remaining = conversations.filter(c => c.id !== conversationId);
+          setConversations(remaining);
+          if (remaining.length > 0) {
+            setActiveId(remaining[0].id);
+          }
+        } catch (err) {
+          console.error("Failed to delete conversation:", err);
+          alert("Failed to delete chat thread.");
         }
-      } catch (err) {
-        console.error("Failed to delete conversation:", err);
-        alert("Failed to delete chat thread.");
-      }
-    }
+      },
+      "Delete Chat Thread",
+      "danger"
+    );
   };
 
   if (loading) {

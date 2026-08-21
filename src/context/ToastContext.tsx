@@ -12,12 +12,24 @@ interface Toast {
 
 interface ToastContextType {
   showToast: (message: string, type?: ToastType) => void;
+  confirmAction: (
+    message: string,
+    onConfirm: () => void,
+    title?: string,
+    variant?: "danger" | "primary" | "warning"
+  ) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [confirmState, setConfirmState] = useState<{
+    message: string;
+    title: string;
+    variant: "danger" | "primary" | "warning";
+    onConfirm: () => void;
+  } | null>(null);
 
   const showToast = useCallback((message: string, type: ToastType = "info") => {
     const id = Math.random().toString(36).substring(2, 9);
@@ -27,6 +39,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 4500);
+  }, []);
+
+  const confirmAction = useCallback((
+    message: string,
+    onConfirm: () => void,
+    title: string = "Confirm Action",
+    variant: "danger" | "primary" | "warning" = "danger"
+  ) => {
+    setConfirmState({ message, onConfirm, title, variant });
   }, []);
 
   // Intercept native browser alert popups globally!
@@ -56,7 +77,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   }, [showToast]);
 
   return (
-    <ToastContext.Provider value={{ showToast }}>
+    <ToastContext.Provider value={{ showToast, confirmAction }}>
       {children}
       
       {/* Toast floating overlay container */}
@@ -89,6 +110,44 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           </div>
         ))}
       </div>
+
+      {/* Styled Confirmation Modal Overlay */}
+      {confirmState && (
+        <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/60 dark:bg-black/75 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-gray-900 border border-gray-150 dark:border-gray-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <h3 className="text-sm font-black text-gray-950 dark:text-white uppercase tracking-wider mb-2">
+              {confirmState.title}
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold leading-relaxed mb-6">
+              {confirmState.message}
+            </p>
+            <div className="flex gap-2.5 justify-end">
+              <button
+                type="button"
+                onClick={() => setConfirmState(null)}
+                className="px-4 py-2 rounded-xl text-xs font-bold border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  confirmState.onConfirm();
+                  setConfirmState(null);
+                }}
+                className={[
+                  "px-4 py-2 rounded-xl text-xs font-bold text-white cursor-pointer transition-colors shadow-sm",
+                  confirmState.variant === "danger" ? "bg-red-600 hover:bg-red-700 shadow-red-500/10" :
+                  confirmState.variant === "warning" ? "bg-amber-600 hover:bg-amber-700 shadow-amber-500/10" :
+                  "bg-brand hover:bg-brand-dark shadow-blue-500/10"
+                ].join(" ")}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </ToastContext.Provider>
   );
 }

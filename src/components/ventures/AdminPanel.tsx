@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { ventureService } from "@/services/ventureService";
 import { Venture } from "@/types";
 import { Button } from "@/components/ui/Button";
+import { useToast } from "@/context/ToastContext";
 
 interface Stats {
   totals: { registrations: number; activeUsers: number; totalReviews: number; totalPosts: number };
@@ -18,6 +19,7 @@ export default function AdminPanel() {
   const [loading, setLoading] = useState(true);
   const [submittingId, setSubmittingId] = useState<string | null>(null);
   const [selectedVenture, setSelectedVenture] = useState<Venture | null>(null);
+  const { confirmAction } = useToast();
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     ventureId: string;
@@ -367,21 +369,27 @@ export default function AdminPanel() {
                       variant="secondary"
                       loading={submittingId === v.id}
                       onClick={async () => {
-                        if (!confirm(`Are you sure you want to suspend "${v.name}"?`)) return;
-                        setSubmittingId(v.id);
-                        try {
-                          const result = await ventureService.suspendVenture(v.id);
-                          if (result.emailSent) {
-                            alert(`Success! "${v.name}" has been suspended. Warning email sent.`);
-                          } else {
-                            alert(`Success! "${v.name}" has been suspended. Email failed: ${result.emailError}`);
-                          }
-                          await loadStats();
-                        } catch (err: any) {
-                          alert("Failed to suspend: " + err.message);
-                        } finally {
-                          setSubmittingId(null);
-                        }
+                        confirmAction(
+                          `Are you sure you want to suspend "${v.name}"?`,
+                          async () => {
+                            setSubmittingId(v.id);
+                            try {
+                              const result = await ventureService.suspendVenture(v.id);
+                              if (result.emailSent) {
+                                alert(`Success! "${v.name}" has been suspended. Warning email sent.`);
+                              } else {
+                                alert(`Success! "${v.name}" has been suspended. Email failed: ${result.emailError}`);
+                              }
+                              await loadStats();
+                            } catch (err: any) {
+                              alert("Failed to suspend: " + err.message);
+                            } finally {
+                              setSubmittingId(null);
+                            }
+                          },
+                          "Suspend Venture",
+                          "danger"
+                        );
                       }}
                       className="border-red-150 hover:bg-red-50 text-red-600 hover:text-red-700 font-extrabold text-[10px] py-1.5 px-3 rounded-lg"
                     >

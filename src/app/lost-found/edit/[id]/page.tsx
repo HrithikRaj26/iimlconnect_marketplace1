@@ -10,6 +10,7 @@ import { RadioCard } from "@/components/ui/RadioCard";
 import { CategoryPicker } from "@/components/lost-found/CategoryPicker";
 import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
 import { lostFoundService, ApiError } from "@/services/lostFoundService";
+import { useToast } from "@/context/ToastContext";
 import { isSensitiveCategory, PGP_OFFICE_LOCATION } from "@/types/lostFound";
 
 interface Detail {
@@ -32,6 +33,7 @@ export default function EditReportPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const { confirmAction } = useToast();
 
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
@@ -126,17 +128,23 @@ export default function EditReportPage() {
   };
 
   const remove = async () => {
-    if (!confirm("Delete this report? This can't be undone.")) return;
-    setSubmitting(true);
-    setError(null);
-    try {
-      await lostFoundService.deleteReport(report.id);
-      router.push("/lost-found");
-    } catch (e: any) {
-      setError(e instanceof ApiError ? e.message : "Could not delete report");
-    } finally {
-      setSubmitting(false);
-    }
+    confirmAction(
+      "Delete this report? This can't be undone.",
+      async () => {
+        setSubmitting(true);
+        setError(null);
+        try {
+          await lostFoundService.deleteReport(report.id);
+          router.push("/lost-found");
+        } catch (e: any) {
+          setError(e instanceof ApiError ? e.message : "Could not delete report");
+        } finally {
+          setSubmitting(false);
+        }
+      },
+      "Delete Report",
+      "danger"
+    );
   };
 
   return (

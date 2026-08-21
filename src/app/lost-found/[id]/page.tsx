@@ -9,6 +9,7 @@ import { useLostFoundAuth } from "@/hooks/useLostFoundAuth";
 import { lostFoundService, ApiError } from "@/services/lostFoundService";
 import { BackToLostFound } from "@/components/lost-found/BackToLostFound";
 import { Contact, InstantMatch } from "@/types/lostFound";
+import { useToast } from "@/context/ToastContext";
 
 function formatDate(iso: string | null | undefined): string | null {
   if (!iso) return null;
@@ -48,6 +49,7 @@ export default function ReportDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [itemLabel, setItemLabel] = useState("");
   const [busy, setBusy] = useState(false);
+  const { confirmAction } = useToast();
   const [matches, setMatches] = useState<InstantMatch[]>([]);
   const [claimAcknowledged, setClaimAcknowledged] = useState(false);
 
@@ -140,9 +142,14 @@ export default function ReportDetailPage() {
   };
 
   const handleReport = async () => {
-    if (!confirm("Report this listing as fake or inappropriate? This will alert the admin team.")) return;
-    // In a real app, this would insert into a 'reports' table.
-    alert("Report submitted successfully. Our admin team will review this listing.");
+    confirmAction(
+      "Report this listing as fake or inappropriate? This will alert the admin team.",
+      async () => {
+        alert("Report submitted successfully. Our admin team will review this listing.");
+      },
+      "Report Listing",
+      "warning"
+    );
   };
 
   const handleShare = async () => {

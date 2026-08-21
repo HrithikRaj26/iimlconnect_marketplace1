@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { TextArea } from "@/components/ui/TextArea";
 import { TextInput } from "@/components/ui/TextInput";
 import { supabase } from "@/lib/supabase";
+import { useToast } from "@/context/ToastContext";
 
 export default function CommunityFeed() {
   const [posts, setPosts] = useState<VenturePost[]>([]);
@@ -18,6 +19,7 @@ export default function CommunityFeed() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedVentureId, setSelectedVentureId] = useState("");
   const [postType, setPostType] = useState<"event" | "promotion" | "update">("update");
+  const { confirmAction } = useToast();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [eventDate, setEventDate] = useState("");
@@ -71,14 +73,20 @@ export default function CommunityFeed() {
   }, [sortOrder]);
 
   const handleDeletePost = async (postId: string) => {
-    if (!confirm("Are you sure you want to delete this post? This action cannot be undone.")) return;
-    try {
-      await ventureService.deletePost(postId);
-      setPosts(prev => prev.filter(p => p.id !== postId));
-    } catch (e: any) {
-      console.error(e);
-      alert(e.message || "Failed to delete post.");
-    }
+    confirmAction(
+      "Are you sure you want to delete this post? This action cannot be undone.",
+      async () => {
+        try {
+          await ventureService.deletePost(postId);
+          setPosts(prev => prev.filter(p => p.id !== postId));
+        } catch (e: any) {
+          console.error(e);
+          alert(e.message || "Failed to delete post.");
+        }
+      },
+      "Delete Post",
+      "danger"
+    );
   };
 
   const handleLike = async (postId: string, isLiked: boolean) => {

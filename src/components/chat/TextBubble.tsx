@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ChatMessage } from "@/types";
 import { MessageTicks } from "@/components/chat/MessageTicks";
 import { CURRENT_USER_ID } from "@/constants/chat";
+import { useToast } from "@/context/ToastContext";
 
 interface TextBubbleProps {
   message: ChatMessage;
@@ -17,6 +18,7 @@ export function TextBubble({ message, time, onRetry, onEdit, onDelete }: TextBub
   const [showPreview, setShowPreview] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(msgText);
+  const { confirmAction } = useToast();
 
   // Sync state if text changes (e.g. edited by another client)
   React.useEffect(() => {
@@ -33,11 +35,16 @@ export function TextBubble({ message, time, onRetry, onEdit, onDelete }: TextBub
   };
 
   const handleDeleteClick = () => {
-    if (confirm("Are you sure you want to delete this message?")) {
-      if (onDelete) {
-        onDelete(message.id);
-      }
-    }
+    confirmAction(
+      "Are you sure you want to delete this message? This cannot be undone.",
+      () => {
+        if (onDelete) {
+          onDelete(message.id);
+        }
+      },
+      "Delete Message",
+      "danger"
+    );
   };
 
   return (

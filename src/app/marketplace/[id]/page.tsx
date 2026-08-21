@@ -9,6 +9,7 @@ import { MakeOfferModal } from "@/components/chat/MakeOfferModal";
 import { formatINR } from "@/utils/format";
 import { FILTER_CATEGORY_OPTIONS, FILTER_CONDITION_OPTIONS } from "@/constants/marketplace";
 import { supabase } from "@/lib/supabase";
+import { useToast } from "@/context/ToastContext";
 
 export default function ListingDetailPage() {
   const params = useParams();
@@ -18,6 +19,7 @@ export default function ListingDetailPage() {
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<any>(null);
   const [offerOpen, setOfferOpen] = useState(false);
+  const { confirmAction } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
@@ -36,21 +38,32 @@ export default function ListingDetailPage() {
   }, [id]);
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to permanently delete this listing?")) return;
-    setIsDeleting(true);
-    const { error } = await supabase.from('listings').delete().eq('id', id);
-    if (!error) {
-      router.push("/marketplace");
-    } else {
-      alert("Failed to delete listing.");
-      setIsDeleting(false);
-    }
+    confirmAction(
+      "Are you sure you want to permanently delete this listing? This cannot be undone.",
+      async () => {
+        setIsDeleting(true);
+        const { error } = await supabase.from('listings').delete().eq('id', id);
+        if (!error) {
+          router.push("/marketplace");
+        } else {
+          alert("Failed to delete listing.");
+          setIsDeleting(false);
+        }
+      },
+      "Delete Listing",
+      "danger"
+    );
   };
 
   const handleReport = async () => {
-    if (!confirm("Report this listing as fake or inappropriate? This will alert the admin team.")) return;
-    // In a real app, this would insert into a 'reports' table. We can simulate it or insert it if the table exists.
-    alert("Report submitted successfully. Our admin team will review this listing.");
+    confirmAction(
+      "Report this listing as fake or inappropriate? This will alert the admin team.",
+      async () => {
+        alert("Report submitted successfully. Our admin team will review this listing.");
+      },
+      "Report Listing",
+      "warning"
+    );
   };
 
   const handleShare = async () => {
