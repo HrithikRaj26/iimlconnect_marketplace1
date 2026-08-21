@@ -22,25 +22,37 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const handleScroll = () => {
+      let isScrolled = false;
       if (mainRef.current) {
-        setShowScrollTop(mainRef.current.scrollTop > 300);
+        isScrolled = mainRef.current.scrollTop > 300;
       }
+      if (typeof window !== "undefined" && !isScrolled) {
+        isScrolled = window.scrollY > 300;
+      }
+      setShowScrollTop(isScrolled);
     };
 
     const mainElement = mainRef.current;
     if (mainElement) {
-      mainElement.addEventListener("scroll", handleScroll);
+      mainElement.addEventListener("scroll", handleScroll, { passive: true });
     }
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       if (mainElement) {
         mainElement.removeEventListener("scroll", handleScroll);
       }
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
   const scrollToTop = () => {
-    mainRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   const getScrollToTopColorClass = () => {
@@ -335,7 +347,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <motion.button
             key="scroll-top-btn"
             onClick={scrollToTop}
-            className={`fixed bottom-6 right-6 z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br text-white shadow-xl border border-white/10 hover:brightness-110 transition-[filter] ${getScrollToTopColorClass()}`}
+            className={`fixed bottom-24 right-6 z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br text-white shadow-xl border border-white/10 hover:brightness-110 transition-[filter] ${getScrollToTopColorClass()}`}
             title="Scroll to Top"
             initial={{ opacity: 0, scale: 0.6, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0,
