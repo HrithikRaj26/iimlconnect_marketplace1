@@ -11,6 +11,7 @@ import {
 import { chatService } from "@/services/chatService";
 import { CURRENT_USER_ID } from "@/constants/chat";
 import { generateId } from "@/utils/format";
+import { useToast } from "@/context/ToastContext";
 
 interface UseConversationResult {
   conversation: Conversation;
@@ -28,6 +29,7 @@ interface UseConversationResult {
 
 export function useConversation(initial: Conversation): UseConversationResult {
   const [conversation, setConversation] = useState<Conversation>(initial);
+  const { showToast } = useToast();
 
   useEffect(() => {
     setConversation(initial);
@@ -74,6 +76,23 @@ export function useConversation(initial: Conversation): UseConversationResult {
     async (text: string) => {
       const trimmed = text.trim();
       if (!trimmed) return;
+
+      // AI Content Moderation Check
+      try {
+        const res = await fetch("/api/chat/moderation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: trimmed }),
+        });
+        const data = await res.json();
+        if (data.isHarmful) {
+          showToast(`Blocked: ${data.reason || "Inappropriate language detected."}`, "warning");
+          return;
+        }
+      } catch (err) {
+        console.error("AI Moderation API failed:", err);
+      }
+
       const optimistic: ChatMessage = {
         id: generateId(),
         kind: "text",
@@ -85,7 +104,7 @@ export function useConversation(initial: Conversation): UseConversationResult {
       appendMessage(optimistic);
       await deliverText(optimistic);
     },
-    [appendMessage, deliverText]
+    [appendMessage, deliverText, showToast]
   );
 
   const retryMessage = useCallback(
@@ -175,20 +194,39 @@ export function useConversation(initial: Conversation): UseConversationResult {
 
   const editMessage = useCallback(
     async (messageId: string, newText: string) => {
+      const trimmed = newText.trim();
+      if (!trimmed) return;
+
+      // AI Content Moderation Check
+      try {
+        const res = await fetch("/api/chat/moderation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: trimmed }),
+        });
+        const data = await res.json();
+        if (data.isHarmful) {
+          showToast(`Blocked: ${data.reason || "Inappropriate language detected."}`, "warning");
+          return;
+        }
+      } catch (err) {
+        console.error("AI Moderation API failed on edit:", err);
+      }
+
       setConversation((prev) => ({
         ...prev,
         messages: prev.messages.map((m) =>
-          m.id === messageId ? { ...m, text: newText } : m
+          m.id === messageId ? { ...m, text: trimmed } : m
         ),
       }));
 
       try {
-        await chatService.editMessage(messageId, newText);
+        await chatService.editMessage(messageId, trimmed);
       } catch (err) {
         console.error("Failed to edit message:", err);
       }
     },
-    []
+    [showToast]
   );
 
   const deleteMessage = useCallback(

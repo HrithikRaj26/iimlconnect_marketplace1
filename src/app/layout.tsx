@@ -12,8 +12,13 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://iiml-connect.vercel.app'),
-  title: "IIM L Connect - MVP",
+  title: "IIM Lucknow Connect",
   description: "A verified-identity ecosystem for the IIM Lucknow community.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  }
 };
 
 export default function RootLayout({

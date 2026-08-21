@@ -137,8 +137,8 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
           </button>
         )}
         <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/15">
-            <Sparkles size={16} className="animate-pulse" />
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-transparent">
+            <img src="/favicon.svg" alt="IIML Connect Logo" className="h-8 w-8 object-contain" />
           </span>
           <div className="leading-tight">
             <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
