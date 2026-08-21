@@ -1,6 +1,32 @@
 import { ChatMessage, Offer, Conversation } from "@/types";
 import { supabase } from "@/lib/supabase";
 
+function formatLastMessageAt(dateStr: string): string {
+  try {
+    const date = new Date(dateStr);
+    const now = new Date();
+    
+    // Reset hours to compare calendar days
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const msgDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    
+    if (msgDate.getTime() === today.getTime()) {
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+    } else if (msgDate.getTime() === yesterday.getTime()) {
+      return "Yesterday";
+    } else if (today.getTime() - msgDate.getTime() < 7 * 24 * 60 * 60 * 1000) {
+      return date.toLocaleDateString([], { weekday: "short" });
+    } else {
+      return date.toLocaleDateString([], { month: "short", day: "numeric" });
+    }
+  } catch {
+    return "";
+  }
+}
+
 export interface IChatService {
   getConversations(): Promise<Conversation[]>;
   getMessages(conversationId: string): Promise<ChatMessage[]>;
@@ -133,7 +159,7 @@ class SupabaseChatService implements IChatService {
           imageUrl: row.listing_image
         },
         lastMessagePreview: row.last_message_preview,
-        lastMessageAt: new Date(row.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        lastMessageAt: formatLastMessageAt(row.last_message_at),
         unreadCount,
         messages: mappedMessages,
         transaction: {
