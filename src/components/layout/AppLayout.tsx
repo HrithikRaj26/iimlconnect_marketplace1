@@ -19,34 +19,31 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const [showScrollTop, setShowScrollTop] = useState(false);
   const mainRef = useRef<HTMLDivElement | null>(null);
+  const lastScrollTargetRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      let isScrolled = false;
-      if (mainRef.current) {
-        isScrolled = mainRef.current.scrollTop > 300;
+    const handleScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target && target.scrollTop !== undefined && target.scrollTop > 0) {
+        lastScrollTargetRef.current = target;
+        setShowScrollTop(target.scrollTop > 300);
+      } else if (typeof window !== "undefined") {
+        setShowScrollTop(window.scrollY > 300);
       }
-      if (typeof window !== "undefined" && !isScrolled) {
-        isScrolled = window.scrollY > 300;
-      }
-      setShowScrollTop(isScrolled);
     };
 
-    const mainElement = mainRef.current;
-    if (mainElement) {
-      mainElement.addEventListener("scroll", handleScroll, { passive: true });
-    }
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Capture phase intercepts scrolls on any element in the DOM tree!
+    window.addEventListener("scroll", handleScroll, { capture: true, passive: true });
 
     return () => {
-      if (mainElement) {
-        mainElement.removeEventListener("scroll", handleScroll);
-      }
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", handleScroll, { capture: true });
     };
   }, []);
 
   const scrollToTop = () => {
+    if (lastScrollTargetRef.current) {
+      lastScrollTargetRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
     if (mainRef.current) {
       mainRef.current.scrollTo({ top: 0, behavior: "smooth" });
     }
