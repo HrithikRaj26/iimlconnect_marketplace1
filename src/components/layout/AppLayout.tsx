@@ -20,6 +20,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const mainRef = useRef<HTMLDivElement | null>(null);
 
+  // Default sidebar state: open on desktop, closed on mobile
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setSidebarOpen(window.innerWidth >= 640);
+    }
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => {
       if (mainRef.current) {
@@ -164,10 +171,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         )}
       </AnimatePresence>
 
-      {/* Sidebar - Desktop Visible / Mobile Overlay */}
+      {/* Sidebar - Desktop Collapsible / Mobile Overlay */}
       <div 
-        className={`fixed inset-y-0 left-0 z-[60] w-64 shrink-0 transform bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ease-in-out sm:translate-x-0 sm:z-0 sm:relative sm:block ${
-          sidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+        className={`fixed inset-y-0 left-0 z-[60] w-64 shrink-0 transform bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ease-in-out sm:relative sm:z-0 ${
+          sidebarOpen 
+            ? "translate-x-0 shadow-2xl sm:shadow-none w-64 block" 
+            : "-translate-x-full w-0 hidden sm:hidden"
         }`}
       >
         <div className="flex h-full flex-col overflow-y-auto overflow-x-hidden w-64 bg-white dark:bg-gray-900">

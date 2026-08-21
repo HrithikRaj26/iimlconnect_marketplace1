@@ -3,6 +3,15 @@
 import Image from "next/image";
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+
+function getHandoverPin(reportId: string): string {
+  let hash = 0;
+  for (let i = 0; i < reportId.length; i++) {
+    hash = reportId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const pin = Math.abs(hash % 10000).toString().padStart(4, "0");
+  return pin;
+}
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
 import { useLostFoundAuth } from "@/hooks/useLostFoundAuth";
@@ -52,6 +61,7 @@ export default function ReportDetailPage() {
   const { confirmAction } = useToast();
   const [matches, setMatches] = useState<InstantMatch[]>([]);
   const [claimAcknowledged, setClaimAcknowledged] = useState(false);
+  const [inputPin, setInputPin] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -283,13 +293,38 @@ export default function ReportDetailPage() {
               </p>
             )}
 
-            {report.type === "found" && isFinder && report.claimant_id && !report.transfer_completed_at && (
-              <div className="space-y-1.5">
-                <Button fullWidth loading={busy} onClick={completeTransfer}>
-                  Transfer Completed
-                </Button>
-                <p className="text-center text-xs text-gray-400">
-                  Optional — this resolves automatically once the owner marks their report resolved.
+            {report.type === "found" && isClaimant && !report.transfer_completed_at && (
+              <div className="rounded-xl bg-brand-light/40 border border-brand-200 p-4 text-center my-3">
+                <p className="text-xs font-bold text-gray-900 dark:text-gray-100">🔑 Security Handover PIN</p>
+                <p className="text-2xl font-black text-brand tracking-widest my-1.5">{getHandoverPin(report.id)}</p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-normal">
+                  Provide this 4-digit security PIN to the finder to verify your identity and confirm handover.
+                </p>
+              </div>
+            )}
+
+            {report.type === "found" && (isFinder || isCustodian) && report.claimant_id && !report.transfer_completed_at && (
+              <div className="rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 p-4 space-y-3 my-3">
+                <p className="text-xs font-bold text-gray-900 dark:text-gray-100">🔒 Verify Handover PIN</p>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    maxLength={4}
+                    placeholder="Enter 4-digit PIN"
+                    value={inputPin}
+                    onChange={(e) => setInputPin(e.target.value.replace(/\D/g, ""))}
+                    className="w-full text-center tracking-widest text-sm font-black rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                  />
+                  <Button 
+                    loading={busy} 
+                    disabled={inputPin !== getHandoverPin(report.id)}
+                    onClick={completeTransfer}
+                  >
+                    Confirm PIN
+                  </Button>
+                </div>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500 leading-normal">
+                  Ask the claimant for their 4-digit security handover PIN to verify their identity before completing the transfer.
                 </p>
               </div>
             )}

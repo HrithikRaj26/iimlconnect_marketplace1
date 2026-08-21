@@ -53,8 +53,29 @@ export function ReportCard({
   onViewMatch?: (id: string) => void;
 }) {
   const [overlayOpen, setOverlayOpen] = useState(false);
+  const [dismissedMatchIds, setDismissedMatchIds] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const stored = localStorage.getItem("iiml-dismissed-matches");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const handleDismissMatch = (matchedReportId: string) => {
+    const updated = [...dismissedMatchIds, matchedReportId];
+    setDismissedMatchIds(updated);
+    try {
+      localStorage.setItem("iiml-dismissed-matches", JSON.stringify(updated));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const activeMatches = matches?.filter((m) => !dismissedMatchIds.includes(m.matchedReportId));
   const location = report.type === "lost" ? report.last_seen_location : report.found_location || report.pickup_location;
-  const topMatch = matches?.[0];
+  const topMatch = activeMatches?.[0];
 
   return (
     <article
@@ -108,38 +129,48 @@ export function ReportCard({
           )}
         </div>
 
-        {topMatch && matches && (
+        {topMatch && activeMatches && (
           <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
             <p className="text-xs font-semibold text-amber-900">
               This {report.type} report may match{" "}
-              {matches.length > 1 ? `${matches.length} different ${topMatch.matchedType} reports` : `a ${topMatch.matchedType} report`}
+              {activeMatches.length > 1 ? `${activeMatches.length} different ${topMatch.matchedType} reports` : `a ${topMatch.matchedType} report`}
             </p>
             <MatchBreakdown match={topMatch} />
-            {matches.length > 1 ? (
+            {activeMatches.length > 1 ? (
               <button
                 type="button"
                 onClick={() => setOverlayOpen(true)}
                 className="mt-2 h-8 w-full rounded-lg bg-amber-500 text-xs font-semibold text-white transition-colors hover:bg-amber-600"
               >
-                View all {matches.length} {topMatch.matchedType} matches
+                View all {activeMatches.length} {topMatch.matchedType} matches
               </button>
             ) : isMatchBlocked(topMatch) ? (
               <div className="mt-2 flex h-8 w-full items-center justify-center rounded-lg bg-gray-200 text-xs font-semibold text-gray-600">
                 {sensitiveMatchLabel(topMatch)}
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={() => onViewMatch?.(topMatch.matchedReportId)}
-                className="mt-2 h-8 w-full rounded-lg bg-amber-500 text-xs font-semibold text-white transition-colors hover:bg-amber-600"
-              >
-                View the matching {topMatch.matchedType} item →
-              </button>
+              <div className="flex gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={() => onViewMatch?.(topMatch.matchedReportId)}
+                  className="h-8 flex-1 rounded-lg bg-amber-500 text-[11px] font-semibold text-white transition-colors hover:bg-amber-600 cursor-pointer animate-in fade-in duration-200"
+                >
+                  View Item →
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDismissMatch(topMatch.matchedReportId)}
+                  className="h-8 px-3 rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-100 text-[11px] font-bold transition-colors cursor-pointer"
+                  title="Dismiss Match"
+                >
+                  ✕ Dismiss
+                </button>
+              </div>
             )}
           </div>
         )}
 
-        {matches && matches.length > 1 && topMatch && (
+        {activeMatches && activeMatches.length > 1 && topMatch && (
           <Modal open={overlayOpen} onClose={() => setOverlayOpen(false)} labelledBy="matches-overlay-title">
             <div className="max-h-[80vh] overflow-y-auto p-5">
               <h2 id="matches-overlay-title" className="mb-1 text-base font-bold text-gray-900 capitalize">
@@ -149,8 +180,8 @@ export function ReportCard({
                 Every item below is a <span className="font-semibold capitalize">{topMatch.matchedType}</span> report — pick the one that&apos;s actually yours.
               </p>
               <div className="space-y-3">
-                {matches.map((m) => (
-                  <div key={m.matchedReportId} className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                {activeMatches.map((m) => (
+                  <div key={m.matchedReportId} className="rounded-lg border border-amber-200 bg-amber-50 p-3 animate-out fade-out duration-200">
                     <div className="mb-1 flex items-center justify-between">
                       <span className="text-xs font-semibold capitalize text-amber-900">{m.matchedType} report · {m.category}</span>
                       <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-amber-200 text-amber-900">
@@ -163,16 +194,30 @@ export function ReportCard({
                         {sensitiveMatchLabel(m)}
                       </div>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOverlayOpen(false);
-                          onViewMatch?.(m.matchedReportId);
-                        }}
-                        className="mt-2 h-8 w-full rounded-lg bg-amber-500 text-xs font-semibold text-white transition-colors hover:bg-amber-600"
-                      >
-                        View this {m.matchedType} item →
-                      </button>
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOverlayOpen(false);
+                            onViewMatch?.(m.matchedReportId);
+                          }}
+                          className="h-8 flex-1 rounded-lg bg-amber-500 text-xs font-semibold text-white transition-colors hover:bg-amber-600 cursor-pointer"
+                        >
+                          View Item →
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleDismissMatch(m.matchedReportId);
+                            if (activeMatches.length <= 2) {
+                              setOverlayOpen(false);
+                            }
+                          }}
+                          className="h-8 px-3 rounded-lg border border-amber-300 text-amber-700 hover:bg-amber-100 text-xs font-bold transition-colors cursor-pointer"
+                        >
+                          ✕ Dismiss
+                        </button>
+                      </div>
                     )}
                   </div>
                 ))}
