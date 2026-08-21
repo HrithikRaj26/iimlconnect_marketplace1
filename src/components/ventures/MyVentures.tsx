@@ -9,6 +9,7 @@ import { TextInput } from "@/components/ui/TextInput";
 import { TextArea } from "@/components/ui/TextArea";
 import { Stepper } from "@/components/ui/Stepper";
 import { supabase } from "@/lib/supabase";
+import { playSuccessSound } from "@/utils/audio";
 
 const PRESET_LOGOS = [
   "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=150&h=150&fit=crop", // Tech blue
@@ -169,6 +170,7 @@ export default function MyVentures() {
 
         setMyVentures(prev => prev.map(item => item.id === updated.id ? updated : item));
         setRegisteredVentureName(name);
+        playSuccessSound();
         setShowSuccessModal(true);
       } else {
         const newVenture = await ventureService.createVenture({
@@ -189,6 +191,7 @@ export default function MyVentures() {
 
         setMyVentures([newVenture, ...myVentures]);
         setRegisteredVentureName(name);
+        playSuccessSound();
         setShowSuccessModal(true);
       }
     } catch (err: any) {

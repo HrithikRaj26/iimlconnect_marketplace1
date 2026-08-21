@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { TextArea } from "@/components/ui/TextArea";
 import { supabase } from "@/lib/supabase";
 import { updateReviewStreak } from "@/services/streakService";
+import { playSuccessSound } from "@/utils/audio";
 import { Mic } from "lucide-react";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 
@@ -185,6 +186,7 @@ export default function VentureDiscovery() {
           .eq("reviewer_id", currentUserId);
         
         if (count === 1) {
+          playSuccessSound();
           setShowFirstReviewSuccess(true);
         }
       }
