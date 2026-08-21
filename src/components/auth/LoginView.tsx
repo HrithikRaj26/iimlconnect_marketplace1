@@ -179,9 +179,9 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
         >
           {/* Card branding header */}
           <div className="text-center mb-8">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/15 mb-4">
-              <Sparkles size={22} className="animate-pulse" />
-            </div>
+            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-transparent mb-4">
+              <img src="/favicon.svg" alt="IIML Connect Logo" className="h-12 w-12 object-contain" />
+            </span>
             
             <h2 className="text-2xl font-black tracking-tight text-gray-900 dark:text-gray-100">
               IIML <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Connect</span>
@@ -386,21 +386,21 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
       </div>
 
       {/* Same footer used in AppLayout */}
-      <footer className="w-full bg-white border-t border-gray-150 px-6 py-10 bg-gradient-to-b from-transparent to-gray-50/40">
+      <footer className="w-full bg-white dark:bg-gray-900 border-t border-gray-150 dark:border-gray-800 px-6 py-10 bg-gradient-to-b from-transparent to-gray-50/40 dark:to-gray-950/40">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand and Info */}
           <div className="space-y-3 col-span-1 md:col-span-2">
             <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/15">
-                <Sparkles size={16} className="animate-pulse" />
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-transparent">
+                <img src="/favicon.svg" alt="IIML Connect Logo" className="h-8 w-8 object-contain" />
               </span>
               <div className="leading-tight">
-                <p className="text-sm font-bold text-gray-900">
+                <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
                   IIML <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Connect</span>
                 </p>
               </div>
             </div>
-            <p className="text-xs font-semibold text-gray-500 leading-relaxed max-w-sm">
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 leading-relaxed max-w-sm">
               The unified hub for IIM Lucknow. Rent or buy listings, submit startup pitches, coordinate late-night items, and connect with peer student founders securely.
             </p>
           </div>
@@ -408,15 +408,15 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
           {/* Quick Links */}
           <div className="space-y-3">
             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Platform Map</h4>
-            <ul className="space-y-2 text-xs font-bold text-gray-600">
+            <ul className="space-y-2 text-xs font-bold text-gray-600 dark:text-gray-400">
               <li>
-                <Link href="/" className="hover:text-orange-600 transition-colors">🏠 Dashboard</Link>
+                <Link href="/" className="hover:text-brand transition-colors">🏠 Dashboard</Link>
               </li>
               <li>
-                <Link href="/marketplace" className="hover:text-orange-600 transition-colors">🛒 Marketplace</Link>
+                <Link href="/marketplace" className="hover:text-brand transition-colors">🛒 Marketplace</Link>
               </li>
               <li>
-                <Link href="/lost-found" className="hover:text-orange-600 transition-colors">🔍 Lost &amp; Found</Link>
+                <Link href="/lost-found" className="hover:text-brand transition-colors">🔍 Lost &amp; Found</Link>
               </li>
             </ul>
           </div>
@@ -424,15 +424,15 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
           {/* Support & Tech Column */}
           <div className="space-y-3">
             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Support &amp; SLA</h4>
-            <ul className="space-y-2 text-xs font-bold text-gray-600">
+            <ul className="space-y-2 text-xs font-bold text-gray-600 dark:text-gray-400">
               <li>
-                <a href="mailto:support@iiml.ac.in" className="hover:text-orange-600 transition-colors">✉️ Helpdesk Email</a>
+                <a href="mailto:support@iiml.ac.in" className="hover:text-brand transition-colors">✉️ Helpdesk Email</a>
               </li>
               <li>
-                <span className="text-gray-500">📄 Version 1.4.2</span>
+                <span className="text-gray-500 dark:text-gray-550">📄 Version 1.4.2</span>
               </li>
               <li>
-                <span className="text-gray-450 text-[10px]">L-Campus Connect</span>
+                <span className="text-gray-450 dark:text-gray-550 text-[10px]">L-Campus Connect</span>
               </li>
             </ul>
           </div>
