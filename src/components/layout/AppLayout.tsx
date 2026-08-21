@@ -20,13 +20,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const mainRef = useRef<HTMLDivElement | null>(null);
 
-  // Default sidebar state: open on desktop, closed on mobile
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setSidebarOpen(window.innerWidth >= 640);
-    }
-  }, []);
-
   useEffect(() => {
     const handleScroll = () => {
       if (mainRef.current) {
