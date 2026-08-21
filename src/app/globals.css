@@ -4,7 +4,7 @@
 
 @layer base {
   html, body {
-    @apply h-full w-full bg-gray-50 text-gray-900;
+    @apply h-full w-full bg-gray-50 text-gray-900 font-sans;
     transition: background-color 0.25s ease, color 0.25s ease;
   }
 
