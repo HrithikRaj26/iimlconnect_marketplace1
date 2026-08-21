@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
+import { TextArea } from "@/components/ui/TextArea";
 import { useRouter } from "next/navigation";
 
 export default function ProfileBuilder() {
@@ -137,10 +138,10 @@ export default function ProfileBuilder() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="rounded-2xl bg-white p-8 shadow-sm border border-gray-200">
-        <div className="mb-8 border-b border-gray-100 pb-6">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">My Profile</h1>
-          <p className="mt-2 text-sm text-gray-500">
+      <div className="rounded-2xl bg-white dark:bg-gray-900 p-8 shadow-sm border border-gray-200 dark:border-gray-800">
+        <div className="mb-8 border-b border-gray-100 dark:border-gray-800 pb-6">
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">My Profile</h1>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             {isGuest ? "Manage your contact and basic profile details." : "Manage your academic and contact details."}
           </p>
         </div>
@@ -243,44 +244,38 @@ export default function ProfileBuilder() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
-              <TextInput
-                type="text"
-                placeholder="First Name"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-              <TextInput
-                type="text"
-                placeholder="Last Name"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-              />
-            </div>
+            <TextInput
+              label="First Name"
+              type="text"
+              placeholder="First Name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+            />
+            <TextInput
+              label="Last Name"
+              type="text"
+              placeholder="Last Name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <TextInput
+              label="Mobile Number"
+              type="tel"
+              placeholder="e.g. +91 98765 43210"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+            />
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
-              <TextInput
-                type="tel"
-                placeholder="e.g. +91 98765 43210"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Batch</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5">Batch</label>
               <select
                 value={batch}
                 onChange={(e) => setBatch(e.target.value)}
                 disabled={isGuest}
-                className="appearance-none w-full rounded-lg border border-gray-300 bg-white pl-4 pr-10 py-2.5 text-sm text-gray-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand outline-none font-medium bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%25234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.75rem_center] bg-[size:1.1rem_1.1rem] bg-no-repeat disabled:opacity-75 disabled:bg-gray-50"
+                className="appearance-none w-full rounded-xl border-2 border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 pl-3.5 pr-10 py-2.5 text-sm font-medium text-gray-900 dark:text-gray-100 focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10 hover:border-gray-300 dark:hover:border-gray-700 outline-none transition-all disabled:opacity-75 disabled:bg-gray-50 dark:disabled:bg-gray-800 bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%25234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.75rem_center] bg-[size:1.1rem_1.1rem] bg-no-repeat"
               >
                 {isGuest ? (
                   <option value="External Guest">External Guest</option>
@@ -297,15 +292,14 @@ export default function ProfileBuilder() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
-            <textarea
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand min-h-[120px] outline-none font-medium"
-              placeholder="Tell us about yourself..."
-            ></textarea>
-          </div>
+          <TextArea
+            label="Bio"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            rows={4}
+            maxLength={300}
+            placeholder="Tell us about yourself, your interests, or your programme..."
+          />
 
           <div className="flex justify-end pt-4">
             <Button type="submit" size="lg" loading={loading}>

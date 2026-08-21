@@ -92,7 +92,7 @@ export function TextBubble({ message, time, onRetry, onEdit, onDelete }: TextBub
             "rounded-2xl px-4 py-2.5 text-sm min-w-[140px]",
             isMine
               ? "rounded-br-sm bg-brand text-white shadow-md shadow-brand/20"
-              : "rounded-bl-sm border border-gray-100 dark:border-gray-700/60 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 shadow-sm",
+              : "rounded-bl-sm bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100",
           ].join(" ")}
         >
           {isEditing ? (
