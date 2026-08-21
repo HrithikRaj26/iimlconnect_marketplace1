@@ -53,9 +53,31 @@ class SupabaseChatService implements IChatService {
       throw error;
     }
 
+    // Filter out locally deleted conversations
+    let deletedConvIds: string[] = [];
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("iiml-deleted-conversations");
+        deletedConvIds = stored ? JSON.parse(stored) : [];
+      } catch {}
+    }
+    const activeRows = (data || []).filter(row => !deletedConvIds.includes(row.id));
+
     const items: Conversation[] = [];
 
-    for (const row of (data || [])) {
+    // Get read and deleted message ids from localStorage fallbacks
+    let readMessageIds: string[] = [];
+    let deletedMsgIds: string[] = [];
+    if (typeof window !== "undefined") {
+      try {
+        const storedRead = localStorage.getItem("iiml-read-messages");
+        readMessageIds = storedRead ? JSON.parse(storedRead) : [];
+        const storedDel = localStorage.getItem("iiml-deleted-messages");
+        deletedMsgIds = storedDel ? JSON.parse(storedDel) : [];
+      } catch {}
+    }
+
+    for (const row of activeRows) {
       const isBuyer = row.buyer_id === currentUserId;
       const participant = {
         id: isBuyer ? row.seller_id : row.buyer_id,
@@ -73,32 +95,33 @@ class SupabaseChatService implements IChatService {
         .eq("conversation_id", row.id)
         .order("created_at", { ascending: true });
 
-      // Count unread messages (sender != currentUserId and is_read = false)
-      const { count } = await supabase
-        .from("messages")
-        .select("*", { count: "exact", head: true })
-        .eq("conversation_id", row.id)
-        .neq("sender_id", currentUserId)
-        .eq("is_read", false);
+      const activeMsgs = (msgRows || []).filter(m => !deletedMsgIds.includes(m.id));
 
-      const unreadCount = count || 0;
+      const unreadCount = activeMsgs.filter(m => {
+        if (m.sender_id === currentUserId) return false;
+        const isRead = m.is_read === true || readMessageIds.includes(m.id);
+        return !isRead;
+      }).length;
 
-      const mappedMessages: ChatMessage[] = (msgRows || []).map(m => ({
-        id: m.id,
-        kind: m.kind as "text" | "offer",
-        authorId: m.sender_id === currentUserId ? "me" : m.sender_id,
-        createdAt: new Date(m.created_at).getTime(),
-        status: "delivered",
-        text: m.text_content || undefined,
-        offer: m.kind === "offer" ? {
+      const mappedMessages: ChatMessage[] = activeMsgs.map(m => {
+        const isRead = m.is_read === true || readMessageIds.includes(m.id);
+        return {
           id: m.id,
-          amount: Number(m.offer_amount),
-          status: m.offer_status as any,
-          direction: m.sender_id === currentUserId ? "sent" : "received",
+          kind: m.kind as "text" | "offer",
+          authorId: m.sender_id === currentUserId ? "me" : m.sender_id,
           createdAt: new Date(m.created_at).getTime(),
-          note: m.offer_note || undefined
-        } : undefined
-      }));
+          status: isRead ? "read" : "delivered",
+          text: m.text_content || undefined,
+          offer: m.kind === "offer" ? {
+            id: m.id,
+            amount: Number(m.offer_amount),
+            status: m.offer_status as any,
+            direction: m.sender_id === currentUserId ? "sent" : "received",
+            createdAt: new Date(m.created_at).getTime(),
+            note: m.offer_note || undefined
+          } : undefined
+        };
+      });
 
       items.push({
         id: row.id,
@@ -137,22 +160,39 @@ class SupabaseChatService implements IChatService {
 
     if (error) throw error;
 
-    return (data || []).map(m => ({
-      id: m.id,
-      kind: m.kind as "text" | "offer",
-      authorId: m.sender_id === currentUserId ? "me" : m.sender_id,
-      createdAt: new Date(m.created_at).getTime(),
-      status: "delivered",
-      text: m.text_content || undefined,
-      offer: m.kind === "offer" ? {
+    // Filter locally deleted messages and map read status
+    let deletedMsgIds: string[] = [];
+    let readMessageIds: string[] = [];
+    if (typeof window !== "undefined") {
+      try {
+        const storedDel = localStorage.getItem("iiml-deleted-messages");
+        deletedMsgIds = storedDel ? JSON.parse(storedDel) : [];
+        const storedRead = localStorage.getItem("iiml-read-messages");
+        readMessageIds = storedRead ? JSON.parse(storedRead) : [];
+      } catch {}
+    }
+
+    const activeMsgs = (data || []).filter(m => !deletedMsgIds.includes(m.id));
+
+    return activeMsgs.map(m => {
+      const isRead = m.is_read === true || readMessageIds.includes(m.id);
+      return {
         id: m.id,
-        amount: Number(m.offer_amount),
-        status: m.offer_status as any,
-        direction: m.sender_id === currentUserId ? "sent" : "received",
+        kind: m.kind as "text" | "offer",
+        authorId: m.sender_id === currentUserId ? "me" : m.sender_id,
         createdAt: new Date(m.created_at).getTime(),
-        note: m.offer_note || undefined
-      } : undefined
-    }));
+        status: isRead ? "read" : "delivered",
+        text: m.text_content || undefined,
+        offer: m.kind === "offer" ? {
+          id: m.id,
+          amount: Number(m.offer_amount),
+          status: m.offer_status as any,
+          direction: m.sender_id === currentUserId ? "sent" : "received",
+          createdAt: new Date(m.created_at).getTime(),
+          note: m.offer_note || undefined
+        } : undefined
+      };
+    });
   }
 
   async sendMessage(conversationId: string, text: string): Promise<{ deliveredAt: number }> {
@@ -463,6 +503,26 @@ class SupabaseChatService implements IChatService {
   async markAsRead(conversationId: string): Promise<void> {
     try {
       const user = await this.getSessionUser();
+      
+      const { data: msgs } = await supabase
+        .from("messages")
+        .select("id, sender_id")
+        .eq("conversation_id", conversationId);
+        
+      if (msgs && typeof window !== "undefined") {
+        try {
+          const stored = localStorage.getItem("iiml-read-messages");
+          const list = stored ? JSON.parse(stored) : [];
+          const unreadIds = msgs
+            .filter((m: any) => m.sender_id !== user.id && !list.includes(m.id))
+            .map((m: any) => m.id);
+            
+          if (unreadIds.length > 0) {
+            localStorage.setItem("iiml-read-messages", JSON.stringify([...list, ...unreadIds]));
+          }
+        } catch {}
+      }
+
       await supabase
         .from("messages")
         .update({ is_read: true })
@@ -483,27 +543,43 @@ class SupabaseChatService implements IChatService {
   }
 
   async deleteMessage(messageId: string): Promise<void> {
-    const { error } = await supabase
-      .from("messages")
-      .delete()
-      .eq("id", messageId);
-    if (error) throw error;
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("iiml-deleted-messages");
+        const list = stored ? JSON.parse(stored) : [];
+        if (!list.includes(messageId)) {
+          localStorage.setItem("iiml-deleted-messages", JSON.stringify([...list, messageId]));
+        }
+      } catch {}
+    }
+    try {
+      await supabase
+        .from("messages")
+        .delete()
+        .eq("id", messageId);
+    } catch {}
   }
 
   async deleteConversation(conversationId: string): Promise<void> {
-    // Delete all messages in this conversation first (safety backup)
-    const { error: msgErr } = await supabase
-      .from("messages")
-      .delete()
-      .eq("conversation_id", conversationId);
-    if (msgErr) console.warn("Failed to delete messages in conversation:", msgErr);
-
-    // Delete the conversation row
-    const { error: convErr } = await supabase
-      .from("conversations")
-      .delete()
-      .eq("id", conversationId);
-    if (convErr) throw convErr;
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("iiml-deleted-conversations");
+        const list = stored ? JSON.parse(stored) : [];
+        if (!list.includes(conversationId)) {
+          localStorage.setItem("iiml-deleted-conversations", JSON.stringify([...list, conversationId]));
+        }
+      } catch {}
+    }
+    try {
+      await supabase
+        .from("messages")
+        .delete()
+        .eq("conversation_id", conversationId);
+      await supabase
+        .from("conversations")
+        .delete()
+        .eq("id", conversationId);
+    } catch {}
   }
 }
 

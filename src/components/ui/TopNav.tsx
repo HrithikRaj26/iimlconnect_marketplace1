@@ -74,20 +74,33 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
     const fetchUnread = async (userId: string) => {
       try {
         const { data: convs } = await supabase
-          .from("conversation_participants")
-          .select("conversation_id")
-          .eq("profile_id", userId);
+          .from("conversations")
+          .select("id")
+          .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
 
         if (convs && convs.length > 0) {
-          const ids = convs.map((c: any) => c.conversation_id);
-          const { count } = await supabase
+          const ids = convs.map((c: any) => c.id);
+          const { data: msgs } = await supabase
             .from("messages")
-            .select("*", { count: "exact", head: true })
+            .select("id, conversation_id, sender_id, is_read")
             .in("conversation_id", ids)
-            .neq("sender_id", userId)
-            .eq("is_read", false);
+            .neq("sender_id", userId);
 
-          if (isMounted) setUnreadChats(count || 0);
+          // Sync with local fallback read messages
+          let readMessageIds: string[] = [];
+          if (typeof window !== "undefined") {
+            try {
+              const stored = localStorage.getItem("iiml-read-messages");
+              readMessageIds = stored ? JSON.parse(stored) : [];
+            } catch {}
+          }
+
+          const unreadCount = (msgs || []).filter((m: any) => {
+            const isRead = m.is_read === true || readMessageIds.includes(m.id);
+            return !isRead;
+          }).length;
+
+          if (isMounted) setUnreadChats(unreadCount);
         } else {
           if (isMounted) setUnreadChats(0);
         }

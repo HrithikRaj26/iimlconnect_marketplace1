@@ -165,7 +165,7 @@ function ChatWorkspaceWrapper() {
 
   // Setup Realtime subscriptions
   useEffect(() => {
-    if (!currentUserId || !activeId) return;
+    if (!currentUserId) return;
 
     const channel = supabase
       .channel("chat-realtime")
@@ -179,8 +179,12 @@ function ChatWorkspaceWrapper() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "messages" },
-        (payload) => {
-          loadActiveConversation(activeId);
+        () => {
+          if (activeId) {
+            loadActiveConversation(activeId);
+          } else {
+            loadConversations();
+          }
         }
       )
       .subscribe();

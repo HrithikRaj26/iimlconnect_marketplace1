@@ -90,8 +90,12 @@ export function ConversationList({ conversations, activeId, onSelect }: Conversa
                   type="button"
                   onClick={() => onSelect(c.id)}
                   className={[
-                    "flex w-full items-center gap-3 px-4 py-3 text-left transition-colors",
-                    isActive ? "border-l-2 border-brand bg-brand-light/50" : "border-l-2 border-transparent hover:bg-gray-50 dark:hover:bg-gray-800/20",
+                    "flex w-full items-center gap-3 px-4 py-3 text-left transition-all duration-200",
+                    isActive 
+                      ? "border-l-2 border-brand bg-brand-light/50" 
+                      : c.unreadCount > 0 
+                        ? "border-l-2 border-brand bg-brand-light/20 font-bold" 
+                        : "border-l-2 border-transparent hover:bg-gray-50 dark:hover:bg-gray-800/20",
                   ].join(" ")}
                 >
                   <div className="relative">
