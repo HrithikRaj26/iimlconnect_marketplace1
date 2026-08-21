@@ -26,23 +26,32 @@ function Avatar({ color, name, size = "md" }: { color: string; name: string; siz
 
 export function ConversationList({ conversations, activeId, onSelect }: ConversationListProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState<"all" | "unread" | "active">("all");
 
-  const filteredConversations = conversations.filter((c) => {
+  const searchFiltered = conversations.filter((c) => {
     const query = searchQuery.toLowerCase().trim();
     if (!query) return true;
-    
     const participantName = (c.participant?.name || "").toLowerCase();
     const listingTitle = (c.listing?.title || "").toLowerCase();
     const lastMsg = (c.lastMessagePreview || "").toLowerCase();
     const batch = (c.participant?.batch || "").toLowerCase();
-    
-    return participantName.includes(query) || 
-           listingTitle.includes(query) || 
-           lastMsg.includes(query) ||
-           batch.includes(query);
+    return participantName.includes(query) || listingTitle.includes(query) || lastMsg.includes(query) || batch.includes(query);
+  });
+
+  const filteredConversations = searchFiltered.filter((c) => {
+    if (activeFilter === "unread") return c.unreadCount > 0;
+    if (activeFilter === "active") return c.participant.online === true;
+    return true;
   });
 
   const totalUnread = conversations.reduce((n, c) => n + (c.unreadCount > 0 ? 1 : 0), 0);
+  const totalActive = conversations.filter((c) => c.participant.online).length;
+
+  const filters: { key: "all" | "unread" | "active"; label: string; count?: number }[] = [
+    { key: "all", label: "All" },
+    { key: "unread", label: "Unread", count: totalUnread },
+    { key: "active", label: "Active", count: totalActive },
+  ];
 
   return (
     <div className="flex h-full flex-col bg-white dark:bg-gray-950">
@@ -92,17 +101,25 @@ export function ConversationList({ conversations, activeId, onSelect }: Conversa
 
       {/* Filter pills */}
       <div className="flex gap-2 px-4 pb-3 overflow-x-auto scrollbar-none">
-        {["All", "Unread", "Active"].map((tab) => (
+        {filters.map((f) => (
           <button
-            key={tab}
+            key={f.key}
             type="button"
-            className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-all duration-150 ${
-              tab === "All"
+            onClick={() => setActiveFilter(f.key)}
+            className={`shrink-0 flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold transition-all duration-150 ${
+              activeFilter === f.key
                 ? "bg-brand text-white shadow-sm shadow-brand/30"
                 : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
             }`}
           >
-            {tab}
+            {f.label}
+            {f.count !== undefined && f.count > 0 && (
+              <span className={`flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-extrabold ${
+                activeFilter === f.key ? "bg-white/25 text-white" : "bg-brand text-white"
+              }`}>
+                {f.count}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -112,11 +129,26 @@ export function ConversationList({ conversations, activeId, onSelect }: Conversa
         {filteredConversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-4 py-16 gap-3">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-2xl">
-              💬
+              {activeFilter === "unread" ? "✅" : activeFilter === "active" ? "👥" : "💬"}
             </div>
             <p className="text-sm font-semibold text-gray-400">
-              {searchQuery ? "No matches found" : "No conversations yet"}
+              {searchQuery
+                ? "No matches found"
+                : activeFilter === "unread"
+                  ? "No unread messages"
+                  : activeFilter === "active"
+                    ? "No active users right now"
+                    : "No conversations yet"}
             </p>
+            {activeFilter !== "all" && !searchQuery && (
+              <button
+                type="button"
+                onClick={() => setActiveFilter("all")}
+                className="text-xs font-bold text-brand hover:underline"
+              >
+                Show all conversations
+              </button>
+            )}
           </div>
         ) : (
           filteredConversations.map((c) => {
