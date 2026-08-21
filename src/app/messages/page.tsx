@@ -95,29 +95,23 @@ function ChatWorkspaceWrapper() {
     });
   }, []);
 
-  // Trigger markAsRead helper
+  // Mark conversation as read and immediately clear unread count in local state
   const handleMarkAsRead = useCallback((id: string) => {
-    // Only mark as read if the tab/window is active and in focus!
-    if (typeof document !== "undefined" && document.visibilityState === "visible" && document.hasFocus()) {
-      chatService.markAsRead(id);
+    chatService.markAsRead(id);
+    // Immediately zero out unread count in state so sidebar updates without waiting for a DB re-fetch
+    setConversations((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, unreadCount: 0 } : c))
+    );
+    // Notify TopNav to re-fetch its badge count
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("iiml-read-updated"));
     }
   }, []);
 
-  // Listen for tab focus/visibility changes to mark active conversation as read
+  // Mark as read whenever the active conversation changes (no focus guard needed)
   useEffect(() => {
     if (!activeId) return;
-
-    const onFocusOrVisible = () => {
-      handleMarkAsRead(activeId);
-    };
-
-    window.addEventListener("focus", onFocusOrVisible);
-    document.addEventListener("visibilitychange", onFocusOrVisible);
-
-    return () => {
-      window.removeEventListener("focus", onFocusOrVisible);
-      document.removeEventListener("visibilitychange", onFocusOrVisible);
-    };
+    handleMarkAsRead(activeId);
   }, [activeId, handleMarkAsRead]);
 
   // Fetch conversations list

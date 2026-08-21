@@ -95,12 +95,14 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
             } catch {}
           }
 
-          const unreadCount = (msgs || []).filter((m: any) => {
+          // Count THREADS with unread (not individual messages), matching sidebar behavior
+          const unreadByConv = new Set<string>();
+          (msgs || []).forEach((m: any) => {
             const isRead = m.is_read === true || readMessageIds.includes(m.id);
-            return !isRead;
-          }).length;
+            if (!isRead) unreadByConv.add(m.conversation_id);
+          });
 
-          if (isMounted) setUnreadChats(unreadCount);
+          if (isMounted) setUnreadChats(unreadByConv.size);
         } else {
           if (isMounted) setUnreadChats(0);
         }
@@ -109,9 +111,11 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
       }
     };
 
+    let userId: string | null = null;
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user && isMounted) {
-        const userId = session.user.id;
+        userId = session.user.id;
         fetchUnread(userId);
 
         const channelName = `top-nav-unread-${userId}-${Date.now()}`;
@@ -121,20 +125,28 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
             "postgres_changes",
             { event: "*", schema: "public", table: "messages" },
             () => {
-              fetchUnread(userId);
+              if (userId) fetchUnread(userId);
             }
           )
           .subscribe();
       }
     });
 
+    // Re-fetch when a chat is opened (dispatched by messages page after markAsRead)
+    const handleReadUpdated = () => {
+      if (userId) fetchUnread(userId);
+    };
+    window.addEventListener("iiml-read-updated", handleReadUpdated);
+
     return () => {
       isMounted = false;
+      window.removeEventListener("iiml-read-updated", handleReadUpdated);
       if (channel) {
         supabase.removeChannel(channel);
       }
     };
   }, []);
+
 
   const linkClass = (key: TopNavProps["active"]) =>
     key === active ? "text-brand" : "text-gray-500 hover:text-gray-800";
