@@ -164,11 +164,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         )}
       </AnimatePresence>
 
-      {/* Sidebar - Desktop Push / Mobile Overlay */}
+      {/* Sidebar - Desktop Visible / Mobile Overlay */}
       <div 
-        className={`fixed inset-y-0 left-0 z-[60] w-64 shrink-0 transform bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ease-in-out sm:relative sm:translate-x-0 sm:z-0 ${
-          sidebarOpen ? "translate-x-0 shadow-2xl sm:shadow-none sm:w-64" : "-translate-x-full sm:w-0"
-        } ${!sidebarOpen ? "sm:hidden" : "sm:block"}`}
+        className={`fixed inset-y-0 left-0 z-[60] w-64 shrink-0 transform bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ease-in-out sm:translate-x-0 sm:z-0 sm:relative sm:block ${
+          sidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+        }`}
       >
         <div className="flex h-full flex-col overflow-y-auto overflow-x-hidden w-64 bg-white dark:bg-gray-900">
           {/* Sidebar Header with Profile */}

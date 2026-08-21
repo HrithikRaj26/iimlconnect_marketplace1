@@ -9,14 +9,24 @@ interface ChatHeaderProps {
   transaction: Transaction;
   onMakeOffer: () => void;
   onDeleteThread?: () => void;
+  onBack?: () => void;
 }
 
-export function ChatHeader({ participant, listing, transaction, onMakeOffer, onDeleteThread }: ChatHeaderProps) {
+export function ChatHeader({ participant, listing, transaction, onMakeOffer, onDeleteThread, onBack }: ChatHeaderProps) {
   const dealClosed = transaction.status === "agreed" || transaction.status === "completed";
 
   return (
-    <div className="flex items-center justify-between border-b border-gray-100 bg-white px-5 py-3">
+    <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 px-5 py-3">
       <div className="flex items-center gap-4">
+        {onBack && (
+          <button 
+            type="button" 
+            onClick={onBack}
+            className="md:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-pointer mr-1 shrink-0 font-bold text-sm"
+          >
+            ←
+          </button>
+        )}
         <div className="flex items-center gap-2">
           <span
             className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white"

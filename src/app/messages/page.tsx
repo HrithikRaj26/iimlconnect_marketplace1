@@ -371,21 +371,39 @@ function ChatWorkspace({
     deleteMessage,
   } = useConversation(initialConversation);
 
+  const [mobileView, setMobileView] = useState<"list" | "thread">("list");
+
+  // Sync mobile view on active chat changes
+  useEffect(() => {
+    if (activeId) {
+      setMobileView("thread");
+    } else {
+      setMobileView("list");
+    }
+  }, [activeId]);
+
   const dealClosed = transaction.status === "agreed" || transaction.status === "completed";
 
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* Conversation list */}
-      <div className="hidden w-80 shrink-0 border-r border-gray-100 dark:border-gray-800 md:block bg-white dark:bg-gray-950">
+      <div className={`w-full md:w-80 shrink-0 border-r border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 md:block ${
+        mobileView === "list" ? "block" : "hidden"
+      }`}>
         <ConversationList
           conversations={conversations}
           activeId={activeId}
-          onSelect={onSelect}
+          onSelect={(id) => {
+            onSelect(id);
+            setMobileView("thread");
+          }}
         />
       </div>
 
       {/* Active conversation */}
-      <div className="flex min-w-0 flex-1 flex-col bg-gray-50 dark:bg-gray-900">
+      <div className={`min-w-0 flex-1 flex-col bg-gray-50 dark:bg-gray-900 md:flex ${
+        mobileView === "thread" ? "flex" : "hidden"
+      }`}>
         <ChatHeader
           participant={{
             ...conversation.participant,
@@ -395,6 +413,7 @@ function ChatWorkspace({
           transaction={transaction}
           onMakeOffer={() => setOfferModalOpen(true)}
           onDeleteThread={() => onDeleteConversation(conversation.id)}
+          onBack={() => setMobileView("list")}
         />
 
         <MessageThread
@@ -422,6 +441,7 @@ function ChatWorkspace({
         }}
         onSubmit={async (amount, message) => {
           await sendOffer(amount, message);
+          setOfferModalOpen(false);
         }}
       />
     </div>
