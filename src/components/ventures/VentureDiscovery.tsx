@@ -748,6 +748,7 @@ export default function VentureDiscovery() {
                                         <button
                                           type="button"
                                           key={star}
+                                          disabled={reviewSubmitting}
                                           onClick={() => setRating(star)}
                                           onMouseEnter={() => setHoverRating(star)}
                                           onMouseLeave={() => setHoverRating(null)}
@@ -755,7 +756,7 @@ export default function VentureDiscovery() {
                                             (hoverRating !== null ? hoverRating >= star : rating >= star)
                                               ? "text-amber-500 scale-105 filter drop-shadow-[0_0_2px_rgba(245,158,11,0.4)]"
                                               : "text-gray-300"
-                                          }`}
+                                          } disabled:opacity-50 disabled:cursor-not-allowed`}
                                         >
                                           ★
                                         </button>
@@ -769,6 +770,7 @@ export default function VentureDiscovery() {
                                     onChange={(e) => setReviewContent(e.target.value)}
                                     required
                                     rows={3}
+                                    disabled={reviewSubmitting}
                                   />
 
                                   {reviewError && (

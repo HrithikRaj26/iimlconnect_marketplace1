@@ -25,6 +25,22 @@ export function TextBubble({ message, time, onRetry, onEdit, onDelete }: TextBub
     setEditText(msgText);
   }, [msgText]);
 
+  // Listen to Escape key to close the lightbox preview modal
+  React.useEffect(() => {
+    if (!showPreview) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowPreview(false);
+      }
+    };
+    
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showPreview]);
+
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editText.trim()) return;

@@ -140,7 +140,9 @@ export default function ProfileBuilder() {
       <div className="rounded-2xl bg-white p-8 shadow-sm border border-gray-200">
         <div className="mb-8 border-b border-gray-100 pb-6">
           <h1 className="text-2xl font-bold tracking-tight text-gray-900">My Profile</h1>
-          <p className="mt-2 text-sm text-gray-500">Manage your academic and contact details.</p>
+          <p className="mt-2 text-sm text-gray-500">
+            {isGuest ? "Manage your contact and basic profile details." : "Manage your academic and contact details."}
+          </p>
         </div>
 
         <form onSubmit={handleSaveProfile} className="space-y-6">
@@ -277,14 +279,20 @@ export default function ProfileBuilder() {
               <select
                 value={batch}
                 onChange={(e) => setBatch(e.target.value)}
-                className="appearance-none w-full rounded-lg border border-gray-300 bg-white pl-4 pr-10 py-2.5 text-sm text-gray-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand outline-none font-medium bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%25234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.75rem_center] bg-[size:1.1rem_1.1rem] bg-no-repeat"
+                disabled={isGuest}
+                className="appearance-none w-full rounded-lg border border-gray-300 bg-white pl-4 pr-10 py-2.5 text-sm text-gray-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand outline-none font-medium bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%25234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.75rem_center] bg-[size:1.1rem_1.1rem] bg-no-repeat disabled:opacity-75 disabled:bg-gray-50"
               >
-                <option value="">Select your batch...</option>
-                <option value="External Guest">External Guest</option>
-                <option value="PGP 1">PGP 1</option>
-                <option value="PGP 2">PGP 2</option>
-                <option value="ABM 1">ABM 1</option>
-                <option value="ABM 2">ABM 2</option>
+                {isGuest ? (
+                  <option value="External Guest">External Guest</option>
+                ) : (
+                  <>
+                    <option value="">Select your batch...</option>
+                    <option value="PGP 1">PGP 1</option>
+                    <option value="PGP 2">PGP 2</option>
+                    <option value="ABM 1">ABM 1</option>
+                    <option value="ABM 2">ABM 2</option>
+                  </>
+                )}
               </select>
             </div>
           </div>

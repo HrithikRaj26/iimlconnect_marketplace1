@@ -426,7 +426,13 @@ function ChatWorkspace({
           onDeleteMessage={deleteMessage}
         />
 
-        <ChatInput onSend={sendText} disabled={dealClosed} />
+        {dealClosed && (
+          <div className="bg-green-50 dark:bg-green-950/20 border-t border-b border-green-150 dark:border-green-900/30 px-4 py-2 text-center text-[10px] font-black text-green-700 dark:text-green-400 uppercase tracking-wider">
+            🤝 Deal closed. You can still message each other to coordinate details.
+          </div>
+        )}
+
+        <ChatInput onSend={sendText} />
       </div>
 
       <MakeOfferModal
