@@ -184,7 +184,7 @@ export function ConversationList({ conversations, activeId, onSelect, onNewChat 
                   <div className="relative shrink-0">
                     <Avatar color={c.participant.avatarColor} name={c.participant.name} />
                     {c.participant.online && (
-                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white dark:border-gray-950 bg-emerald-500 shadow-sm shadow-emerald-500/50" />
+                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white dark:border-gray-950 bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse" />
                     )}
                   </div>
 
@@ -220,9 +220,11 @@ export function ConversationList({ conversations, activeId, onSelect, onNewChat 
                       )}
                     </div>
                     {/* Listing pill */}
-                    <p className="mt-0.5 truncate text-[10px] text-gray-400/70 dark:text-gray-600">
-                      📦 {c.listing?.title}
-                    </p>
+                    {c.listing?.title && c.listing.title !== "Direct Message" && (
+                      <p className="mt-0.5 truncate text-[10px] text-gray-400/70 dark:text-gray-600">
+                        📦 {c.listing.title}
+                      </p>
+                    )}
                   </div>
                 </button>
               </li>

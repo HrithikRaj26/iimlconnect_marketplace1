@@ -462,7 +462,7 @@ function ChatWorkspace({
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* Conversation list */}
-      <div className={`w-full md:w-80 shrink-0 border-r border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 md:block ${
+      <div className={`w-full md:w-96 shrink-0 border-r border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 md:block ${
         mobileView === "list" ? "block" : "hidden"
       }`}>
         <ConversationList

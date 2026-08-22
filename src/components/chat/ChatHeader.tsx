@@ -73,16 +73,18 @@ export function ChatHeader({ participant, listing, transaction, onMakeOffer, onD
         </div>
 
         {/* Listing info pill */}
-        <div className="hidden items-center gap-2.5 border-l border-gray-100 dark:border-gray-800 pl-4 ml-1 sm:flex">
-          <div className="relative h-10 w-10 overflow-hidden rounded-xl bg-gray-100 ring-1 ring-gray-200 dark:ring-gray-700 shrink-0">
-            <Image src={listing.imageUrl} alt="" fill sizes="40px" className="object-cover" unoptimized />
+        {listing.title !== "Direct Message" && (
+          <div className="hidden items-center gap-2.5 border-l border-gray-100 dark:border-gray-800 pl-4 ml-1 sm:flex">
+            <div className="relative h-10 w-10 overflow-hidden rounded-xl bg-gray-100 ring-1 ring-gray-200 dark:ring-gray-700 shrink-0">
+              <Image src={listing.imageUrl} alt="" fill sizes="40px" className="object-cover" unoptimized />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Listing</p>
+              <p className="text-[13px] font-bold text-gray-900 dark:text-white truncate max-w-[140px]">{listing.title}</p>
+              <p className="text-xs font-semibold text-brand">{formatINR(listing.askingPrice)}</p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <p className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Listing</p>
-            <p className="text-[13px] font-bold text-gray-900 dark:text-white truncate max-w-[140px]">{listing.title}</p>
-            <p className="text-xs font-semibold text-brand">{formatINR(listing.askingPrice)}</p>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Right side actions */}
