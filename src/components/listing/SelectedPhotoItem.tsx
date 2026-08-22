@@ -49,7 +49,7 @@ export function SelectedPhotoItem({
 
       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100">
         <Image
-          src={image.previewUrl}
+          src={image.remoteUrl || image.previewUrl}
           alt=""
           fill
           sizes="56px"
@@ -69,7 +69,7 @@ export function SelectedPhotoItem({
             Cover Photo
           </span>
         )}
-        <p className="truncate text-sm text-gray-600">{image.file.name}</p>
+        <p className="truncate text-sm text-gray-600">{image.file?.name || "Uploaded Photo"}</p>
         {image.status === "error" && (
           <div className="mt-1 flex items-center gap-2">
             <p className="text-xs font-medium text-red-500">{image.errorMessage}</p>
@@ -88,7 +88,7 @@ export function SelectedPhotoItem({
         <button
           type="button"
           onClick={() => onRemove(image.id)}
-          aria-label={`Remove ${image.file.name}`}
+          aria-label={`Remove ${image.file?.name || "Photo"}`}
           className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600"
         >
           <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">

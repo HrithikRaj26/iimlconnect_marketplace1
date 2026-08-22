@@ -34,79 +34,21 @@ interface ConversationListItemProps {
   onDelete?: (id: string) => void;
 }
 
-function ConversationListItem({ conversation, isActive, onSelect, onDelete }: ConversationListItemProps) {
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [swipeOffset, setSwipeOffset] = useState(0);
-  const [isSwiped, setIsSwiped] = useState(false);
-
+function ConversationListItem({ conversation, isActive, onSelect }: ConversationListItemProps) {
   const hasUnread = conversation.unreadCount > 0;
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.touches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (touchStartX === null) return;
-    const currentX = e.touches[0].clientX;
-    const deltaX = currentX - touchStartX;
-
-    // Swipe left (negative delta)
-    if (deltaX < 0) {
-      const offset = isSwiped ? -70 + deltaX : deltaX;
-      setSwipeOffset(Math.max(-75, Math.min(0, offset)));
-    }
-    // Swipe right (positive delta) to snap back
-    else if (deltaX > 0 && isSwiped) {
-      const offset = -70 + deltaX;
-      setSwipeOffset(Math.max(-70, Math.min(0, offset)));
-    }
-  };
-
-  const handleTouchEnd = () => {
-    setTouchStartX(null);
-    if (swipeOffset < -35) {
-      setSwipeOffset(-70);
-      setIsSwiped(true);
-    } else {
-      setSwipeOffset(0);
-      setIsSwiped(false);
-    }
-  };
-
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onDelete) {
-      onDelete(conversation.id);
-    }
-    setSwipeOffset(0);
-    setIsSwiped(false);
-  };
+  const displayPreview = (conversation.lastMessagePreview || "").startsWith("data:")
+    ? "Sent an attachment"
+    : conversation.lastMessagePreview;
 
   return (
-    <div className="relative overflow-hidden w-full bg-white dark:bg-gray-950 select-none">
-      {/* Hidden Action Behind */}
-      {onDelete && (
-        <button
-          type="button"
-          onClick={handleDeleteClick}
-          className="absolute inset-y-0 right-0 w-[70px] bg-red-600 flex items-center justify-center text-white z-0 hover:bg-red-700 active:bg-red-800 transition-colors"
-          title="Delete Conversation"
-          aria-label="Delete Conversation"
-        >
-          <Trash2 size={18} />
-        </button>
-      )}
-
+    <div className="relative w-full bg-white dark:bg-gray-950 select-none">
       {/* Foreground Button */}
       <button
         type="button"
         onClick={() => onSelect(conversation.id)}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        style={{ transform: `translateX(${swipeOffset}px)` }}
         className={[
-          "relative z-10 flex w-full items-center gap-3.5 px-4 py-3.5 text-left transition-all duration-150 group",
+          "relative flex w-full items-center gap-3.5 px-4 py-3.5 text-left transition-all duration-150 group",
           isActive
             ? "bg-brand/10 dark:bg-brand/15"
             : hasUnread
@@ -154,7 +96,7 @@ function ConversationListItem({ conversation, isActive, onSelect, onDelete }: Co
                 ? "font-semibold text-gray-700 dark:text-gray-300"
                 : "text-gray-400 dark:text-gray-500"
             }`}>
-              {conversation.lastMessagePreview}
+              {displayPreview}
             </p>
             {hasUnread && (
               <span className="shrink-0 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand px-1.5 text-[10px] font-extrabold text-white shadow-sm shadow-brand/30">

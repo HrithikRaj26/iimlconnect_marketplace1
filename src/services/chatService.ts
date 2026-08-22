@@ -315,7 +315,7 @@ class SupabaseChatService implements IChatService {
     const { error: convErr } = await supabase
       .from("conversations")
       .update({
-        last_message_preview: text,
+        last_message_preview: text.startsWith("data:") ? "Sent an attachment" : text,
         last_message_at: nowStr
       })
       .eq("id", conversationId);
@@ -372,7 +372,7 @@ class SupabaseChatService implements IChatService {
     const { error: convErr } = await supabase
       .from("conversations")
       .update({
-        last_message_preview: preview,
+        last_message_preview: preview.startsWith("data:") ? "Sent an attachment" : preview,
         last_message_at: nowStr
       })
       .eq("id", conversationId);
