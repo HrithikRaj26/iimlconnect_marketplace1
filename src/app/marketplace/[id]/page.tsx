@@ -11,6 +11,7 @@ import { FILTER_CATEGORY_OPTIONS, FILTER_CONDITION_OPTIONS } from "@/constants/m
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/context/ToastContext";
 import { Loader } from "@/components/ui/Loader";
+import { SkeletonListingDetail } from "@/components/ui/Skeleton";
 
 export default function ListingDetailPage() {
   const params = useParams();
@@ -89,7 +90,11 @@ export default function ListingDetailPage() {
   };
 
   if (loading) {
-    return <Loader fullscreen message="Loading details..." />;
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-950 transition-colors duration-300">
+        <SkeletonListingDetail />
+      </div>
+    );
   }
 
   if (!listing) {

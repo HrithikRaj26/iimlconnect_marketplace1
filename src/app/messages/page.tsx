@@ -15,6 +15,7 @@ import { supabase } from "@/lib/supabase";
 import { Conversation } from "@/types";
 import { useToast } from "@/context/ToastContext";
 import { NewChatModal, PlatformUser } from "@/components/chat/NewChatModal";
+import { SkeletonConversations } from "@/components/ui/Skeleton";
 
 export default function MessagesPage() {
   return (
@@ -348,7 +349,7 @@ function ChatWorkspaceWrapper() {
   };
 
   if (loading) {
-    return <Loader fullscreen message="Loading your conversations..." />;
+    return <SkeletonConversations />;
   }
 
   if (conversations.length === 0 && !activeId) {

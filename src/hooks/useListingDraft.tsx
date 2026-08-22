@@ -43,6 +43,7 @@ type Action =
   | { type: "SET_NEGOTIABLE"; value: boolean }
   | { type: "SET_PICKUP_TYPE"; value: PickupLocationType }
   | { type: "SET_CUSTOM_PICKUP_NOTE"; value: string }
+  | { type: "RESTORE_DRAFT"; draft: ListingDraft }
   | { type: "RESET" };
 
 function reducer(state: ListingDraft, action: Action): ListingDraft {
@@ -80,7 +81,12 @@ function reducer(state: ListingDraft, action: Action): ListingDraft {
       return { ...state, pickupLocationType: action.value };
     case "SET_CUSTOM_PICKUP_NOTE":
       return { ...state, customPickupNote: action.value };
+    case "RESTORE_DRAFT":
+      return { ...action.draft };
     case "RESET":
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("iiml-listing-draft");
+      }
       return initialDraft;
     default:
       return state;
@@ -115,6 +121,44 @@ export function ListingDraftProvider({ children }: { children: React.ReactNode }
   const [draft, dispatch] = useReducer(reducer, initialDraft);
   const [publishedListing, setPublishedListingState] = React.useState<PublishedListing | null>(null);
   const setPublishedListing = useCallback((listing: PublishedListing) => setPublishedListingState(listing), []);
+
+  // Restore draft on mount (avoids hydration mismatch)
+  React.useEffect(() => {
+    try {
+      const saved = localStorage.getItem("iiml-listing-draft");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.images) {
+          parsed.images = parsed.images.map((img: any) => ({
+            ...img,
+            file: undefined, // File objects cannot be parsed back
+          }));
+        }
+        dispatch({ type: "RESTORE_DRAFT", draft: parsed });
+      }
+    } catch (e) {
+      console.error("Failed to restore draft:", e);
+    }
+  }, []);
+
+  // Save draft to localStorage on changes
+  React.useEffect(() => {
+    try {
+      const cleanDraft = {
+        ...draft,
+        images: draft.images.map((img) => ({
+          id: img.id,
+          previewUrl: img.previewUrl,
+          remoteUrl: img.remoteUrl,
+          status: img.status === "uploaded" ? ("uploaded" as const) : ("idle" as const),
+          errorMessage: img.errorMessage,
+        })),
+      };
+      localStorage.setItem("iiml-listing-draft", JSON.stringify(cleanDraft));
+    } catch (e) {
+      console.error("Failed to save draft:", e);
+    }
+  }, [draft]);
 
   const addImages = useCallback((images: ListingImage[]) => dispatch({ type: "ADD_IMAGES", images }), []);
   const removeImage = useCallback((id: string) => dispatch({ type: "REMOVE_IMAGE", id }), []);
