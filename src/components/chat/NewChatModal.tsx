@@ -183,6 +183,7 @@ export function NewChatModal({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close modal"
             className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4">
@@ -206,7 +207,7 @@ export function NewChatModal({
               className="flex-1 bg-transparent text-sm font-medium text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 border-none focus:ring-0 p-0"
             />
             {query && (
-              <button type="button" onClick={() => setQuery("")} className="shrink-0 text-gray-400 hover:text-gray-600">
+              <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="shrink-0 text-gray-400 hover:text-gray-600">
                 <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                 </svg>
@@ -218,8 +219,8 @@ export function NewChatModal({
         {/* User list */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-12 gap-3">
-              <div className="h-8 w-8 animate-spin rounded-full border-3 border-gray-200 border-t-brand" />
+            <div className="flex flex-col items-center justify-center py-12 gap-3" role="status">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-brand" />
               <p className="text-xs font-semibold text-gray-400">Finding people...</p>
             </div>
           ) : filtered.length === 0 ? (
@@ -259,17 +260,17 @@ export function NewChatModal({
                             {user.batch}
                           </span>
                           {user.source === "venture" && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-orange-500 bg-orange-50 dark:bg-orange-950/30 px-1.5 py-0.5 rounded-full">
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-orange-700 bg-orange-100 dark:bg-orange-900/30 px-1.5 py-0.5 rounded-full" aria-label="Founder badge">
                               Founder
                             </span>
                           )}
                           {user.source === "listing" && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-blue-500 bg-blue-50 dark:bg-blue-950/30 px-1.5 py-0.5 rounded-full">
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-blue-700 bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 rounded-full" aria-label="Seller badge">
                               Seller
                             </span>
                           )}
                           {user.source === "conversation" && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded-full">
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 px-1.5 py-0.5 rounded-full" aria-label="Contact badge">
                               Contact
                             </span>
                           )}
