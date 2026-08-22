@@ -9,6 +9,7 @@ import { TopNav } from "@/components/ui/TopNav";
 import { checkAndUpdateLoginStreak } from "@/services/streakService";
 import { motion, AnimatePresence } from "framer-motion";
 import { playWelcomeSound } from "@/utils/audio";
+import { CommandPalette } from "@/components/ui/CommandPalette";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -404,6 +405,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </nav>
       {/* Bottom padding so content isn't hidden behind the mobile nav */}
       <div className="h-16 md:hidden" />
+      <CommandPalette />
     </div>
   );
 }

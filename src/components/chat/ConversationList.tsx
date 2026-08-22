@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Conversation } from "@/types";
+import { Trash2 } from "lucide-react";
 
 interface ConversationListProps {
   conversations: Conversation[];
   activeId: string;
   onSelect: (id: string) => void;
   onNewChat: () => void;
+  onDeleteConversation?: (id: string) => void;
 }
 
 function Avatar({ color, name, size = "md" }: { color: string; name: string; size?: "sm" | "md" | "lg" }) {
@@ -25,7 +27,160 @@ function Avatar({ color, name, size = "md" }: { color: string; name: string; siz
   );
 }
 
-export function ConversationList({ conversations, activeId, onSelect, onNewChat }: ConversationListProps) {
+interface ConversationListItemProps {
+  conversation: Conversation;
+  isActive: boolean;
+  onSelect: (id: string) => void;
+  onDelete?: (id: string) => void;
+}
+
+function ConversationListItem({ conversation, isActive, onSelect, onDelete }: ConversationListItemProps) {
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isSwiped, setIsSwiped] = useState(false);
+
+  const hasUnread = conversation.unreadCount > 0;
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    const currentX = e.touches[0].clientX;
+    const deltaX = currentX - touchStartX;
+
+    // Swipe left (negative delta)
+    if (deltaX < 0) {
+      const offset = isSwiped ? -70 + deltaX : deltaX;
+      setSwipeOffset(Math.max(-75, Math.min(0, offset)));
+    }
+    // Swipe right (positive delta) to snap back
+    else if (deltaX > 0 && isSwiped) {
+      const offset = -70 + deltaX;
+      setSwipeOffset(Math.max(-70, Math.min(0, offset)));
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setTouchStartX(null);
+    if (swipeOffset < -35) {
+      setSwipeOffset(-70);
+      setIsSwiped(true);
+    } else {
+      setSwipeOffset(0);
+      setIsSwiped(false);
+    }
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) {
+      onDelete(conversation.id);
+    }
+    setSwipeOffset(0);
+    setIsSwiped(false);
+  };
+
+  return (
+    <div className="relative overflow-hidden w-full bg-white dark:bg-gray-950 select-none">
+      {/* Hidden Action Behind */}
+      {onDelete && (
+        <button
+          type="button"
+          onClick={handleDeleteClick}
+          className="absolute inset-y-0 right-0 w-[70px] bg-red-600 flex items-center justify-center text-white z-0 hover:bg-red-700 active:bg-red-800 transition-colors"
+          title="Delete Conversation"
+          aria-label="Delete Conversation"
+        >
+          <Trash2 size={18} />
+        </button>
+      )}
+
+      {/* Foreground Button */}
+      <button
+        type="button"
+        onClick={() => onSelect(conversation.id)}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ transform: `translateX(${swipeOffset}px)` }}
+        className={[
+          "relative z-10 flex w-full items-center gap-3.5 px-4 py-3.5 text-left transition-all duration-150 group",
+          isActive
+            ? "bg-brand/10 dark:bg-brand/15"
+            : hasUnread
+              ? "bg-blue-50/60 dark:bg-blue-950/20 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+              : "hover:bg-gray-50 dark:hover:bg-gray-800/40",
+        ].join(" ")}
+      >
+        {/* Active bar */}
+        {isActive && (
+          <span className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-brand" />
+        )}
+        {/* Unread bar */}
+        {!isActive && hasUnread && (
+          <span className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-brand/60" />
+        )}
+
+        {/* Avatar + online dot */}
+        <div className="relative shrink-0">
+          <Avatar color={conversation.participant.avatarColor} name={conversation.participant.name} />
+          {conversation.participant.online && (
+            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white dark:border-gray-950 bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse" />
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline justify-between gap-1 mb-0.5">
+            <p className={`truncate text-[13.5px] leading-snug ${
+              hasUnread
+                ? "font-extrabold text-gray-900 dark:text-white"
+                : isActive
+                  ? "font-bold text-gray-900 dark:text-white"
+                  : "font-semibold text-gray-700 dark:text-gray-200"
+            }`}>
+              {conversation.participant.name}
+            </p>
+            <span className={`shrink-0 text-[11px] tabular-nums ${
+              hasUnread ? "font-bold text-brand" : "text-gray-400"
+            }`}>
+              {conversation.lastMessageAt}
+            </span>
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <p className={`truncate text-xs leading-relaxed ${
+              hasUnread
+                ? "font-semibold text-gray-700 dark:text-gray-300"
+                : "text-gray-400 dark:text-gray-500"
+            }`}>
+              {conversation.lastMessagePreview}
+            </p>
+            {hasUnread && (
+              <span className="shrink-0 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand px-1.5 text-[10px] font-extrabold text-white shadow-sm shadow-brand/30">
+                {conversation.unreadCount}
+              </span>
+            )}
+          </div>
+          {/* Listing pill */}
+          {conversation.listing?.title && conversation.listing.title !== "Direct Message" && (
+            <p className="mt-0.5 truncate text-[10px] text-gray-400/70 dark:text-gray-600">
+              📦 {conversation.listing.title}
+            </p>
+          )}
+        </div>
+      </button>
+    </div>
+  );
+}
+
+export function ConversationList({
+  conversations,
+  activeId,
+  onSelect,
+  onNewChat,
+  onDeleteConversation,
+}: ConversationListProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<"all" | "unread" | "active">("all");
 
@@ -154,82 +309,16 @@ export function ConversationList({ conversations, activeId, onSelect, onNewChat 
             )}
           </div>
         ) : (
-          filteredConversations.map((c) => {
-            const isActive = c.id === activeId;
-            const hasUnread = c.unreadCount > 0;
-            return (
-              <li key={c.id}>
-                <button
-                  type="button"
-                  onClick={() => onSelect(c.id)}
-                  className={[
-                    "relative flex w-full items-center gap-3.5 px-4 py-3.5 text-left transition-all duration-200 group",
-                    isActive
-                      ? "bg-brand/10 dark:bg-brand/15"
-                      : hasUnread
-                        ? "bg-blue-50/60 dark:bg-blue-950/20 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-                        : "hover:bg-gray-50 dark:hover:bg-gray-800/40",
-                  ].join(" ")}
-                >
-                  {/* Active bar */}
-                  {isActive && (
-                    <span className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-brand" />
-                  )}
-                  {/* Unread bar */}
-                  {!isActive && hasUnread && (
-                    <span className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-brand/60" />
-                  )}
-
-                  {/* Avatar + online dot */}
-                  <div className="relative shrink-0">
-                    <Avatar color={c.participant.avatarColor} name={c.participant.name} />
-                    {c.participant.online && (
-                      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white dark:border-gray-950 bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse" />
-                    )}
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-baseline justify-between gap-1 mb-0.5">
-                      <p className={`truncate text-[13.5px] leading-snug ${
-                        hasUnread
-                          ? "font-extrabold text-gray-900 dark:text-white"
-                          : isActive
-                            ? "font-bold text-gray-900 dark:text-white"
-                            : "font-semibold text-gray-700 dark:text-gray-200"
-                      }`}>
-                        {c.participant.name}
-                      </p>
-                      <span className={`shrink-0 text-[11px] tabular-nums ${
-                        hasUnread ? "font-bold text-brand" : "text-gray-400"
-                      }`}>
-                        {c.lastMessageAt}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <p className={`truncate text-xs leading-relaxed ${
-                        hasUnread
-                          ? "font-semibold text-gray-700 dark:text-gray-300"
-                          : "text-gray-400 dark:text-gray-500"
-                      }`}>
-                        {c.lastMessagePreview}
-                      </p>
-                      {hasUnread && (
-                        <span className="shrink-0 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand px-1.5 text-[10px] font-extrabold text-white shadow-sm shadow-brand/30">
-                          {c.unreadCount}
-                        </span>
-                      )}
-                    </div>
-                    {/* Listing pill */}
-                    {c.listing?.title && c.listing.title !== "Direct Message" && (
-                      <p className="mt-0.5 truncate text-[10px] text-gray-400/70 dark:text-gray-600">
-                        📦 {c.listing.title}
-                      </p>
-                    )}
-                  </div>
-                </button>
-              </li>
-            );
-          })
+          filteredConversations.map((c) => (
+            <li key={c.id}>
+              <ConversationListItem
+                conversation={c}
+                isActive={c.id === activeId}
+                onSelect={onSelect}
+                onDelete={onDeleteConversation}
+              />
+            </li>
+          ))
         )}
       </ul>
     </div>

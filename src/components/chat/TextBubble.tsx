@@ -15,6 +15,17 @@ interface TextBubbleProps {
 export function TextBubble({ message, time, onRetry, onEdit, onDelete }: TextBubbleProps) {
   const isMine = message.authorId === CURRENT_USER_ID;
   const msgText = message.text || "";
+  const isPdf = msgText.startsWith("data:application/pdf") || (msgText.startsWith("http") && msgText.toLowerCase().includes(".pdf"));
+  
+  let pdfName = "Shared Document.pdf";
+  if (msgText.startsWith("http")) {
+    const parts = msgText.split("/");
+    const lastPart = parts[parts.length - 1];
+    if (lastPart && lastPart.toLowerCase().endsWith(".pdf")) {
+      pdfName = decodeURIComponent(lastPart);
+    }
+  }
+
   const [showPreview, setShowPreview] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(msgText);
@@ -126,6 +137,40 @@ export function TextBubble({ message, time, onRetry, onEdit, onDelete }: TextBub
           ) : msgText.startsWith("data:image/") || (msgText.startsWith("http") && (msgText.match(/\.(jpeg|jpg|gif|png|webp)/i))) ? (
             <div className="overflow-hidden rounded-lg max-w-full cursor-zoom-in" onClick={() => setShowPreview(true)}>
               <img src={msgText} alt="Attachment" className="max-h-60 max-w-full rounded-lg object-cover hover:brightness-95 transition-all" />
+            </div>
+          ) : isPdf ? (
+            <div className="flex items-center gap-3.5 py-2 px-1 rounded-xl bg-white/5 dark:bg-black/20 border border-white/10 dark:border-white/5 shadow-inner min-w-[200px] sm:min-w-[260px]">
+              {/* PDF Icon Badge */}
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 shadow-sm animate-pulse">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-6 w-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+              </div>
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="text-xs font-extrabold truncate text-gray-900 dark:text-gray-100 hover:underline cursor-pointer" onClick={() => setShowPreview(true)}>
+                  {pdfName}
+                </span>
+                <span className="text-[9px] font-semibold text-gray-400 dark:text-gray-500 mt-0.5">
+                  PDF Document (1.4 MB)
+                </span>
+                <div className="flex gap-3 mt-1.5 select-none">
+                  <a
+                    href={msgText}
+                    download={pdfName}
+                    className={["text-[10px] font-black tracking-wide uppercase hover:underline", isMine ? "text-blue-100 hover:text-white" : "text-brand hover:text-brand-dark"].join(" ")}
+                  >
+                    Download
+                  </a>
+                  <span className={isMine ? "text-white/20 text-[10px]" : "text-gray-300 dark:text-gray-700 text-[10px]"}>|</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowPreview(true)}
+                    className={["text-[10px] font-black tracking-wide uppercase hover:underline", isMine ? "text-blue-100 hover:text-white" : "text-brand hover:text-brand-dark"].join(" ")}
+                  >
+                    Preview
+                  </button>
+                </div>
+              </div>
             </div>
           ) : msgText.startsWith("data:") ? (
             <div className="flex items-center gap-3 py-1.5 px-0.5">

@@ -474,6 +474,7 @@ function ChatWorkspace({
             setMobileView("thread");
           }}
           onNewChat={onNewChat}
+          onDeleteConversation={onDeleteConversation}
         />
       </div>
 
