@@ -223,17 +223,17 @@ export default function CommunityFeed() {
       {loading ? (
         <div className="space-y-6">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="animate-pulse rounded-2xl bg-white p-6 border border-gray-200 space-y-4">
+            <div key={i} className="animate-pulse rounded-2xl bg-white dark:bg-gray-900 p-6 border border-gray-200 dark:border-gray-800 space-y-4">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-gray-200" />
+                <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-800" />
                 <div className="space-y-2">
-                  <div className="h-4 w-28 bg-gray-200 rounded" />
-                  <div className="h-3 w-16 bg-gray-200 rounded" />
+                  <div className="h-4 w-28 bg-gray-200 dark:bg-gray-800 rounded" />
+                  <div className="h-3 w-16 bg-gray-200 dark:bg-gray-800 rounded" />
                 </div>
               </div>
-              <div className="h-6 w-3/4 bg-gray-200 rounded" />
-              <div className="h-16 w-full bg-gray-200 rounded" />
-              <div className="h-8 w-24 bg-gray-200 rounded" />
+              <div className="h-6 w-3/4 bg-gray-200 dark:bg-gray-800 rounded" />
+              <div className="h-16 w-full bg-gray-200 dark:bg-gray-800 rounded" />
+              <div className="h-8 w-24 bg-gray-200 dark:bg-gray-800 rounded" />
             </div>
           ))}
         </div>
@@ -354,13 +354,13 @@ export default function CommunityFeed() {
 
       {/* Broadcast Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="relative w-full max-w-lg rounded-2xl bg-white shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-              <h3 className="text-base font-extrabold text-gray-900">📢 Create Broadcast Post</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="relative w-full max-w-lg rounded-2xl bg-white dark:bg-gray-900 shadow-xl border border-gray-150 dark:border-gray-800 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+              <h3 className="text-base font-extrabold text-gray-900 dark:text-white">📢 Create Broadcast Post</h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="h-8 w-8 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100 text-gray-500 font-extrabold text-lg"
+                className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 font-extrabold text-lg"
               >
                 ✕
               </button>
@@ -370,14 +370,14 @@ export default function CommunityFeed() {
               {/* Select Venture */}
               {myVentures.length > 1 && (
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Post on behalf of:</label>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-450 uppercase tracking-wide">Post on behalf of:</label>
                   <select
                     value={selectedVentureId}
                     onChange={(e) => setSelectedVentureId(e.target.value)}
-                    className="appearance-none block w-full rounded-xl border border-gray-200 pl-3 pr-10 py-2.5 text-sm font-bold text-gray-800 outline-none focus:border-orange-500 bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%25234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.75rem_center] bg-[size:1.1rem_1.1rem] bg-no-repeat"
+                    className="appearance-none block w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 pl-3 pr-10 py-2.5 text-sm font-bold text-gray-800 dark:text-gray-200 outline-none focus:border-orange-500 bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%25234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.75rem_center] bg-[size:1.1rem_1.1rem] bg-no-repeat"
                   >
                     {myVentures.map((v) => (
-                      <option key={v.id} value={v.id}>
+                      <option key={v.id} value={v.id} className="dark:bg-gray-900 dark:text-gray-200">
                         {v.name}
                       </option>
                     ))}
@@ -387,7 +387,7 @@ export default function CommunityFeed() {
 
               {/* Select Type */}
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Broadcast Category:</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-450 uppercase tracking-wide">Broadcast Category:</label>
                 <div className="grid grid-cols-3 gap-2">
                   {(["update", "promotion", "event"] as const).map((type) => (
                     <button
@@ -396,8 +396,8 @@ export default function CommunityFeed() {
                       onClick={() => setPostType(type)}
                       className={`rounded-xl border py-2 text-center text-xs font-bold uppercase transition-all ${
                         postType === type
-                          ? "bg-gray-900 border-gray-900 text-white shadow-sm"
-                          : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
+                          ? "bg-gray-900 dark:bg-white border-gray-900 dark:border-white text-white dark:text-gray-900 shadow-sm"
+                          : "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
                       }`}
                     >
                       {type === "event" ? "📅 Event" : type === "promotion" ? "🎉 Promo" : "📢 Update"}
@@ -466,13 +466,13 @@ export default function CommunityFeed() {
 
       {/* Event Details modal */}
       {activeEvent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="relative w-full max-w-md rounded-2xl bg-white shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-              <h3 className="text-base font-extrabold text-blue-900">📅 Scheduled Event details</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="relative w-full max-w-md rounded-2xl bg-white dark:bg-gray-900 shadow-xl border border-gray-150 dark:border-gray-800 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 px-6 py-4">
+              <h3 className="text-base font-extrabold text-blue-900 dark:text-blue-400">📅 Scheduled Event details</h3>
               <button
                 onClick={() => setActiveEvent(null)}
-                className="h-8 w-8 rounded-full bg-gray-50 flex items-center justify-center hover:bg-gray-100 text-gray-500 font-extrabold text-lg"
+                className="h-8 w-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 font-extrabold text-lg"
               >
                 ✕
               </button>
@@ -481,30 +481,30 @@ export default function CommunityFeed() {
               <div className="flex items-center gap-3">
                 <img
                   src={activeEvent.venture?.logo_url || ''}
-                  className="h-10 w-10 rounded-lg object-cover bg-gray-50 border"
+                  className="h-10 w-10 rounded-lg object-cover bg-gray-50 dark:bg-gray-800 border border-gray-150 dark:border-gray-750"
                 />
                 <div>
-                  <h4 className="text-sm font-black text-gray-900">{activeEvent.venture?.name}</h4>
+                  <h4 className="text-sm font-black text-gray-900 dark:text-white">{activeEvent.venture?.name}</h4>
                   <p className="text-[10px] font-semibold text-gray-400">Host Startup</p>
                 </div>
               </div>
-              <h3 className="text-base font-black text-gray-900 mt-2">{activeEvent.title}</h3>
-              <p className="text-xs font-medium text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100">
+              <h3 className="text-base font-black text-gray-900 dark:text-white mt-2">{activeEvent.title}</h3>
+              <p className="text-xs font-medium text-gray-600 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-850 p-3 rounded-lg border border-gray-100 dark:border-gray-800">
                 {activeEvent.content}
               </p>
-              <div className="space-y-2 border-t border-gray-100 pt-3">
-                <div className="flex items-center gap-2 text-xs font-semibold text-gray-700">
+              <div className="space-y-2 border-t border-gray-100 dark:border-gray-800 pt-3">
+                <div className="flex items-center gap-2 text-xs font-semibold text-gray-700 dark:text-gray-300">
                   <span className="text-lg">📅</span>
                   <div className="flex flex-col">
                     <span className="font-extrabold">Date & Time</span>
-                    <span className="text-gray-500">{new Date(activeEvent.event_date!).toLocaleString()}</span>
+                    <span className="text-gray-500 dark:text-gray-405">{new Date(activeEvent.event_date!).toLocaleString()}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-semibold text-gray-700 pt-1">
+                <div className="flex items-center gap-2 text-xs font-semibold text-gray-700 dark:text-gray-300 pt-1">
                   <span className="text-lg">📍</span>
                   <div className="flex flex-col">
                     <span className="font-extrabold">Venue/Location</span>
-                    <span className="text-gray-500">{activeEvent.event_location}</span>
+                    <span className="text-gray-500 dark:text-gray-405">{activeEvent.event_location}</span>
                   </div>
                 </div>
               </div>

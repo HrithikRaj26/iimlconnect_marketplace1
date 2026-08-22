@@ -895,39 +895,39 @@ export default function MyVentures() {
           </div>
 
           {/* Success Dialog */}
-          <div className="relative bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl border border-gray-100 z-20 text-center space-y-6 scale-in-center animate-in zoom-in-95 duration-200">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-50 text-green-500 border border-green-100 shadow-sm animate-bounce">
+          <div className="relative bg-white dark:bg-gray-900 rounded-3xl p-8 max-w-md w-full shadow-2xl border border-gray-100 dark:border-gray-800 z-20 text-center space-y-6 scale-in-center animate-in zoom-in-95 duration-200">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-50 dark:bg-green-950/30 text-green-500 border border-green-100 dark:border-green-900/30 shadow-sm animate-bounce">
               <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
             </div>
             
              <div className="space-y-2">
-              <h3 className="text-xl font-black text-gray-900">
+              <h3 className="text-xl font-black text-gray-900 dark:text-white">
                 {editingVentureId ? "✨ Profile Updates Submitted!" : "🎉 Registration Submitted!"}
               </h3>
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
                 {editingVentureId ? "Awaiting Update Approval" : "Awaiting Admin Moderation"}
               </p>
-              <p className="text-sm font-medium text-gray-500 leading-relaxed pt-2">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400 leading-relaxed pt-2">
                 {editingVentureId ? (
                   <>
-                    Your updates for <span className="font-extrabold text-gray-900">"{registeredVentureName}"</span> have been saved.
+                    Your updates for <span className="font-extrabold text-gray-900 dark:text-white">"{registeredVentureName}"</span> have been saved.
                   </>
                 ) : (
                   <>
-                    Congratulations! Your student venture <span className="font-extrabold text-gray-900">"{registeredVentureName}"</span> has been registered successfully.
+                    Congratulations! Your student venture <span className="font-extrabold text-gray-900 dark:text-white">"{registeredVentureName}"</span> has been registered successfully.
                   </>
                 )}
               </p>
-              <p className="text-xs text-gray-400 leading-relaxed bg-gray-50 p-3 rounded-xl border mt-2">
+              <p className="text-xs text-gray-400 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-150 dark:border-gray-700 mt-2">
                 {editingVentureId ? (
                   <>
                     The updates are now pending moderation. The current live details will remain online to protect your business operations. Once approved, the new changes will take effect!
                   </>
                 ) : (
                   <>
-                    It is now pending review. Once approved by our team, it will go live on the campus directory board and we will notify you at <span className="font-bold text-gray-600">{email}</span>!
+                    It is now pending review. Once approved by our team, it will go live on the campus directory board and we will notify you at <span className="font-bold text-gray-600 dark:text-gray-300">{email}</span>!
                   </>
                 )}
               </p>
@@ -945,7 +945,7 @@ export default function MyVentures() {
           </motion.div>
         )}
       </AnimatePresence>
-
+ 
       <AnimatePresence>
         {showGuidancePrompt && (
           <motion.div
@@ -965,13 +965,13 @@ export default function MyVentures() {
           >
             <span className="text-4xl block">📚</span>
             <div className="space-y-1">
-              <h3 className="text-lg font-black text-gray-900">Founder Guidelines & SLA</h3>
-              <p className="text-xs text-gray-500 font-semibold leading-relaxed">
+              <h3 className="text-lg font-black text-gray-900 dark:text-white">Founder Guidelines & SLA</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold leading-relaxed">
                 Before registering your first campus venture, please review the critical platform operation rules:
               </p>
             </div>
             
-            <div className="text-left bg-gray-50 border rounded-2xl p-4 text-[11px] font-semibold text-gray-600 space-y-2.5 leading-relaxed">
+            <div className="text-left bg-gray-50 dark:bg-gray-850 border border-gray-150 dark:border-gray-800 rounded-2xl p-4 text-[11px] font-semibold text-gray-600 dark:text-gray-300 space-y-2.5 leading-relaxed">
               <div className="flex gap-2">
                 <span className="text-orange-500">💼</span>
                 <span><strong>Moderation:</strong> All submissions and profile updates are verified by admin before going live.</span>

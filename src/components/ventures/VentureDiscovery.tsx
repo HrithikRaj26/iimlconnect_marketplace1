@@ -317,23 +317,23 @@ export default function VentureDiscovery() {
             <div key={i} className="rounded-2xl border border-white/80 bg-white/50 backdrop-blur-md p-6 h-64 flex flex-col justify-between animate-pulse">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="h-10 w-10 rounded-xl bg-gray-200 animate-shimmer" />
-                  <div className="h-5 w-16 rounded-full bg-gray-200 animate-shimmer" />
+                  <div className="h-10 w-10 rounded-xl bg-gray-200 dark:bg-gray-800 animate-shimmer" />
+                  <div className="h-5 w-16 rounded-full bg-gray-200 dark:bg-gray-800 animate-shimmer" />
                 </div>
                 <div className="space-y-2">
-                  <div className="h-4 w-3/4 rounded bg-gray-200 animate-shimmer" />
-                  <div className="h-3 w-1/2 rounded bg-gray-200 animate-shimmer" />
+                  <div className="h-4 w-3/4 rounded bg-gray-200 dark:bg-gray-800 animate-shimmer" />
+                  <div className="h-3 w-1/2 rounded bg-gray-200 dark:bg-gray-800 animate-shimmer" />
                 </div>
               </div>
-              <div className="h-10 w-full rounded-xl bg-gray-200 animate-shimmer" />
+              <div className="h-10 w-full rounded-xl bg-gray-200 dark:bg-gray-800 animate-shimmer" />
             </div>
           ))}
         </div>
       ) : ventures.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl bg-white border border-gray-200 py-16 px-6 text-center">
+        <div className="flex flex-col items-center justify-center rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 py-16 px-6 text-center">
           <span className="text-5xl">🚀</span>
-          <h3 className="mt-4 text-lg font-bold text-gray-900">No Ventures Found</h3>
-          <p className="mt-2 text-sm text-gray-500 max-w-xs">
+          <h3 className="mt-4 text-lg font-bold text-gray-900 dark:text-white">No Ventures Found</h3>
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-450 max-w-xs">
             Be the pioneer! Create and showcase the first venture under this category today.
           </p>
         </div>
@@ -368,7 +368,7 @@ export default function VentureDiscovery() {
                   <div>
                     {/* Logo and Category */}
                     <div className="flex items-center justify-between">
-                      <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-gray-50 border border-gray-150 shrink-0">
+                      <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-150 dark:border-gray-700 shrink-0">
                         <img
                           src={venture.logo_url || "https://images.unsplash.com/photo-1606857521015-7f9fcf423740?w=150&h=150&fit=crop"}
                           alt={venture.name}
@@ -388,48 +388,48 @@ export default function VentureDiscovery() {
                         )}
                         <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-extrabold border ${
                           venture.is_open 
-                            ? "bg-green-50 text-green-700 border-green-200" 
-                            : "bg-gray-50 text-gray-500 border-gray-200"
+                            ? "bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-900/35" 
+                            : "bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-750"
                         }`}>
                           <span className={`h-1.5 w-1.5 rounded-full ${venture.is_open ? "bg-green-500 animate-pulse" : "bg-gray-400"}`} />
                           {venture.is_open ? "Open" : "Closed"}
                         </span>
-                        <span className="rounded-full bg-orange-50 px-2.5 py-1 text-[10px] font-bold text-orange-600">
+                        <span className="rounded-full bg-orange-50 dark:bg-orange-950/30 px-2.5 py-1 text-[10px] font-bold text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/20">
                           {venture.category}
                         </span>
                       </div>
                     </div>
 
                     {/* Info */}
-                    <h3 className="mt-4 text-base font-extrabold text-gray-900 group-hover:text-orange-600 transition-colors">
+                    <h3 className="mt-4 text-base font-extrabold text-gray-900 dark:text-white group-hover:text-orange-600 transition-colors">
                       {venture.name}
                     </h3>
-                    <p className="mt-1 text-xs font-semibold text-gray-400 line-clamp-1">
+                    <p className="mt-1 text-xs font-semibold text-gray-450 dark:text-gray-500">
                       By {venture.owner_name} ({venture.owner_batch})
                     </p>
-                    <p className="mt-3 text-sm font-medium text-gray-500 line-clamp-2 leading-relaxed">
+                    <p className="mt-3 text-sm font-medium text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
                       {venture.tagline}
                     </p>
 
                     {/* Rating */}
                     <div className="mt-4 flex items-center gap-2">
-                      <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg text-xs font-black text-amber-700">
+                      <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/30 px-2 py-0.5 rounded-lg text-xs font-black text-amber-700 dark:text-amber-400">
                         <span>★</span>
                         <span>{venture.average_rating}</span>
                       </div>
-                      <span className="text-xs font-semibold text-gray-400">({venture.reviews_count} reviews)</span>
+                      <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">({venture.reviews_count} reviews)</span>
                     </div>
 
                     {/* Offerings snippet */}
                     {venture.offerings.length > 0 && (
                       <div className="mt-4 flex flex-wrap gap-1.5">
                         {venture.offerings.slice(0, 2).map((offering, idx) => (
-                          <span key={idx} className="rounded bg-gray-50 border border-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-600 truncate max-w-[120px]">
+                          <span key={idx} className="rounded bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 px-2 py-0.5 text-[10px] font-semibold text-gray-600 dark:text-gray-400 truncate max-w-[120px]">
                             {offering}
                           </span>
                         ))}
                         {venture.offerings.length > 2 && (
-                          <span className="text-[10px] font-bold text-gray-400 self-center pl-1">
+                          <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 self-center pl-1">
                             +{venture.offerings.length - 2} more
                           </span>
                         )}
@@ -524,7 +524,7 @@ export default function VentureDiscovery() {
                           </div>
 
                           {/* Rating summary */}
-                          <div className="flex flex-row items-center gap-3 border-l-0 md:border-l border-gray-100 pl-0 md:pl-6">
+                          <div className="flex flex-row items-center gap-3 border-l-0 md:border-l border-gray-100 dark:border-gray-800 pl-0 md:pl-6">
                             <div className="text-center">
                               <p className="text-3xl font-black text-orange-600">★ {activeVenture.average_rating}</p>
                               <p className="text-xs font-bold text-gray-400 mt-1">{activeVenture.reviews_count} student reviews</p>
@@ -536,8 +536,8 @@ export default function VentureDiscovery() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                           {/* Pitch description */}
                           <div className="md:col-span-2 space-y-4">
-                            <h3 className="text-sm font-extrabold text-gray-900 uppercase tracking-wider">About the Venture</h3>
-                            <p className="text-sm font-medium leading-relaxed text-gray-600 whitespace-pre-line bg-gray-50/50 p-4 rounded-xl border border-gray-100">
+                            <h3 className="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">About the Venture</h3>
+                            <p className="text-sm font-medium leading-relaxed text-gray-600 dark:text-gray-300 whitespace-pre-line bg-gray-50/50 dark:bg-gray-850/50 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
                               {activeVenture.description}
                             </p>
                           </div>
@@ -547,10 +547,10 @@ export default function VentureDiscovery() {
                             {/* Offerings list */}
                             {activeVenture.offerings.length > 0 && (
                               <div className="space-y-3">
-                                <h3 className="text-sm font-extrabold text-gray-900 uppercase tracking-wider">Our Offerings</h3>
+                                <h3 className="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Our Offerings</h3>
                                 <ul className="space-y-2">
                                   {activeVenture.offerings.map((offering, idx) => (
-                                    <li key={idx} className="flex items-center gap-2 text-xs font-semibold text-gray-600">
+                                    <li key={idx} className="flex items-center gap-2 text-xs font-semibold text-gray-600 dark:text-gray-350">
                                       <span className="text-orange-500">✓</span> {offering}
                                     </li>
                                   ))}
