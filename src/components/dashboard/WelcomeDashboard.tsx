@@ -21,6 +21,7 @@ const SECTIONS = [
     title: "Marketplace",
     icon: ShoppingBag,
     colorClass: "bg-blue-600 dark:bg-blue-700",
+    borderClass: "border-t-4 border-t-blue-600 dark:border-t-blue-500",
     actions: [
       { label: "Browse Listings", path: "/marketplace" },
       { label: "List Item", path: "/marketplace/new" },
@@ -31,6 +32,7 @@ const SECTIONS = [
     title: "Lost & Found",
     icon: Search,
     colorClass: "bg-purple-600 dark:bg-purple-700",
+    borderClass: "border-t-4 border-t-purple-600 dark:border-t-purple-500",
     actions: [
       { label: "Browse Items", path: "/lost-found?tab=found" },
       { label: "Report Lost", path: "/lost-found/report/lost" },
@@ -42,6 +44,7 @@ const SECTIONS = [
     title: "Student Ventures",
     icon: Rocket,
     colorClass: "bg-orange-600 dark:bg-orange-700",
+    borderClass: "border-t-4 border-t-orange-600 dark:border-t-orange-500",
     actions: [
       { label: "Explore Hub", path: "/ventures" },
       { label: "Register Venture", path: "/ventures?tab=my-ventures" },
@@ -87,11 +90,11 @@ export default function WelcomeDashboard({ session }: { session: any }) {
           {SECTIONS.map((section) => (
             <div
               key={section.key}
-              className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 flex flex-col gap-4 transition-all duration-200"
+              className={`rounded-md border border-gray-200 dark:border-gray-800 ${section.borderClass} bg-white dark:bg-gray-900 p-5 flex flex-col gap-4 transition-all duration-200`}
             >
               {/* Section header */}
               <div className="flex items-center gap-2.5">
-                <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${section.colorClass} text-white shadow-xs`}>
+                <div className={`flex h-9 w-9 items-center justify-center rounded-md ${section.colorClass} text-white shadow-xs`}>
                   <section.icon strokeWidth={1.8} size={18} />
                 </div>
                 <div>
@@ -109,7 +112,7 @@ export default function WelcomeDashboard({ session }: { session: any }) {
                     key={action.label}
                     type="button"
                     onClick={() => router.push(action.path)}
-                    className="group flex items-center justify-center rounded-xl bg-gray-50 dark:bg-gray-900/50 p-4 transition-all duration-150 hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 active:scale-95 min-h-[3.5rem]"
+                    className="group flex items-center justify-center rounded-md bg-gray-50 dark:bg-gray-900/50 p-4 transition-all duration-150 hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 active:scale-95 min-h-[3.5rem]"
                   >
                     <span className="text-[11px] font-bold text-gray-700 dark:text-gray-350 text-center leading-tight group-hover:text-gray-950 dark:group-hover:text-white transition-colors">
                       {action.label}
@@ -125,10 +128,10 @@ export default function WelcomeDashboard({ session }: { session: any }) {
         <button
           type="button"
           onClick={() => router.push("/messages")}
-          className="w-full flex items-center justify-between rounded-2xl border border-gray-200 dark:border-gray-850 bg-white dark:bg-gray-900 px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-all duration-200 group active:scale-[0.99]"
+          className="w-full flex items-center justify-between rounded-md border border-gray-200 dark:border-gray-850 bg-white dark:bg-gray-900 border-l-4 border-l-teal-600 dark:border-l-teal-500 px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-all duration-200 group active:scale-[0.99]"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-600 dark:bg-teal-700 text-white shadow-xs">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-teal-600 dark:bg-teal-700 text-white shadow-xs">
               <MessageSquare size={18} strokeWidth={2} />
             </div>
             <div className="text-left">
@@ -150,7 +153,7 @@ export default function WelcomeDashboard({ session }: { session: any }) {
         <div className="mt-8 mb-12">
           <button
             onClick={() => router.push("/admin")}
-            className="flex items-center px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition-colors border border-red-100 text-sm font-semibold gap-2 shadow-sm"
+            className="flex items-center px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-md transition-colors border border-red-100 text-sm font-semibold gap-2 shadow-sm"
           >
             <ShieldAlert size={16} />
             Admin Console

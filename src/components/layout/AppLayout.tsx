@@ -345,7 +345,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <motion.button
             key="scroll-top-btn"
             onClick={scrollToTop}
-            className={`fixed bottom-24 right-6 z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br text-white shadow-xl border border-white/10 hover:brightness-110 transition-[filter] ${getScrollToTopColorClass()}`}
+            className={`fixed bottom-24 right-6 z-[60] flex h-12 w-12 items-center justify-center rounded-md text-white shadow border border-transparent hover:brightness-110 transition-[filter] ${getScrollToTopColorClass()}`}
             title="Scroll to Top"
             initial={{ opacity: 0, scale: 0.6, y: 16 }}
             animate={{ opacity: 1, scale: 1, y: 0,

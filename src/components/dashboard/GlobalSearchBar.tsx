@@ -225,7 +225,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
       <div className="relative w-full">
         <form onSubmit={handleSearch} className="w-full relative z-50">
           <div
-            className={`w-full h-14 md:h-16 flex items-center rounded-full border px-2 py-1 md:px-4 md:py-2 transition-all duration-300 ${
+            className={`w-full h-14 md:h-16 flex items-center rounded-md border px-2 py-1 md:px-4 md:py-2 transition-all duration-300 ${
               searchMode === "llm"
                 ? "border-blue-500 bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:ring-blue-500/20"
                 : "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:ring-gray-900/10 focus-within:border-gray-700"
@@ -255,7 +255,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
             <button
               type="button"
               onClick={startListening}
-              className={`p-2 rounded-full transition-colors mr-1 md:mr-2 ${isListening ? 'bg-red-100 text-red-500 animate-pulse' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
+              className={`p-2 rounded-md transition-colors mr-1 md:mr-2 ${isListening ? 'bg-red-100 text-red-500 animate-pulse' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
               title="Voice Search"
             >
               <Mic size={22} strokeWidth={2} />
@@ -264,7 +264,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
             <button
               type="submit"
               disabled={!query.trim()}
-              className={`ml-1 px-4 py-2 md:px-6 md:py-2.5 rounded-full font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed hidden md:block ${
+              className={`ml-1 px-4 py-2 md:px-6 md:py-2.5 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed hidden md:block ${
                 searchMode === "llm" 
                   ? "bg-blue-600 text-white hover:bg-blue-700" 
                   : "bg-gray-900 text-white hover:bg-gray-800"
@@ -276,11 +276,11 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
         </form>
 
         <div className="mt-4 flex justify-center">
-          <div className="bg-gray-100 dark:bg-gray-800 p-1 rounded-full inline-flex items-center">
+          <div className="bg-gray-100 dark:bg-gray-800 p-1 rounded-md inline-flex items-center">
             <button
               type="button"
               onClick={() => setSearchMode("regex")}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${
                 searchMode === "regex" 
                   ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm" 
                   : "text-gray-500 dark:text-gray-400 hover:text-gray-850 dark:hover:text-gray-250"
@@ -291,7 +291,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
             <button
               type="button"
               onClick={() => setSearchMode("llm")}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${
                 searchMode === "llm" 
                   ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm" 
                   : "text-gray-500 dark:text-gray-400 hover:text-gray-850 dark:hover:text-gray-250"
@@ -303,7 +303,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
         </div>
 
         {showDropdown && (
-          <div className="absolute top-16 left-0 right-0 bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden z-40 max-h-[70vh] overflow-y-auto">
+          <div className="absolute top-16 left-0 right-0 bg-white dark:bg-gray-900 rounded-md shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden z-40 max-h-[70vh] overflow-y-auto">
             {liveIntent && searchMode === "regex" && (
               <div 
                 onClick={() => handleResultClick(liveIntent.redirectTo)}
@@ -338,7 +338,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
                     Press <kbd className="bg-white dark:bg-gray-800 text-blue-900 dark:text-blue-300 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-800 font-sans shadow-sm text-[10px] font-bold mx-0.5">ENTER</kbd> or click here to ask the AI
                   </p>
                 </div>
-                 <div className="bg-blue-600 text-white p-2.5 rounded-xl shadow-xs">
+                 <div className="bg-blue-600 text-white p-2.5 rounded-md shadow-xs">
                   <Sparkles size={18} />
                 </div>
               </div>
@@ -438,7 +438,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
             exit={{ opacity: 0, transition: { duration: 0.18 } }}
           >
             <motion.div
-              className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col max-w-2xl w-full h-[80vh] relative overflow-hidden"
+              className="bg-white dark:bg-gray-900 rounded-md shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col max-w-2xl w-full h-[80vh] relative overflow-hidden"
               initial={{ opacity: 0, scale: 0.92, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0,
                 transition: { type: "spring", stiffness: 380, damping: 30 } }}
@@ -467,7 +467,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
             <div ref={chatScrollRef} className="flex-1 overflow-y-auto p-4 space-y-6">
               {chatHistory.map((msg, idx) => (
                 <div key={idx} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                  <div className={`max-w-[85%] rounded-2xl px-5 py-3 ${
+                  <div className={`max-w-[85%] rounded-md px-5 py-3 ${
                     msg.role === 'user' 
                       ? 'bg-blue-600 text-white rounded-tr-sm shadow-sm' 
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-sm'
@@ -484,7 +484,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
                             setIsChatOpen(false);
                             router.push(opt.url);
                           }}
-                          className="px-4 py-2 text-sm font-medium rounded-full border border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-white dark:bg-gray-900 transition-all shadow-sm hover:shadow active:scale-95 flex items-center gap-2"
+                          className="px-4 py-2 text-sm font-medium rounded-md border border-blue-200 dark:border-blue-800/50 text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 bg-white dark:bg-gray-900 transition-all shadow-sm hover:shadow active:scale-95 flex items-center gap-2"
                         >
                           {opt.label} <Zap size={14} />
                         </button>
@@ -496,7 +496,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
               
               {isIntentLoading && (
                 <div className="flex items-start">
-                  <div className="bg-gray-100 dark:bg-gray-800 text-gray-800 rounded-2xl px-5 py-4 rounded-tl-sm flex gap-1 items-center">
+                  <div className="bg-gray-100 dark:bg-gray-800 text-gray-800 rounded-md px-5 py-4 rounded-tl-sm flex gap-1 items-center">
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
@@ -512,13 +512,13 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   placeholder="Type a follow-up..."
-                  className="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-full py-4 pl-6 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-gray-900 dark:text-white placeholder-gray-500"
+                  className="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-md py-4 pl-6 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-gray-900 dark:text-white placeholder-gray-500"
                   disabled={isIntentLoading}
                 />
                 <button
                   type="submit"
                   disabled={!chatInput.trim() || isIntentLoading}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full disabled:opacity-50 transition-colors shadow-md"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md disabled:opacity-50 transition-colors shadow-md"
                 >
                   <Search size={18} />
                 </button>

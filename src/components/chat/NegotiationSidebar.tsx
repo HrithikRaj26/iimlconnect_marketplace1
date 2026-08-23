@@ -45,10 +45,10 @@ export function NegotiationSidebar({
             <img
               src={conversation.listing.imageUrl}
               alt={conversation.listing.title}
-              className="h-16 w-16 rounded-xl object-cover border border-gray-200 dark:border-gray-800 shadow-sm shrink-0"
+              className="h-16 w-16 rounded-md object-cover border border-gray-200 dark:border-gray-800 shadow-sm shrink-0"
             />
           ) : (
-            <div className="h-16 w-16 rounded-xl bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 flex items-center justify-center text-2xl shrink-0">
+            <div className="h-16 w-16 rounded-md bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 flex items-center justify-center text-2xl shrink-0">
               📦
             </div>
           )}
@@ -76,11 +76,8 @@ export function NegotiationSidebar({
           {/* Deal Closed State */}
           {dealClosed ? (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/40 p-3.5 text-green-700 dark:text-green-400">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-green-600 text-white text-xs font-bold shrink-0">
-                  ✓
-                </span>
-                <span className="text-xs font-bold">Deal Completed & Agreed</span>
+              <div className="flex items-center gap-2 rounded-md bg-green-50 dark:bg-green-950/10 border-l-4 border-l-green-600 dark:border-l-green-500 p-3.5 text-green-700 dark:text-green-400 border-y border-r border-gray-150 dark:border-gray-850">
+                <span className="text-xs font-bold">✓ Deal Completed & Agreed</span>
               </div>
               <TransactionAgreementCard
                 transaction={transaction}
@@ -91,7 +88,7 @@ export function NegotiationSidebar({
             </div>
           ) : activeOffer && activeOffer.status === "pending" ? (
             /* Pending Offer Card */
-            <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 p-5 space-y-4">
+            <div className="rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400">
                   <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
@@ -117,7 +114,7 @@ export function NegotiationSidebar({
                   <button
                     type="button"
                     onClick={() => onAcceptOffer(latestOfferMessage.id)}
-                    className="w-full h-10 rounded-xl bg-success text-sm font-bold text-white hover:bg-success/95 active:scale-95 transition-all"
+                    className="w-full h-10 rounded-md bg-success text-sm font-bold text-white hover:bg-success/95 active:scale-95 transition-all"
                   >
                     Accept Offer
                   </button>
@@ -125,14 +122,14 @@ export function NegotiationSidebar({
                     <button
                       type="button"
                       onClick={() => onDeclineOffer(latestOfferMessage.id)}
-                      className="flex-1 h-10 rounded-xl border border-red-200 dark:border-red-900/30 bg-white dark:bg-gray-900 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 active:scale-95 transition-all"
+                      className="flex-1 h-10 rounded-md border border-red-200 dark:border-red-900/30 bg-white dark:bg-gray-900 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 active:scale-95 transition-all"
                     >
                       Decline
                     </button>
                     <button
                       type="button"
                       onClick={onCounterOffer}
-                      className="flex-1 h-10 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/80 active:scale-95 transition-all"
+                      className="flex-1 h-10 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/80 active:scale-95 transition-all"
                     >
                       Counter
                     </button>
@@ -141,14 +138,14 @@ export function NegotiationSidebar({
               )}
 
               {isOfferAuthorCurrentUser && (
-                <div className="rounded-lg bg-white dark:bg-gray-900 p-3 text-[11px] font-semibold text-gray-400 dark:text-gray-500 text-center border border-gray-100 dark:border-gray-800">
+                <div className="rounded-md bg-white dark:bg-gray-900 p-3 text-[11px] font-semibold text-gray-400 dark:text-gray-500 text-center border border-gray-100 dark:border-gray-800">
                   Waiting for {conversation.participant.name.split(" ")[0]} to accept, decline, or counter.
                 </div>
               )}
             </div>
           ) : (
             /* No Active Offer State */
-            <div className="rounded-xl border border-dashed border-gray-200 dark:border-gray-850 p-6 text-center space-y-4">
+            <div className="rounded-md border border-dashed border-gray-200 dark:border-gray-850 p-6 text-center space-y-4">
               <span className="block text-3xl">🤝</span>
               <div>
                 <p className="text-xs font-bold text-gray-800 dark:text-gray-200">No active negotiations</p>
@@ -159,7 +156,7 @@ export function NegotiationSidebar({
               <button
                 type="button"
                 onClick={onMakeOffer}
-                className="w-full h-10 rounded-xl bg-brand text-xs font-bold text-white hover:bg-brand-dark active:scale-95 transition-all shadow-sm"
+                className="w-full h-10 rounded-md bg-brand text-xs font-bold text-white hover:bg-brand-dark active:scale-95 transition-all shadow-sm"
               >
                 Make an Offer
               </button>
@@ -169,7 +166,7 @@ export function NegotiationSidebar({
 
         {/* Informative guidelines */}
         {!dealClosed && (
-          <div className="rounded-xl border border-gray-100 dark:border-gray-900 bg-gray-50/55 dark:bg-gray-900/20 p-4">
+          <div className="rounded-md border-l-4 border-l-blue-600 dark:border-l-blue-500 bg-gray-50/55 dark:bg-gray-900/20 p-4 border-y border-r border-gray-150 dark:border-gray-850">
             <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1.5">
               Secure Transactions Guide
             </h4>
