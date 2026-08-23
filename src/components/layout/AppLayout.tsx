@@ -56,34 +56,34 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const getScrollToTopColorClass = () => {
     // 🟠 Ventures — orange/amber brand
     if (pathname.startsWith("/ventures")) {
-      return "from-orange-500 to-amber-500 shadow-orange-500/30 hover:shadow-orange-500/50";
+      return "bg-orange-600 hover:bg-orange-700 shadow-sm";
     }
     // 🟣 Lost & Found — purple/fuchsia
     if (pathname.startsWith("/lost-found")) {
-      return "from-purple-600 to-fuchsia-600 shadow-purple-500/30 hover:shadow-purple-500/50";
+      return "bg-purple-600 hover:bg-purple-700 shadow-sm";
     }
     // 💬 Messages — teal/cyan
     if (pathname.startsWith("/messages")) {
-      return "from-teal-500 to-cyan-500 shadow-teal-500/30 hover:shadow-teal-500/50";
+      return "bg-teal-600 hover:bg-teal-700 shadow-sm";
     }
     // 👤 Profile — violet/slate
     if (pathname.startsWith("/profile")) {
-      return "from-violet-600 to-slate-600 shadow-violet-500/30 hover:shadow-violet-500/50";
+      return "bg-violet-600 hover:bg-violet-700 shadow-sm";
     }
     // 🛒 Marketplace & listing create flow — blue/indigo
     if (pathname.startsWith("/marketplace") || pathname.startsWith("/listing")) {
-      return "from-blue-600 to-indigo-600 shadow-blue-500/30 hover:shadow-blue-500/50";
+      return "bg-blue-600 hover:bg-blue-700 shadow-sm";
     }
     // 🔍 Search — sky/blue
     if (pathname.startsWith("/search")) {
-      return "from-sky-500 to-blue-500 shadow-sky-500/30 hover:shadow-sky-500/50";
+      return "bg-sky-600 hover:bg-sky-700 shadow-sm";
     }
     // 🛡️ Admin — red/rose
     if (pathname.startsWith("/admin")) {
-      return "from-red-600 to-rose-600 shadow-red-500/30 hover:shadow-red-500/50";
+      return "bg-red-600 hover:bg-red-700 shadow-sm";
     }
-    // 🏠 Dashboard / home — brand blue/indigo (default)
-    return "from-blue-600 to-indigo-600 shadow-blue-500/30 hover:shadow-blue-500/50";
+    // 🏠 Dashboard / home — brand blue (default)
+    return "bg-blue-600 hover:bg-blue-700 shadow-sm";
   };
 
   useEffect(() => {
@@ -188,7 +188,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {profile?.avatar ? (
               <img src={profile.avatar} alt="Profile" className="h-20 w-20 rounded-full object-cover shadow-sm mb-3 border-2 border-white dark:border-gray-800" />
             ) : (
-              <div className="h-20 w-20 rounded-full bg-gradient-to-r from-orange-500 to-amber-600 flex items-center justify-center text-white text-2xl font-bold shadow-sm mb-3 border-2 border-white dark:border-gray-800">
+              <div className="h-20 w-20 rounded-full bg-blue-600 dark:bg-blue-700 flex items-center justify-center text-white text-2xl font-bold shadow-sm mb-3 border-2 border-white dark:border-gray-800">
                 {profile?.name ? profile.name[0].toUpperCase() : "👤"}
               </div>
             )}
@@ -275,7 +275,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
           
           {/* Beautiful Platform Footer */}
-          <footer className="w-full bg-white dark:bg-gray-900 border-t border-gray-150 dark:border-gray-800 px-6 py-10 mt-12 bg-gradient-to-b from-transparent to-gray-50/40 dark:to-gray-950/40">
+          <footer className="w-full bg-white dark:bg-gray-900 border-t border-gray-150 dark:border-gray-800 px-6 py-10 mt-12">
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
               {/* Brand and Info */}
               <div className="space-y-3 col-span-1 md:col-span-2">
@@ -285,7 +285,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </span>
                   <div className="leading-tight">
                     <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                      IIML <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Connect</span>
+                      IIML <span className="text-blue-600 dark:text-blue-400">Connect</span>
                     </p>
                   </div>
                 </div>

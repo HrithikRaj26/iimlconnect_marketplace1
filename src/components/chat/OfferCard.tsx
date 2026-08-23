@@ -111,7 +111,7 @@ export function OfferCard({
         <p className="text-2xl font-bold text-gray-900">{formatINR(offer.amount)}</p>
         <p className="text-xs text-gray-500">Seller offered · {listingTitle}</p>
 
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3 flex gap-2 lg:hidden">
           <button
             type="button"
             onClick={() => onAccept(message.id)}
@@ -134,6 +134,9 @@ export function OfferCard({
             Counter
           </button>
         </div>
+        <p className="mt-2 hidden lg:block text-[10px] text-gray-400 dark:text-gray-500 italic">
+          Review this offer in the Negotiation Panel on the right.
+        </p>
       </div>
     </div>
   );

@@ -16,6 +16,7 @@ import { Conversation } from "@/types";
 import { useToast } from "@/context/ToastContext";
 import { NewChatModal, PlatformUser } from "@/components/chat/NewChatModal";
 import { SkeletonConversations } from "@/components/ui/Skeleton";
+import { NegotiationSidebar } from "@/components/chat/NegotiationSidebar";
 
 export default function MessagesPage() {
   return (
@@ -478,39 +479,54 @@ function ChatWorkspace({
         />
       </div>
 
-      {/* Active conversation */}
-      <div className={`min-w-0 flex-1 flex-col bg-gray-50 dark:bg-gray-900 md:flex ${
+      {/* Active conversation split layout */}
+      <div className={`min-w-0 flex-1 flex md:flex-row bg-gray-50 dark:bg-gray-900 ${
         mobileView === "thread" ? "flex" : "hidden"
       }`}>
-        <ChatHeader
-          participant={{
-            ...conversation.participant,
-            online: conversations.find((c) => c.id === activeId)?.participant.online || false
-          }}
-          listing={conversation.listing}
-          transaction={transaction}
-          onMakeOffer={() => setOfferModalOpen(true)}
-          onDeleteThread={() => onDeleteConversation(conversation.id)}
-          onBack={() => setMobileView("list")}
-        />
+        {/* Left Column: Chat Thread */}
+        <div className="flex-1 flex flex-col min-w-0 h-full border-r border-gray-100 dark:border-gray-800">
+          <ChatHeader
+            participant={{
+              ...conversation.participant,
+              online: conversations.find((c) => c.id === activeId)?.participant.online || false
+            }}
+            listing={conversation.listing}
+            transaction={transaction}
+            onMakeOffer={() => setOfferModalOpen(true)}
+            onDeleteThread={() => onDeleteConversation(conversation.id)}
+            onBack={() => setMobileView("list")}
+          />
 
-        <MessageThread
-          conversation={conversation}
-          onRetryMessage={retryMessage}
-          onAcceptOffer={(id) => respondToOffer(id, "accept")}
-          onDeclineOffer={(id) => respondToOffer(id, "decline")}
-          onCounterOffer={() => setOfferModalOpen(true)}
-          onEditMessage={editMessage}
-          onDeleteMessage={deleteMessage}
-        />
+          <MessageThread
+            conversation={conversation}
+            onRetryMessage={retryMessage}
+            onAcceptOffer={(id) => respondToOffer(id, "accept")}
+            onDeclineOffer={(id) => respondToOffer(id, "decline")}
+            onCounterOffer={() => setOfferModalOpen(true)}
+            onEditMessage={editMessage}
+            onDeleteMessage={deleteMessage}
+          />
 
-        {dealClosed && (
-          <div className="bg-green-50 dark:bg-green-950/20 border-t border-b border-green-150 dark:border-green-900/30 px-4 py-2 text-center text-[10px] font-black text-green-700 dark:text-green-400 uppercase tracking-wider">
-            🤝 Deal closed. You can still message each other to coordinate details.
-          </div>
-        )}
+          {dealClosed && (
+            <div className="bg-green-50 dark:bg-green-950/20 border-t border-b border-green-150 dark:border-green-900/30 px-4 py-2 text-center text-[10px] font-black text-green-700 dark:text-green-400 uppercase tracking-wider">
+              🤝 Deal closed. You can still message each other to coordinate details.
+            </div>
+          )}
 
-        <ChatInput onSend={sendText} />
+          <ChatInput onSend={sendText} />
+        </div>
+
+        {/* Right Column: Dedicated Negotiation Sidebar */}
+        <div className="hidden lg:block w-80 shrink-0 bg-white dark:bg-gray-950 h-full overflow-y-auto border-l border-gray-100 dark:border-gray-850">
+          <NegotiationSidebar
+            conversation={conversation}
+            transaction={transaction}
+            onAcceptOffer={(id) => respondToOffer(id, "accept")}
+            onDeclineOffer={(id) => respondToOffer(id, "decline")}
+            onCounterOffer={() => setOfferModalOpen(true)}
+            onMakeOffer={() => setOfferModalOpen(true)}
+          />
+        </div>
       </div>
 
       <MakeOfferModal

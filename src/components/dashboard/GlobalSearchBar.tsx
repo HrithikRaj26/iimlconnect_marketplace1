@@ -224,16 +224,11 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
       
       <div className="relative w-full">
         <form onSubmit={handleSearch} className="w-full relative z-50">
-          <Button
-            as="div"
-            borderRadius="9999px"
-            containerClassName={`w-full h-14 md:h-16 transition-shadow duration-300 ${
+          <div
+            className={`w-full h-14 md:h-16 flex items-center rounded-full border px-2 py-1 md:px-4 md:py-2 transition-all duration-300 ${
               searchMode === "llm"
-                ? "shadow-[0_8px_30px_rgba(59,130,246,0.25)] hover:shadow-[0_8px_30px_rgba(59,130,246,0.35)] ring-2 ring-blue-500/20"
-                : "shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
-            }`}
-            className={`px-2 py-1 md:px-4 md:py-2 transition-colors duration-300 ${
-              searchMode === "llm" ? "bg-blue-50/50" : "bg-white"
+                ? "border-blue-500 bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:ring-blue-500/20"
+                : "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:ring-gray-900/10 focus-within:border-gray-700"
             }`}
           >
             <div className="flex items-center justify-center p-2 text-gray-400">
@@ -277,7 +272,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
             >
               Search
             </button>
-          </Button>
+          </div>
         </form>
 
         <div className="mt-4 flex justify-center">
@@ -345,7 +340,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
                     Press <kbd className="bg-white text-blue-900 px-1.5 py-0.5 rounded border border-blue-200 font-sans shadow-sm text-[10px] font-bold mx-0.5">ENTER</kbd> or click here to ask the AI
                   </p>
                 </div>
-                <div className="bg-gradient-to-tr from-blue-600 to-indigo-600 text-white p-2.5 rounded-xl shadow-md">
+                 <div className="bg-blue-600 text-white p-2.5 rounded-xl shadow-xs">
                   <Sparkles size={18} />
                 </div>
               </div>
@@ -452,7 +447,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
               exit={{ opacity: 0, scale: 0.94, y: 10,
                 transition: { duration: 0.18, ease: "easeIn" } }}
             >
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500"></div>
+             <div className="absolute top-0 left-0 w-full h-1 bg-blue-600 dark:bg-blue-700"></div>
             <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
@@ -476,7 +471,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
                 <div key={idx} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                   <div className={`max-w-[85%] rounded-2xl px-5 py-3 ${
                     msg.role === 'user' 
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 rounded-tr-sm' 
+                      ? 'bg-blue-600 text-white rounded-tr-sm shadow-sm' 
                       : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tl-sm'
                   }`}>
                     {msg.content}
