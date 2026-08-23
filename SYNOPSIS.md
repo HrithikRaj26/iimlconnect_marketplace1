@@ -67,11 +67,10 @@ A summary of all user-facing sections, features, and technical implementations a
 * **Route:** `/messages`
 * **Core Page Component:** [`src/app/messages/page.tsx`](file:///Users/shinjanpatra/Documents/IIML_Connect/iimlconnect_marketplace1/src/app/messages/page.tsx)
 * **Overview:**
-  A real-time negotiations workspace. It combines:
-  * **Conversational Interface:** Sidebar conversation list, online status indicators, and verified badges.
-  * **Make an Offer Modal:** Numerical input, rapid-select offer chips, and bargaining etiquette guidance.
-  * **Offer Status Engine:** Chat bubble updates tracking the bargaining lifecycle (Awaiting Decision, Declined, Countered, Accepted).
-  * **Transaction Agreement:** An automated card locking in final terms (final price, pickup instructions) once an offer is accepted, disabling chat input to formalize the deal.
+  A real-time negotiations workspace. It separates standard messaging from transaction actions:
+  * **Split Negotiation Layout:** Implements a dual-column layout. The left column displays the scrollable conversation thread, while the right column hosts a dedicated [`NegotiationSidebar`](file:///Users/shinjanpatra/Documents/IIML_Connect/iimlconnect_marketplace1/src/components/chat/NegotiationSidebar.tsx) component.
+  * **First-Class Transaction States:** The Negotiation Sidebar features high-contrast, structural cards representing active offers, incoming requests (Accept / Decline / Counter), or a finalized transaction contract.
+  * **Read-only Message Logs:** Inline offer bubbles inside the main message thread serve as a historical audit trail, with interaction buttons hidden on desktop views to concentrate user decisions in the sidebar.
 
 ---
 
@@ -129,7 +128,7 @@ The website implements a premium, engaging, and highly modern design system tail
    * **Messages / Chat:** Teal / Cyan
    * **Profile:** Violet / Slate
    * **Admin Console:** Red / Rose
-   *This color scheme dynamically changes global UI elements like the "Scroll to Top" button, focus rings, hover indicators, and dashboard gradients.*
+   *This color scheme dynamically changes global UI elements like the "Scroll to Top" button, focus rings, hover indicators, and solid visual accents.*
 
 2. **Distinctive Editorial Typography:**
    Pairing the premium academic/institutional serif display typeface **Playfair Display** (for headers and page titles) with the clean, highly readable functional UI sans-serif **Inter** (for body copy, data grids, inputs, and controls).
@@ -140,7 +139,7 @@ The website implements a premium, engaging, and highly modern design system tail
    * **Framer Motion Transitions:** Smooth loading overlays, slide-out sidebars, and tab changes.
    * **Shaking Alerts:** Shake animation (`animate-shake`) triggered on validation errors.
    * **Typewriter Greeting:** A typewriter effect animating the greeting text.
-   * **Moving Borders:** Glowing animated borders (via Aceternity UI components) highlight call-to-action buttons.
+   * **Interactive Actions:** High-contrast focus state boundaries and flat transitions highlight call-to-action buttons.
 
 4. **Responsive Dual-Shell Layout:**
    The site features an [`AppLayout`](file:///Users/shinjanpatra/Documents/IIML_Connect/iimlconnect_marketplace1/src/components/layout/AppLayout.tsx) which collapses to a drawer menu on smaller screens, supplemented by a dedicated mobile bottom navigation bar (`safe-area-pb`), ensuring a fluid experience across desktop and mobile.
@@ -198,7 +197,7 @@ Animations are divided into CSS keyframes and spring-based components:
   ```
 * **Shaking Alerts (`animate-shake`):** Triggered on incorrect input submissions, rendering a prompt horizontal layout vibration.
 * **Spring Dynamics:** Framer Motion settings use spring physics (`stiffness: 420`, `damping: 26`) for UI drawers, mobile backdrop toggles, and floating menus.
-* **Moving Borders (`moving-border.tsx`):** A custom SVG component [`moving-border.tsx`](file:///Users/shinjanpatra/Documents/IIML_Connect/iimlconnect_marketplace1/src/components/ui/moving-border.tsx) renders animated gradient highlights traveling along component paths.
+* **Flat Boundaries:** Replaced glowing animated borders with solid high-contrast borders and active focus rings (`focus-within:ring-2`) to keep surfaces flat.
 
 ### E. Global Theme Switch & CSS-in-JS Mapping
 Rather than repeating Tailwind dark variants across all TSX templates (which bloats code files), dark mode re-mappings are handled globally in [`src/app/globals.css`](file:///Users/shinjanpatra/Documents/IIML_Connect/iimlconnect_marketplace1/src/app/globals.css#L33-L84):
