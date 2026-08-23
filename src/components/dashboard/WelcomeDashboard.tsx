@@ -19,32 +19,32 @@ const SECTIONS = [
   {
     key: "marketplace",
     title: "Marketplace",
-    emoji: "🛒",
+    icon: ShoppingBag,
     colorClass: "bg-blue-600 dark:bg-blue-700",
     actions: [
-      { icon: ShoppingBag, label: "Browse Listings", path: "/marketplace", color: "text-blue-600 dark:text-blue-400", bg: "bg-gray-50 dark:bg-gray-900/50", hover: "group-hover:bg-gray-100 dark:group-hover:bg-gray-850" },
-      { icon: PlusCircle, label: "List Item", path: "/marketplace/new", color: "text-indigo-600 dark:text-indigo-400", bg: "bg-gray-50 dark:bg-gray-900/50", hover: "group-hover:bg-gray-100 dark:group-hover:bg-gray-850" },
+      { label: "Browse Listings", path: "/marketplace" },
+      { label: "List Item", path: "/marketplace/new" },
     ],
   },
   {
     key: "lostfound",
     title: "Lost & Found",
-    emoji: "🔍",
+    icon: Search,
     colorClass: "bg-purple-600 dark:bg-purple-700",
     actions: [
-      { icon: Box, label: "Browse Items", path: "/lost-found?tab=found", color: "text-purple-600 dark:text-purple-400", bg: "bg-gray-50 dark:bg-gray-900/50", hover: "group-hover:bg-gray-100 dark:group-hover:bg-gray-850" },
-      { icon: Search, label: "Report Lost", path: "/lost-found/report/lost", color: "text-fuchsia-600 dark:text-fuchsia-400", bg: "bg-gray-50 dark:bg-gray-900/50", hover: "group-hover:bg-gray-100 dark:group-hover:bg-gray-850" },
-      { icon: CheckCircle, label: "Report Found", path: "/lost-found/report/found", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-gray-50 dark:bg-gray-900/50", hover: "group-hover:bg-gray-100 dark:group-hover:bg-gray-850" },
+      { label: "Browse Items", path: "/lost-found?tab=found" },
+      { label: "Report Lost", path: "/lost-found/report/lost" },
+      { label: "Report Found", path: "/lost-found/report/found" },
     ],
   },
   {
     key: "ventures",
     title: "Student Ventures",
-    emoji: "🚀",
+    icon: Rocket,
     colorClass: "bg-orange-600 dark:bg-orange-700",
     actions: [
-      { icon: Rocket, label: "Explore Hub", path: "/ventures", color: "text-orange-600 dark:text-orange-400", bg: "bg-gray-50 dark:bg-gray-900/50", hover: "group-hover:bg-gray-100 dark:group-hover:bg-gray-850" },
-      { icon: PlusCircle, label: "Register Venture", path: "/ventures?tab=my-ventures", color: "text-amber-600 dark:text-amber-400", bg: "bg-gray-50 dark:bg-gray-900/50", hover: "group-hover:bg-gray-100 dark:group-hover:bg-gray-850" },
+      { label: "Explore Hub", path: "/ventures" },
+      { label: "Register Venture", path: "/ventures?tab=my-ventures" },
     ],
   },
 ];
@@ -91,8 +91,8 @@ export default function WelcomeDashboard({ session }: { session: any }) {
             >
               {/* Section header */}
               <div className="flex items-center gap-2.5">
-                <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${section.colorClass} text-white text-base shadow-xs`}>
-                  {section.emoji}
+                <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${section.colorClass} text-white shadow-xs`}>
+                  <section.icon strokeWidth={1.8} size={18} />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-gray-800 dark:text-gray-100">{section.title}</p>
@@ -109,12 +109,9 @@ export default function WelcomeDashboard({ session }: { session: any }) {
                     key={action.label}
                     type="button"
                     onClick={() => router.push(action.path)}
-                    className="group flex flex-col items-center gap-2 rounded-xl bg-gray-50 dark:bg-gray-900/50 p-3 transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
+                    className="group flex items-center justify-center rounded-xl bg-gray-50 dark:bg-gray-900/50 p-4 transition-all duration-150 hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 active:scale-95 min-h-[3.5rem]"
                   >
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-white dark:bg-gray-900 shadow-xs border border-white/80 dark:border-gray-800 ${action.color}`}>
-                      <action.icon strokeWidth={1.8} size={20} />
-                    </div>
-                    <span className="text-[11px] font-bold text-gray-600 dark:text-gray-450 text-center leading-tight group-hover:text-gray-900 dark:group-hover:text-white">
+                    <span className="text-[11px] font-bold text-gray-700 dark:text-gray-350 text-center leading-tight group-hover:text-gray-950 dark:group-hover:text-white transition-colors">
                       {action.label}
                     </span>
                   </button>

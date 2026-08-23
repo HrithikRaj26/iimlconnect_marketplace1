@@ -37,41 +37,32 @@
   animation: card-wobble 0.6s ease-in-out;
 }
 
-/* ===== Dark Mode: Text ===== */
-.dark .text-gray-900 { color: #f9fafb !important; }
-.dark .text-gray-800 { color: #f3f4f6 !important; }
-.dark .text-gray-700 { color: #e5e7eb !important; }
-.dark .text-gray-650 { color: #d1d5db !important; }
-.dark .text-gray-600 { color: #d1d5db !important; }
-.dark .text-gray-500 { color: #9ca3af !important; }
-.dark .text-gray-400 { color: #6b7280 !important; }
-
 /* ===== Dark Mode: Backgrounds ===== */
-.dark .bg-white          { background-color: #111827 !important; }
-.dark .bg-gray-50        { background-color: #030712 !important; }
-.dark .bg-gray-100       { background-color: #1f2937 !important; }
-.dark .bg-gray-200       { background-color: #374151 !important; }
-.dark .hover\:bg-gray-50:hover  { background-color: #1f2937 !important; }
-.dark .hover\:bg-gray-100:hover { background-color: #374151 !important; }
+.dark .bg-white          { background-color: #111827; }
+.dark .bg-gray-50        { background-color: #030712; }
+.dark .bg-gray-100       { background-color: #1f2937; }
+.dark .bg-gray-200       { background-color: #374151; }
+.dark .hover\:bg-gray-50:hover  { background-color: #1f2937; }
+.dark .hover\:bg-gray-100:hover { background-color: #374151; }
 
 /* ===== Dark Mode: Borders ===== */
 .dark .border-gray-200,
 .dark .border-gray-150,
-.dark .border-gray-100 { border-color: #1f2937 !important; }
+.dark .border-gray-100 { border-color: #1f2937; }
 
 /* ===== Dark Mode: Dividers ===== */
-.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: #1f2937 !important; }
-.dark .divide-gray-50  > :not([hidden]) ~ :not([hidden]) { border-color: #1f2937 !important; }
+.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: #1f2937; }
+.dark .divide-gray-50  > :not([hidden]) ~ :not([hidden]) { border-color: #1f2937; }
 
 /* ===== Dark Mode: Forms ===== */
 .dark input,
 .dark textarea,
 .dark select {
-  background-color: #1f2937 !important;
-  color: #f9fafb !important;
-  border-color: #374151 !important;
+  background-color: #1f2937;
+  color: #f9fafb;
+  border-color: #374151;
 }
-.dark label { color: #d1d5db !important; }
+.dark label { color: #d1d5db; }
 
 /* ===== Dark Mode: Sidebar & Nav ===== */
 .dark header { background-color: #111827 !important; border-color: #1f2937 !important; }

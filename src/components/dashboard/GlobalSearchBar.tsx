@@ -212,10 +212,10 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
     <div className="w-full max-w-4xl mx-auto flex flex-col items-center mb-16 px-4 pt-12">
       {greetingFirstPart && (
         <div className="mb-8 text-center tracking-tight">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-2">
             {greetingFirstPart}
           </h1>
-          <p className="text-lg md:text-xl text-gray-500 font-medium h-8">
+          <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 font-medium h-8">
             {typedSecondPart}
             <span className="animate-pulse text-brand">|</span>
           </p>
@@ -276,36 +276,34 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
         </form>
 
         <div className="mt-4 flex justify-center">
-          <div className="bg-gray-100 p-1 rounded-full inline-flex items-center">
+          <div className="bg-gray-100 dark:bg-gray-800 p-1 rounded-full inline-flex items-center">
             <button
               type="button"
               onClick={() => setSearchMode("regex")}
               className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 searchMode === "regex" 
-                  ? "bg-white text-gray-900 shadow-sm" 
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm" 
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-850 dark:hover:text-gray-250"
               }`}
             >
-              <Zap size={14} />
-              Fast Mode
+              Regex Router
             </button>
             <button
               type="button"
               onClick={() => setSearchMode("llm")}
               className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 searchMode === "llm" 
-                  ? "bg-white text-blue-600 shadow-sm" 
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm" 
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-850 dark:hover:text-gray-250"
               }`}
             >
-              <Sparkles size={14} />
-              AI Mode
+              LLM Assist
             </button>
           </div>
         </div>
 
         {showDropdown && (
-          <div className="absolute top-16 left-0 right-0 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-40 max-h-[70vh] overflow-y-auto">
+          <div className="absolute top-16 left-0 right-0 bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden z-40 max-h-[70vh] overflow-y-auto">
             {liveIntent && searchMode === "regex" && (
               <div 
                 onClick={() => handleResultClick(liveIntent.redirectTo)}
@@ -329,15 +327,15 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
             {searchMode === "llm" && query.trim().length >= 2 && (
               <div 
                 onClick={handleSearch as any}
-                className="bg-blue-50/80 border-b border-blue-100 p-5 cursor-pointer hover:bg-blue-100 transition-colors flex items-center justify-between"
+                className="bg-blue-50/80 dark:bg-blue-950/20 border-b border-blue-100 dark:border-blue-900/40 p-5 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-950/30 transition-colors flex items-center justify-between"
               >
                 <div>
-                  <h4 className="text-sm font-bold text-blue-900 flex items-center gap-2">
-                    <Sparkles size={18} className="text-blue-600" />
+                  <h4 className="text-sm font-bold text-blue-900 dark:text-blue-200 flex items-center gap-2">
+                    <Sparkles size={18} className="text-blue-600 dark:text-blue-400" />
                     Let AI find this for you
                   </h4>
-                  <p className="text-xs text-blue-700 mt-1">
-                    Press <kbd className="bg-white text-blue-900 px-1.5 py-0.5 rounded border border-blue-200 font-sans shadow-sm text-[10px] font-bold mx-0.5">ENTER</kbd> or click here to ask the AI
+                  <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                    Press <kbd className="bg-white dark:bg-gray-800 text-blue-900 dark:text-blue-300 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-800 font-sans shadow-sm text-[10px] font-bold mx-0.5">ENTER</kbd> or click here to ask the AI
                   </p>
                 </div>
                  <div className="bg-blue-600 text-white p-2.5 rounded-xl shadow-xs">
@@ -356,23 +354,23 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
               <div className="flex flex-col py-2">
                 {results.marketplace.length > 0 && (
                   <div className="mb-2">
-                    <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50">Marketplace</div>
+                     <div className="px-4 py-2 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider bg-gray-50/50 dark:bg-gray-850/40">Marketplace</div>
                     {results.marketplace.map((item) => (
                       <div 
                         key={item.id} 
                         onClick={() => handleResultClick(item.url)}
-                        className="flex items-center px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
+                        className="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/60 cursor-pointer transition-colors"
                       >
                         {item.image ? (
-                          <img src={item.image} alt={item.title} className="w-10 h-10 rounded-md object-cover mr-4 border border-gray-200" />
+                          <img src={item.image} alt={item.title} className="w-10 h-10 rounded-md object-cover mr-4 border border-gray-200 dark:border-gray-800" />
                         ) : (
-                          <div className="w-10 h-10 rounded-md bg-gray-100 mr-4 flex items-center justify-center">
-                            <Search size={16} className="text-gray-400" />
+                          <div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-800 mr-4 flex items-center justify-center">
+                            <Search size={16} className="text-gray-400 dark:text-gray-500" />
                           </div>
                         )}
                         <div className="flex-1">
-                          <h4 className="text-sm font-semibold text-gray-900">{item.title}</h4>
-                          <p className="text-xs text-gray-500">{item.subtitle}</p>
+                          <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{item.title}</h4>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{item.subtitle}</p>
                         </div>
                       </div>
                     ))}
@@ -381,23 +379,23 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
 
                 {results.ventures.length > 0 && (
                   <div className="mb-2">
-                    <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50">Student Ventures</div>
+                     <div className="px-4 py-2 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider bg-gray-50/50 dark:bg-gray-850/40">Student Ventures</div>
                     {results.ventures.map((item) => (
                       <div 
                         key={item.id} 
                         onClick={() => handleResultClick(item.url)}
-                        className="flex items-center px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
+                        className="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/60 cursor-pointer transition-colors"
                       >
                         {item.image ? (
-                          <img src={item.image} alt={item.title} className="w-10 h-10 rounded-full object-cover mr-4 border border-gray-200" />
+                          <img src={item.image} alt={item.title} className="w-10 h-10 rounded-full object-cover mr-4 border border-gray-200 dark:border-gray-800" />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-orange-100 mr-4 flex items-center justify-center">
-                            <span className="text-orange-600 font-bold">{item.title[0]}</span>
+                          <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-950/30 mr-4 flex items-center justify-center">
+                            <span className="text-orange-600 dark:text-orange-400 font-bold">{item.title[0]}</span>
                           </div>
                         )}
                         <div className="flex-1">
-                          <h4 className="text-sm font-semibold text-gray-900">{item.title}</h4>
-                          <p className="text-xs text-gray-500 truncate">{item.subtitle}</p>
+                          <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{item.title}</h4>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{item.subtitle}</p>
                         </div>
                       </div>
                     ))}
@@ -406,19 +404,19 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
 
                 {results.lostFound.length > 0 && (
                   <div className="mb-2">
-                    <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider bg-gray-50/50">Lost & Found</div>
+                     <div className="px-4 py-2 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider bg-gray-50/50 dark:bg-gray-855/40">Lost & Found</div>
                     {results.lostFound.map((item) => (
                       <div 
                         key={item.id} 
                         onClick={() => handleResultClick(item.url)}
-                        className="flex items-center px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors"
+                        className="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/60 cursor-pointer transition-colors"
                       >
-                        <div className={`w-10 h-10 rounded-full ${item.type === 'lost' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'} mr-4 flex items-center justify-center font-bold text-xs uppercase tracking-tighter`}>
+                        <div className={`w-10 h-10 rounded-full ${item.type === 'lost' ? 'bg-red-100 dark:bg-red-950/30 text-red-600 dark:text-red-400' : 'bg-green-100 dark:bg-green-950/30 text-green-600 dark:text-green-400'} mr-4 flex items-center justify-center font-bold text-xs uppercase tracking-tighter`}>
                           {item.type}
                         </div>
                         <div className="flex-1">
-                          <h4 className="text-sm font-semibold text-gray-900">{item.title}</h4>
-                          <p className="text-xs text-gray-500 truncate">{item.subtitle}</p>
+                          <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{item.title}</h4>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{item.subtitle}</p>
                         </div>
                       </div>
                     ))}
