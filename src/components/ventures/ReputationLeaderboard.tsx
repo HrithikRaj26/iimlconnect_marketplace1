@@ -90,9 +90,9 @@ export default function ReputationLeaderboard() {
   return (
     <div className="space-y-8">
       {/* Reputation/Badge shelf */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 md:p-8 shadow-sm space-y-6">
+      <div className="bg-white dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-6 md:p-8 shadow-xs space-y-6">
         <div>
-          <h2 className="text-lg font-extrabold text-gray-900 dark:text-white">🏆 Campus Reputation Shelf</h2>
+          <h2 className="text-lg font-extrabold text-gray-900 dark:text-white">🏆 Campus Trust Shelf</h2>
           <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">
             Earn badges to build student trust, unlock founder capabilities, and rise on the contributor list.
           </p>
@@ -101,7 +101,7 @@ export default function ReputationLeaderboard() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-pulse">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-100 rounded-xl" />
+              <div key={i} className="h-32 bg-gray-100 dark:bg-gray-805 rounded-md" />
             ))}
           </div>
         ) : (
@@ -160,7 +160,7 @@ export default function ReputationLeaderboard() {
                     }`}
                   >
                     {/* FRONT SIDE (Standard Badge Info) */}
-                    <div className={`absolute inset-0 backface-hidden rounded-2xl border p-5 flex flex-col justify-between transition-all bg-white/70 dark:bg-gray-900/75 backdrop-blur-md border-white/80 dark:border-gray-800 shadow-md group-hover:shadow-lg group-hover:border-orange-200/50 ${
+                    <div className={`absolute inset-0 backface-hidden rounded-md border p-5 flex flex-col justify-between transition-all bg-white/70 dark:bg-gray-900/75 backdrop-blur-md border-white/80 dark:border-gray-800 shadow-md group-hover:shadow-lg group-hover:border-blue-500/20 ${
                       unlocked ? "opacity-100" : "opacity-80"
                     }`}>
                       <div className="space-y-2">
@@ -168,7 +168,7 @@ export default function ReputationLeaderboard() {
                           <span className="text-2xl">{badge.icon}</span>
                           <span
                             className={`rounded px-2 py-0.5 text-[9px] font-extrabold border uppercase tracking-wider ${
-                              unlocked ? "bg-orange-100 text-orange-700 border-orange-200" : "bg-gray-100 text-gray-500 border-gray-200"
+                              unlocked ? "bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 border-blue-200/50 dark:border-blue-900/30" : "bg-gray-100 text-gray-500 border-gray-200"
                             }`}
                           >
                             {unlocked ? "Unlocked" : "Locked"}
@@ -180,7 +180,7 @@ export default function ReputationLeaderboard() {
 
                       {/* Progress tracker or Flip hint */}
                       {unlocked ? (
-                        <div className="mt-2 text-[9px] font-extrabold text-orange-600 animate-pulse text-right">
+                        <div className="mt-2 text-[9px] font-extrabold text-blue-600 dark:text-blue-400 animate-pulse text-right">
                           💡 Click to view trophy ⟳
                         </div>
                       ) : (
@@ -194,7 +194,7 @@ export default function ReputationLeaderboard() {
                             <div className="space-y-1">
                               <div className="h-1.5 w-full rounded-full bg-gray-200 overflow-hidden">
                                 <div
-                                  className="h-full bg-orange-500"
+                                  className="h-full bg-blue-650"
                                   style={{ width: `${Math.min(100, (badge.current! / badge.target!) * 100)}%` }}
                                 />
                               </div>
@@ -208,12 +208,12 @@ export default function ReputationLeaderboard() {
                     </div>
 
                     {/* BACK SIDE (Trophy Details) */}
-                    <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-2xl border p-5 flex flex-col items-center justify-center text-center bg-gradient-to-br from-orange-500 to-amber-600 border-orange-600 text-white shadow-xl space-y-2">
+                    <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-md border p-5 flex flex-col items-center justify-center text-center bg-blue-600 border-blue-700 text-white shadow-xl space-y-2">
                       <div className="text-4xl animate-bounce">🏆</div>
                       <h4 className="text-sm font-black uppercase tracking-widest">{badge.name}</h4>
                       {unlocked ? (
                         <div className="space-y-1">
-                          <p className="text-[11px] font-extrabold text-orange-100">Milestone Completed!</p>
+                          <p className="text-[11px] font-extrabold text-blue-100">Milestone Completed!</p>
                           <p className="text-[10px] text-white/95 leading-relaxed bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 mt-1">
                             Verified on-campus contributor. Your feedback and projects help the IIML ecosystem thrive.
                           </p>
@@ -241,16 +241,16 @@ export default function ReputationLeaderboard() {
       {/* Leaderboards Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Top Ventures */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 md:p-8 shadow-sm space-y-6">
+        <div className="bg-white dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-6 md:p-8 shadow-xs space-y-6">
           <div>
-            <h3 className="text-base font-extrabold text-gray-900 dark:text-white">⭐ Top Rated Ventures</h3>
-            <p className="text-xs font-semibold text-gray-500 mt-0.5">Startups with highest average student ratings.</p>
+            <h3 className="text-base font-extrabold text-gray-900 dark:text-white">⭐ Most Recommended Campus Ventures</h3>
+            <p className="text-xs font-semibold text-gray-500 mt-0.5">Student ventures with the highest peer recommendations.</p>
           </div>
 
           {loading ? (
             <div className="space-y-4 animate-pulse">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-12 bg-gray-100 rounded-xl" />
+                <div key={i} className="h-12 bg-gray-100 dark:bg-gray-805 rounded-md" />
               ))}
             </div>
           ) : topVentures.length === 0 ? (
@@ -282,11 +282,11 @@ export default function ReputationLeaderboard() {
                         </div>
                       </td>
                       <td className="py-3 px-2">
-                        <span className="rounded bg-orange-50 px-2 py-0.5 text-[10px] font-bold text-orange-600">
+                        <span className="rounded bg-blue-50 dark:bg-blue-950/20 px-2 py-0.5 text-[10px] font-bold text-blue-600 dark:text-blue-400">
                           {venture.category}
                         </span>
                       </td>
-                      <td className="py-3 pl-2 text-right font-extrabold text-orange-600">
+                      <td className="py-3 pl-2 text-right font-extrabold text-blue-600 dark:text-blue-450">
                         ★ {venture.average_rating} <span className="text-[10px] text-gray-400 font-semibold">({venture.reviews_count})</span>
                       </td>
                     </tr>
@@ -298,16 +298,16 @@ export default function ReputationLeaderboard() {
         </div>
 
         {/* Top Reviewers/Contributors */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 md:p-8 shadow-sm space-y-6">
+        <div className="bg-white dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-6 md:p-8 shadow-xs space-y-6">
           <div>
-            <h3 className="text-base font-extrabold text-gray-900 dark:text-white">👥 Top Community Contributors</h3>
-            <p className="text-xs font-semibold text-gray-500 mt-0.5">Students supporting ventures with ratings and engagement.</p>
+            <h3 className="text-base font-extrabold text-gray-900 dark:text-white">👥 Most Active Supporters & Reviewers</h3>
+            <p className="text-xs font-semibold text-gray-500 mt-0.5">Top peer contributors supporting campus startups with feedback.</p>
           </div>
 
           {loading ? (
             <div className="space-y-4 animate-pulse">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-12 bg-gray-100 rounded-xl" />
+                <div key={i} className="h-12 bg-gray-100 dark:bg-gray-805 rounded-md" />
               ))}
             </div>
           ) : topContributors.length === 0 ? (

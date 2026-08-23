@@ -79,12 +79,12 @@ function VenturesPageInner() {
     );
   }
 
-  const tabs: { id: TabId; label: string; icon: string; adminOnly?: boolean }[] = [
-    { id: "discover", label: "Discover Ventures", icon: "🔍" },
-    { id: "feed", label: "Community Feed", icon: "💬" },
-    { id: "reputation", label: "Reputation Shelf", icon: "🏆" },
-    { id: "my-ventures", label: "My Ventures", icon: "💼" },
-    { id: "admin", label: "Admin Hub", icon: "🛡️", adminOnly: true },
+  const tabs: { id: TabId; label: string; adminOnly?: boolean }[] = [
+    { id: "discover", label: "Discover" },
+    { id: "reputation", label: "Trust" },
+    { id: "feed", label: "Participate" },
+    { id: "my-ventures", label: "Build" },
+    { id: "admin", label: "Console", adminOnly: true },
   ];
 
   return (
@@ -94,18 +94,21 @@ function VenturesPageInner() {
           <div className="mx-auto max-w-7xl">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white md:text-3xl">
-                  🚀 Student Venture Hub & Community
+                <span className="text-[10px] font-black tracking-widest text-blue-600 dark:text-blue-400 uppercase bg-blue-50 dark:bg-blue-950/40 px-2.5 py-1 rounded">
+                  IIML Enterprise Journal
+                </span>
+                <h1 className="text-2xl font-serif font-black tracking-tight text-gray-900 dark:text-white md:text-3xl mt-3">
+                  The Campus Enterprise Network
                 </h1>
-                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 md:text-base">
-                  Discover student-run startups, read verified reviews, and connect directly with founders.
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 md:text-base max-w-2xl leading-relaxed">
+                  A curated ecosystem for student-led startups and campus services. Read verified peer journals, recommend trusted operations, and co-build products.
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 {activeTab !== "my-ventures" && (
                   <button
                     onClick={() => setActiveTab("my-ventures")}
-                    className="inline-flex items-center justify-center rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-orange-700 hover:shadow transition-all"
+                    className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-blue-700 hover:shadow transition-all"
                   >
                     + Register Your Venture
                   </button>
@@ -115,7 +118,7 @@ function VenturesPageInner() {
 
             {/* Navigation Tabs */}
             <div className="mt-8 overflow-x-auto">
-              <nav className="flex space-x-1 rounded-xl bg-gray-100 dark:bg-gray-800 p-1" aria-label="Tabs">
+              <nav className="flex space-x-1 rounded-md bg-gray-100 dark:bg-gray-805 p-1" aria-label="Tabs">
                 {tabs
                   .filter((tab) => !tab.adminOnly || isAdmin)
                   .map((tab) => {
@@ -124,12 +127,11 @@ function VenturesPageInner() {
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-bold transition-all ${isActive
+                        className={`flex items-center gap-2 whitespace-nowrap rounded-md px-4 py-2.5 text-sm font-bold transition-all ${isActive
                           ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
                           : "text-gray-500 dark:text-gray-450 hover:bg-gray-50 dark:hover:bg-gray-800/80 hover:text-gray-900 dark:hover:text-white"
                           }`}
                       >
-                        <span>{tab.icon}</span>
                         <span>{tab.label}</span>
                       </button>
                     );

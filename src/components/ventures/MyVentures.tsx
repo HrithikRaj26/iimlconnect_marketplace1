@@ -284,7 +284,7 @@ export default function MyVentures() {
       {!showWizard ? (
         <div className="space-y-6">
           {/* Top banner check */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white dark:bg-gray-900 p-6 rounded-md border border-gray-200 dark:border-gray-800 shadow-xs">
             <div>
               <h2 className="text-lg font-extrabold text-gray-900 dark:text-white">Manage Your Ventures</h2>
               <p className="mt-1 text-xs font-semibold text-gray-500">
@@ -301,7 +301,7 @@ export default function MyVentures() {
                     setShowWizard(true);
                   }
                 }}
-                className="inline-flex items-center justify-center rounded-xl bg-orange-600 px-4 py-2.5 text-xs font-black text-white hover:bg-orange-700 transition-colors"
+                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-blue-700 transition-colors"
               >
                 + Register New Venture
               </button>
@@ -309,7 +309,7 @@ export default function MyVentures() {
           </div>
 
           {/* Collapsible Guidance Playbook Manual */}
-          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden mb-6">
+          <div className="bg-white dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 shadow-xs overflow-hidden mb-6">
             <button
               type="button"
               onClick={() => setShowPlaybook(!showPlaybook)}
@@ -332,19 +332,19 @@ export default function MyVentures() {
                 {/* Steps tabs */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 border-b border-gray-100 pb-4">
                   {[
-                    { step: 1, title: "1. Brand Profile", icon: "🚀" },
-                    { step: 2, title: "2. Offerings", icon: "✓" },
-                    { step: 3, title: "3. Coordinates", icon: "💬" },
-                    { step: 4, title: "4. SLA & Billing", icon: "💳" },
+                    { step: 1, title: "1. Venture Identity", icon: "🚀" },
+                    { step: 2, title: "2. Service Catalog", icon: "✓" },
+                    { step: 3, title: "3. Connect & Proof", icon: "💬" },
+                    { step: 4, title: "4. Publish & Live", icon: "💳" },
                   ].map((t) => (
                     <button
                       key={t.step}
                       type="button"
                       onClick={() => setPlaybookTab(t.step)}
-                      className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-black transition-all ${
+                      className={`flex items-center gap-2 p-2.5 rounded-md border text-xs font-bold transition-all ${
                         playbookTab === t.step
-                          ? "border-orange-500 bg-orange-50/50 text-orange-700 shadow-xs"
-                          : "border-gray-150 bg-white text-gray-650 hover:bg-gray-50"
+                          ? "border-blue-500 bg-blue-50/50 text-blue-700 shadow-xs"
+                          : "border-gray-200 bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 hover:bg-gray-50"
                       }`}
                     >
                       <span>{t.icon}</span>
@@ -357,11 +357,11 @@ export default function MyVentures() {
                 <div className="space-y-4 min-h-[140px] flex flex-col justify-between">
                   {playbookTab === 1 && (
                     <div className="space-y-2 animate-in fade-in duration-200">
-                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-wider">Step 1: Presenting Your Brand</h4>
-                      <p className="text-xs font-medium text-gray-650 leading-relaxed">
+                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-wider">Phase 1: Venture Identity</h4>
+                      <p className="text-xs font-medium text-gray-600 dark:text-gray-400 leading-relaxed">
                         A great venture starts with clear branding. Provide a catchy, short brand name, a single-sentence tagline that explains your concept, and a detailed description listing operational hours and location.
                       </p>
-                      <p className="text-xs font-bold text-orange-600 bg-orange-50/50 border border-orange-100 rounded-lg p-2.5">
+                      <p className="text-xs font-bold text-blue-600 bg-blue-50/50 border border-blue-100 rounded-md p-2.5">
                         💡 Tip: Choose a recognizable avatar or preset logo to look professional on the Discover board!
                       </p>
                     </div>
@@ -369,11 +369,11 @@ export default function MyVentures() {
 
                   {playbookTab === 2 && (
                     <div className="space-y-2 animate-in fade-in duration-200">
-                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-wider">Step 2: Cataloging Your Offerings</h4>
-                      <p className="text-xs font-medium text-gray-650 leading-relaxed">
-                        Under the "Offerings" step, specify exactly what items, products, combos, or professional services you sell. You can add items one-by-one to create a customized catalog list.
+                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-wider">Phase 2: Product & Service Catalog</h4>
+                      <p className="text-xs font-medium text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Under the "Catalog" phase, specify exactly what items, products, combos, or professional services you sell. You can add items one-by-one to create a customized catalog list.
                       </p>
-                      <p className="text-xs font-bold text-green-700 bg-green-50/50 border border-green-150 rounded-lg p-2.5">
+                      <p className="text-xs font-bold text-green-705 bg-green-50/50 border border-green-150 rounded-md p-2.5">
                         ✓ Example: "Late Night Maggie", "Egg Rolls", "Python Tutoring", "Custom Merch Design"
                       </p>
                     </div>
@@ -381,11 +381,11 @@ export default function MyVentures() {
 
                   {playbookTab === 3 && (
                     <div className="space-y-2 animate-in fade-in duration-200">
-                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-wider">Step 3: Secure Connect Channels</h4>
-                      <p className="text-xs font-medium text-gray-655 leading-relaxed">
+                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-wider">Phase 3: Connect & Direct Contact Channels</h4>
+                      <p className="text-xs font-medium text-gray-600 dark:text-gray-400 leading-relaxed">
                         Provide your WhatsApp number (in format +91XXXXXXXXXX) and your official student email ID. To protect your details, student clients must use interactive scratch cards to unlock these coordinates on the board.
                       </p>
-                      <p className="text-xs font-bold text-gray-500 bg-gray-50 border rounded-lg p-2.5 italic">
+                      <p className="text-xs font-bold text-gray-500 bg-gray-50 border rounded-md p-2.5 italic">
                         🔒 Privacy Note: Scratch actions are remembered to prevent repetitive friction for verified students.
                       </p>
                     </div>
@@ -393,11 +393,11 @@ export default function MyVentures() {
 
                   {playbookTab === 4 && (
                     <div className="space-y-2 animate-in fade-in duration-200">
-                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-wider">Step 4: Platform SLA & Commission Rules</h4>
-                      <p className="text-xs font-medium text-gray-655 leading-relaxed">
+                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-wider">Phase 4: SLA, Preview & Publish</h4>
+                      <p className="text-xs font-medium text-gray-600 dark:text-gray-400 leading-relaxed">
                         To maintain the matchmaking directory, the platform collects a commission based on transaction traffic. The billing cycles are bi-weekly, starting from your venture approval date.
                       </p>
-                      <div className="rounded-lg bg-red-50 border border-red-100 p-2.5 space-y-1">
+                      <div className="rounded-md bg-red-50 border border-red-100 p-2.5 space-y-1">
                         <p className="text-xs font-extrabold text-red-800">⚠️ Suspension Risk Clause:</p>
                         <p className="text-[11px] font-semibold text-red-700 leading-relaxed">
                           If billing dues are left unpaid for more than 7 days past the cycle deadline, your venture will be automatically suspended indefinitely. You can pay dues securely on your dashboard to reactivate it.
@@ -411,10 +411,9 @@ export default function MyVentures() {
                     <button
                       type="button"
                       onClick={() => setPlaybookTab(prev => prev === 4 ? 1 : prev + 1)}
-                      className="text-xs font-extrabold text-orange-600 hover:text-orange-700 flex items-center gap-1"
+                      className="text-xs font-extrabold text-blue-600 hover:text-blue-700 flex items-center gap-1"
                     >
                       <span>Next Section ({playbookTab === 4 ? "Restart" : `${playbookTab + 1}/4`})</span>
-                      <span>→</span>
                     </button>
                   </div>
                 </div>
@@ -426,11 +425,11 @@ export default function MyVentures() {
           {loading ? (
             <div className="space-y-4">
               {[...Array(2)].map((_, i) => (
-                <div key={i} className="animate-pulse rounded-2xl bg-white p-6 border border-gray-200 h-28" />
+                <div key={i} className="animate-pulse rounded-md bg-white p-6 border border-gray-200 h-28" />
               ))}
             </div>
           ) : myVentures.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl bg-white border border-gray-200 py-16 px-6 text-center">
+            <div className="flex flex-col items-center justify-center rounded-md bg-white border border-gray-200 py-16 px-6 text-center">
               <span className="text-5xl">💼</span>
               <h3 className="mt-4 text-lg font-bold text-gray-900">No registered ventures yet</h3>
               <p className="mt-2 text-sm text-gray-500 max-w-xs">
@@ -442,20 +441,20 @@ export default function MyVentures() {
               {myVentures.map((v) => (
                 <div
                   key={v.id}
-                  className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm"
+                  className="bg-white dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xs"
                 >
                   <div className="flex items-center gap-4">
                     <img
                       src={v.logo_url || PRESET_LOGOS[0]}
                       alt={v.name}
-                      className="h-14 w-14 rounded-xl object-cover border bg-gray-50"
+                      className="h-14 w-14 rounded-md object-cover border bg-gray-50"
                     />
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <h4 className="text-base font-extrabold text-gray-900">{v.name}</h4>
                         {getStatusBadge(v.status)}
                       </div>
-                      <p className="text-xs font-bold text-orange-600 mt-0.5">{v.category}</p>
+                      <p className="text-xs font-bold text-blue-600 dark:text-blue-450 mt-0.5">{v.category}</p>
                       <p className="text-xs font-medium text-gray-500 line-clamp-1 mt-1">{v.tagline}</p>
                     </div>
                   </div>
@@ -487,7 +486,7 @@ export default function MyVentures() {
                         setShowWizard(true);
                         setCurrentStep(1);
                       }}
-                      className="rounded-xl border border-gray-255 hover:bg-gray-50 text-gray-700 px-3 py-1.5 text-xs font-bold transition-colors"
+                      className="rounded-md border border-gray-255 hover:bg-gray-50 text-gray-700 px-3 py-1.5 text-xs font-bold transition-colors"
                     >
                       Edit Profile ⚙️
                     </button>
@@ -532,7 +531,7 @@ export default function MyVentures() {
         </div>
       ) : (
         /* Register/Edit Wizard Stage */
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 md:p-8 space-y-8 shadow-sm">
+        <div className="bg-white dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-6 md:p-8 space-y-8 shadow-xs">
           <div className="flex items-center justify-between border-b border-gray-100 pb-4">
             <div>
               <h2 className="text-xl font-black text-gray-900">
@@ -544,7 +543,7 @@ export default function MyVentures() {
             </div>
             <button
               onClick={() => setShowWizard(false)}
-              className="text-xs font-bold text-gray-400 hover:text-gray-600 bg-gray-50 border p-2 rounded-lg"
+              className="text-xs font-bold text-gray-400 hover:text-gray-600 bg-gray-50 border p-2 rounded-md"
             >
               ✕ Exit Form
             </button>
@@ -584,7 +583,7 @@ export default function MyVentures() {
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value as VentureCategory)}
-                    className="appearance-none block w-full rounded-xl border border-gray-200 pl-3 pr-10 py-2.5 text-sm font-bold text-gray-800 focus:border-orange-500 outline-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%25234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.75rem_center] bg-[size:1.1rem_1.1rem] bg-no-repeat"
+                    className="appearance-none block w-full rounded-md border border-gray-200 pl-3 pr-10 py-2.5 text-sm font-bold text-gray-800 focus:border-blue-500 outline-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%25234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.75rem_center] bg-[size:1.1rem_1.1rem] bg-no-repeat"
                   >
                     {PRESET_LOGOS.map((_, idx) => (
                       <option key={idx} value={["Tech", "F&B", "Fashion", "Consulting/Freelance", "Creative/Art", "Services"][idx]}>
@@ -616,8 +615,8 @@ export default function MyVentures() {
                         type="button"
                         key={idx}
                         onClick={() => setLogoUrl(preset)}
-                        className={`relative h-16 w-16 overflow-hidden rounded-xl border-2 transition-all ${
-                          logoUrl === preset ? "border-orange-500 scale-105 shadow-md" : "border-transparent opacity-75"
+                        className={`relative h-16 w-16 overflow-hidden rounded-md border-2 transition-all ${
+                          logoUrl === preset ? "border-blue-500 scale-105 shadow-sm" : "border-transparent opacity-75"
                         }`}
                       >
                         <img src={preset} alt="" className="h-full w-full object-cover" />
@@ -630,7 +629,7 @@ export default function MyVentures() {
                 <div className="max-w-xl space-y-2">
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block">Or Upload Brand Logo Image File:</label>
                   <div className="flex items-center gap-3">
-                    <label className="cursor-pointer inline-flex items-center justify-center rounded-xl bg-orange-600 hover:bg-orange-700 px-4 py-2.5 text-xs font-black text-white transition-colors gap-2 shadow-xs disabled:opacity-50">
+                    <label className="cursor-pointer inline-flex items-center justify-center rounded-md bg-blue-600 hover:bg-blue-700 px-4 py-2.5 text-xs font-bold text-white transition-colors gap-2 shadow-xs disabled:opacity-50">
                       <span>{uploadingImage ? "Uploading..." : "Choose Image File 📁"}</span>
                       <input
                         type="file"
@@ -678,7 +677,7 @@ export default function MyVentures() {
                     <button
                       type="button"
                       onClick={handleAddOffering}
-                      className="rounded-xl bg-gray-900 px-4 text-xs font-black text-white hover:bg-gray-800"
+                      className="rounded-md bg-gray-900 px-4 text-xs font-bold text-white hover:bg-gray-800"
                     >
                       + Add
                     </button>
@@ -751,7 +750,7 @@ export default function MyVentures() {
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="text-lg font-black text-gray-900">{name || "My Venture Name"}</h3>
-                        <span className="rounded-full bg-orange-50 px-2 py-0.5 text-[10px] font-bold text-orange-600">
+                        <span className="rounded bg-blue-50 dark:bg-blue-950/20 px-2 py-0.5 text-[10px] font-bold text-blue-600 dark:text-blue-400">
                           {category}
                         </span>
                       </div>
@@ -761,7 +760,7 @@ export default function MyVentures() {
                       </p>
                     </div>
                   </div>
-                  <div className="text-center font-black text-orange-600 text-sm">
+                  <div className="text-center font-bold text-blue-600 dark:text-blue-400 text-sm">
                     ★ 5.0 (0 reviews)
                   </div>
                 </div>
@@ -787,16 +786,16 @@ export default function MyVentures() {
                 )}
 
                 {/* SLA Terms & Conditions Checkbox */}
-                <div className="bg-orange-50/40 border border-orange-100/60 rounded-2xl p-5 space-y-3">
+                <div className="bg-blue-50/20 border-l-4 border-l-blue-600 p-5 rounded-md border-y border-r border-gray-150 dark:border-gray-800 space-y-3">
                   <label className="flex items-start gap-3 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={acceptTerms}
                       onChange={(e) => setAcceptTerms(e.target.checked)}
-                      className="mt-0.5 h-4.5 w-4.5 rounded border-gray-300 text-orange-600 focus:ring-orange-500 cursor-pointer"
+                      className="mt-0.5 h-4.5 w-4.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                     />
                     <div className="text-xs font-semibold text-gray-700 leading-relaxed">
-                      I accept the <span className="font-extrabold text-orange-700">IIML Connect Venture SLA</span>. I agree to the platform commission terms (bi-weekly billing cycles starting 14 days after approval). I understand that failing to settle non-zero dues within 7 days past the billing deadline will result in indefinite suspension of my venture from the portal.
+                      I accept the <span className="font-extrabold text-blue-700 dark:text-blue-400">IIML Connect Venture SLA</span>. I agree to the platform commission terms (bi-weekly billing cycles starting 14 days after approval). I understand that failing to settle non-zero dues within 7 days past the billing deadline will result in indefinite suspension of my venture from the portal.
                     </div>
                   </label>
                 </div>
@@ -816,7 +815,7 @@ export default function MyVentures() {
               type="button"
               disabled={currentStep === 1}
               onClick={() => setCurrentStep(currentStep - 1)}
-              className="rounded-xl border border-gray-200 px-4 py-2.5 text-xs font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              className="rounded-md border border-gray-200 px-4 py-2.5 text-xs font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
             >
               ← Back
             </button>
@@ -825,7 +824,7 @@ export default function MyVentures() {
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="rounded-xl bg-gray-900 px-5 py-2.5 text-xs font-black text-white hover:bg-gray-800 transition-colors"
+                className="rounded-md bg-gray-900 px-5 py-2.5 text-xs font-bold text-white hover:bg-gray-800 transition-colors"
               >
                 Continue →
               </button>
@@ -848,7 +847,7 @@ export default function MyVentures() {
             exit={{ opacity: 0, transition: { duration: 0.18 } }}
           >
           <motion.div
-            className="relative bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 p-8 max-w-sm w-full overflow-hidden"
+            className="relative bg-white dark:bg-gray-900 rounded-md shadow-2xl border border-gray-105 dark:border-gray-800 p-8 max-w-sm w-full overflow-hidden"
             initial={{ opacity: 0, scale: 0.88, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0,
               transition: { type: "spring", stiffness: 400, damping: 28 } }}
@@ -895,7 +894,7 @@ export default function MyVentures() {
           </div>
 
           {/* Success Dialog */}
-          <div className="relative bg-white dark:bg-gray-900 rounded-3xl p-8 max-w-md w-full shadow-2xl border border-gray-100 dark:border-gray-800 z-20 text-center space-y-6 scale-in-center animate-in zoom-in-95 duration-200">
+          <div className="relative bg-white dark:bg-gray-900 rounded-md p-8 max-w-md w-full shadow-2xl border border-gray-100 dark:border-gray-805 z-20 text-center space-y-6 scale-in-center animate-in zoom-in-95 duration-200">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-50 dark:bg-green-950/30 text-green-500 border border-green-100 dark:border-green-900/30 shadow-sm animate-bounce">
               <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -920,7 +919,7 @@ export default function MyVentures() {
                   </>
                 )}
               </p>
-              <p className="text-xs text-gray-400 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-150 dark:border-gray-700 mt-2">
+              <p className="text-xs text-gray-400 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-800 p-3 rounded-md border border-gray-150 dark:border-gray-700 mt-2">
                 {editingVentureId ? (
                   <>
                     The updates are now pending moderation. The current live details will remain online to protect your business operations. Once approved, the new changes will take effect!
@@ -936,7 +935,7 @@ export default function MyVentures() {
             <button
               type="button"
               onClick={handleCloseSuccess}
-              className="w-full rounded-xl bg-orange-600 px-5 py-3 text-xs font-black text-white hover:bg-orange-700 shadow-md transition-colors"
+              className="w-full rounded-md bg-blue-600 px-5 py-3 text-xs font-bold text-white hover:bg-blue-700 shadow-sm transition-colors"
             >
               Awesome! 🚀
             </button>
@@ -956,7 +955,7 @@ export default function MyVentures() {
             exit={{ opacity: 0, transition: { duration: 0.18 } }}
           >
           <motion.div
-            className="relative bg-white dark:bg-gray-900 rounded-3xl p-6 max-w-md w-full shadow-2xl border border-gray-100 dark:border-gray-800 text-center space-y-5"
+            className="relative bg-white dark:bg-gray-900 rounded-md p-6 max-w-md w-full shadow-2xl border border-gray-100 dark:border-gray-800 text-center space-y-5"
             initial={{ opacity: 0, scale: 0.88, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0,
               transition: { type: "spring", stiffness: 400, damping: 28 } }}
@@ -971,7 +970,7 @@ export default function MyVentures() {
               </p>
             </div>
             
-            <div className="text-left bg-gray-50 dark:bg-gray-850 border border-gray-150 dark:border-gray-800 rounded-2xl p-4 text-[11px] font-semibold text-gray-600 dark:text-gray-300 space-y-2.5 leading-relaxed">
+            <div className="text-left bg-gray-50 dark:bg-gray-850 border border-gray-150 dark:border-gray-800 rounded-md p-4 text-[11px] font-semibold text-gray-600 dark:text-gray-300 space-y-2.5 leading-relaxed">
               <div className="flex gap-2">
                 <span className="text-orange-500">💼</span>
                 <span><strong>Moderation:</strong> All submissions and profile updates are verified by admin before going live.</span>
@@ -994,7 +993,7 @@ export default function MyVentures() {
                   setShowPlaybook(true);
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
-                className="w-full rounded-xl border border-gray-250 hover:bg-gray-50 px-4 py-2.5 text-xs font-black text-gray-700 transition-colors"
+                className="w-full rounded-md border border-gray-250 hover:bg-gray-50 px-4 py-2.5 text-xs font-bold text-gray-700 transition-colors"
               >
                 Read Manual
               </button>
@@ -1004,7 +1003,7 @@ export default function MyVentures() {
                   setShowGuidancePrompt(false);
                   setShowWizard(true);
                 }}
-                className="w-full rounded-xl bg-orange-600 px-4 py-2.5 text-xs font-black text-white hover:bg-orange-700 shadow-md transition-colors"
+                className="w-full rounded-md bg-blue-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-blue-700 shadow-sm transition-colors"
               >
                 I'm Fine, Proceed
               </button>
@@ -1126,23 +1125,26 @@ function BillingSection({ venture, onPaySuccess }: BillingSectionProps) {
             exit={{ opacity: 0, transition: { duration: 0.18 } }}
           >
           <motion.div
-            className="bg-white dark:bg-gray-900 rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-gray-100 dark:border-gray-800 relative space-y-6"
+            className="bg-white dark:bg-gray-900 rounded-md p-6 max-w-sm w-full shadow-2xl border border-gray-100 dark:border-gray-800 relative space-y-6"
             initial={{ opacity: 0, scale: 0.88, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0,
               transition: { type: "spring", stiffness: 400, damping: 28 } }}
             exit={{ opacity: 0, scale: 0.92, y: 12,
               transition: { duration: 0.18, ease: "easeIn" } }}
           >
-            <button
-              onClick={() => setShowPaymentModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 font-extrabold text-sm"
-            >
-              ✕
-            </button>
-
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-850 pb-3">
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Dues Clearance</span>
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                className="h-7 w-7 rounded-md bg-gray-50 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 font-extrabold text-sm"
+              >
+                ✕
+              </button>
+            </div>
+            
             <div className="text-center space-y-1">
-              <h3 className="text-lg font-black text-gray-900">SLA Balance Payment</h3>
-              <p className="text-xs font-semibold text-gray-400">Scan & Pay via UPI</p>
+              <h3 className="text-lg font-black text-gray-900 dark:text-white">SLA Balance Payment</h3>
+              <p className="text-xs font-semibold text-gray-405">Scan & Pay via UPI</p>
             </div>
 
             {paySuccess ? (
@@ -1150,38 +1152,38 @@ function BillingSection({ venture, onPaySuccess }: BillingSectionProps) {
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-50 text-green-500 border border-green-100 shadow-sm animate-bounce">
                   ✓
                 </div>
-                <h4 className="text-sm font-extrabold text-gray-800">Payment Verified!</h4>
+                <h4 className="text-sm font-extrabold text-gray-800 dark:text-gray-200">Payment Verified!</h4>
                 <p className="text-xs text-gray-500">Your venture status has been restored.</p>
               </div>
             ) : (
               <form onSubmit={handlePay} className="space-y-4">
                 {/* Styled CSS QR Code Box */}
-                <div className="mx-auto h-36 w-36 bg-gray-50 border rounded-2xl flex flex-col items-center justify-center p-2.5 relative group cursor-pointer shadow-inner">
+                <div className="mx-auto h-36 w-36 bg-gray-50 dark:bg-gray-800 border rounded-md flex flex-col items-center justify-center p-2.5 relative group cursor-pointer shadow-inner">
                   <div className="grid grid-cols-6 gap-0.5 w-full h-full opacity-80 group-hover:opacity-100 transition-opacity">
                     {[...Array(36)].map((_, idx) => {
                       const isPattern = (idx % 5 === 0) || (idx < 6) || (idx > 30) || (idx % 6 === 0);
                       return (
                         <div
                           key={idx}
-                          className={`rounded-xs ${isPattern ? "bg-gray-800" : "bg-transparent"}`}
+                          className={`rounded-xs ${isPattern ? "bg-gray-800 dark:bg-gray-200" : "bg-transparent"}`}
                         />
                       );
                     })}
                   </div>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="bg-white px-2 py-1 rounded-md text-[9px] font-black border text-orange-600 shadow-sm">
+                    <span className="bg-white dark:bg-gray-900 px-2 py-1 rounded-md text-[9px] font-black border text-blue-600 dark:text-blue-400 shadow-sm">
                       UPI QR
                     </span>
                   </div>
                 </div>
 
                 <div className="text-center space-y-1 text-xs">
-                  <p className="font-bold text-gray-800">Payable: ₹{parseFloat(venture.current_due.toString()).toFixed(2)}</p>
+                  <p className="font-bold text-gray-800 dark:text-gray-200">Payable: ₹{parseFloat(venture.current_due.toString()).toFixed(2)}</p>
                   <p className="text-[10px] text-gray-400">UPI ID: iimlconnect@upi</p>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
+                  <label className="text-[10px] font-bold text-gray-505 uppercase tracking-wider block">
                     Transaction reference ID (UTR)
                   </label>
                   <input
@@ -1190,12 +1192,12 @@ function BillingSection({ venture, onPaySuccess }: BillingSectionProps) {
                     placeholder="Enter 12-digit UTR/Ref ID"
                     value={utr}
                     onChange={(e) => setUtr(e.target.value)}
-                    className="w-full text-xs rounded-xl border border-gray-200 px-3 py-2.5 font-semibold focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    className="w-full text-xs rounded-md border border-gray-200 dark:border-gray-800 px-3 py-2.5 font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
 
                 {payError && (
-                  <p className="text-[10px] font-bold text-red-600 bg-red-50 p-2 rounded-lg border border-red-100">
+                  <p className="text-[10px] font-bold text-red-650 bg-red-50 dark:bg-red-950/20 p-2 rounded-md border border-red-100 dark:border-red-900/30">
                     ⚠️ {payError}
                   </p>
                 )}
@@ -1203,7 +1205,7 @@ function BillingSection({ venture, onPaySuccess }: BillingSectionProps) {
                 <button
                   type="submit"
                   disabled={paying}
-                  className="w-full rounded-xl bg-orange-600 hover:bg-orange-700 text-white py-2.5 text-xs font-black shadow-md transition-colors disabled:opacity-50"
+                  className="w-full rounded-md bg-blue-600 hover:bg-blue-700 text-white py-2.5 text-xs font-bold shadow-sm transition-colors disabled:opacity-50"
                 >
                   {paying ? "Verifying..." : "Confirm Payment 🚀"}
                 </button>
