@@ -179,7 +179,7 @@ Typography is the primary identity mechanism of the platform, utilizing a dual-t
 * **Elevation & Shadow Cards:** Elevation uses a custom shadow key `shadow-card` defined in the tailwind config:
   `0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08)`
   This prevents thick blocky boundaries, giving a modern paper layer effect.
-* **Border Radii:** Corners are curved using standard `rounded-xl` (12px) and custom `rounded-2xl` (16px) properties, offering a soft look.
+* **Border Radii:** Corners use structured, compact `rounded-md` (6px) or flat boundaries, replacing SaaS bubble cards to establish an editorial block style.
 * **Fluid Masonry (Lost & Found):** Unlike unified CSS grid layouts that create large empty gaps below cards of differing heights, the **Lost & Found** page uses a CSS multi-column setup:
   `columns-1 sm:columns-2 xl:columns-3 gap-5` with `break-inside-avoid`.
   This nests matched alert cards right under standard cards vertically, eliminating layout gaps.
