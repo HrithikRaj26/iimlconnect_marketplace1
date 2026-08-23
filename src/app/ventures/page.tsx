@@ -97,7 +97,7 @@ function VenturesPageInner() {
                 <span className="text-[10px] font-black tracking-widest text-blue-600 dark:text-blue-400 uppercase bg-blue-50 dark:bg-blue-950/40 px-2.5 py-1 rounded">
                   IIML Enterprise Journal
                 </span>
-                <h1 className="text-2xl font-serif font-black tracking-tight text-gray-900 dark:text-white md:text-3xl mt-3">
+                <h1 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-3xl mt-3">
                   The Campus Enterprise Network
                 </h1>
                 <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 md:text-base max-w-2xl leading-relaxed">

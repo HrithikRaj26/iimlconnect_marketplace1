@@ -130,8 +130,8 @@ The website implements a premium, engaging, and highly modern design system tail
    * **Admin Console:** Red / Rose
    *This color scheme dynamically changes global UI elements like the "Scroll to Top" button, focus rings, hover indicators, and solid visual accents.*
 
-2. **Distinctive Editorial Typography:**
-   Pairing the premium academic/institutional serif display typeface **Playfair Display** (for headers and page titles) with the clean, highly readable functional UI sans-serif **Inter** (for body copy, data grids, inputs, and controls).
+2. **Distinctive Typography:**
+   Styling throughout uses the clean, highly readable functional UI sans-serif **Inter** (for headers, page titles, body copy, data grids, inputs, and controls) to achieve a unified visual system.
 
 3. **Premium Micro-Animations:**
    Enhances user engagement through subtle visual feedbacks:
@@ -170,9 +170,8 @@ Instead of applying a single monochromatic brand color, the portal relies on **f
 *This theme system overrides standard elements dynamically, including scroll indicators, floating action buttons (FABs), and header borders (configured in [`AppLayout.tsx`](file:///Users/shinjanpatra/Documents/IIML_Connect/iimlconnect_marketplace1/src/components/layout/AppLayout.tsx#L56-L87)).*
 
 ### B. Typography & Hierarchical Weighting
-Typography is the primary identity mechanism of the platform, utilizing a dual-typeface system to achieve an institutional yet functional aesthetic:
-* **Editorial Headers:** All core page headers (`h1`, `h2`, `h3`, etc.) use the serif **Playfair Display** (configured in [`tailwind.config.ts`](file:///Users/shinjanpatra/Documents/IIML_Connect/iimlconnect_marketplace1/tailwind.config.ts#L22-L26)). Headings are styled with normal or wide tracking (`tracking-normal` or `tracking-wide`) and elegant semi-bold weights (`font-semibold`), separating the app's visual identity from typical startup templates.
-* **Functional UI:** Labels, buttons, input text, message bubbles, and details specs use the clean sans-serif **Inter** (under `@apply font-sans`) to ensure high readability and accessibility.
+Typography is the primary identity mechanism of the platform, utilizing a single typography system to achieve a unified, functional aesthetic:
+* **Functional UI & Headers:** Headers, labels, buttons, input text, message bubbles, and details specs use the clean sans-serif **Inter** (under `@apply font-sans` and default body styling) to ensure high readability and accessibility.
 * **Secondary Tags:** Metadata markers are set to uppercase with wide character tracking (`tracking-widest`) and a tiny size (`text-[10px]`) for a clean layout hierarchy.
 
 ### C. Spacing, Elevation & Fluid Masonry Layouts

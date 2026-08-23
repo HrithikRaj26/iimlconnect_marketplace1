@@ -592,7 +592,7 @@ export default function AdminPanel() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                 </svg>
               ) : (
-                <span className="text-lg font-black font-mono">⚠️</span>
+                <span className="text-lg font-bold">⚠️</span>
               )}
             </div>
 

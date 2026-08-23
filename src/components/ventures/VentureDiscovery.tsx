@@ -220,7 +220,7 @@ export default function VentureDiscovery() {
               </span>
             </div>
             
-            <h2 className="text-3xl font-black font-serif text-gray-950 dark:text-white leading-tight">
+            <h2 className="text-3xl font-black text-gray-950 dark:text-white leading-tight">
               {featured[carouselIndex].name}
             </h2>
             <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed font-medium">

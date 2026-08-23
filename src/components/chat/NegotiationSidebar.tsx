@@ -98,7 +98,7 @@ export function NegotiationSidebar({
               </div>
 
               <div>
-                <p className="text-3xl font-bold font-serif text-gray-900 dark:text-gray-100">
+                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                   {formatINR(activeOffer.amount)}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-normal">

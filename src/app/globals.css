@@ -14,9 +14,8 @@
     color: #f9fafb;
   }
 
-  /* Editorial display headings (institutional serif) */
-  h1, h2, h3, h4, h5, h6, .font-editorial {
-    font-family: var(--font-serif), Georgia, Cambria, "Times New Roman", Times, serif;
+  /* Headings inherit base sans-serif font */
+  h1, h2, h3, h4, h5, h6 {
     letter-spacing: 0.015em;
     font-weight: 600;
   }
