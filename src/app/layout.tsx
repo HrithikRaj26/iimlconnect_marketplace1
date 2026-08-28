@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import { ToastProvider } from "@/context/ToastContext";
-
-const inter = Inter({ 
-  subsets: ["latin"],
-  variable: "--font-inter"
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://iiml-connect.vercel.app'),
@@ -50,7 +44,7 @@ export default function RootLayout({
         />
         <Script src="https://accounts.google.com/gsi/client" strategy="beforeInteractive" />
       </head>
-      <body className={`${inter.variable} font-sans antialiased text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-950 min-h-screen`}>
+      <body className={`font-sans antialiased text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-950 min-h-screen`}>
         <ThemeProvider>
           <ToastProvider>
             {children}

@@ -21,7 +21,7 @@ const config: Config = {
         surface: "#F7F8FA",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["sans-serif"],
       },
       boxShadow: {
         card: "0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08)",
