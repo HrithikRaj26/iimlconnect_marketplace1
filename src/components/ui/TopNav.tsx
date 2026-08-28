@@ -151,7 +151,7 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
     key === active ? "text-brand" : "text-gray-500 hover:text-gray-800";
 
   return (
-    <header className="flex h-16 w-full items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 md:px-6 shrink-0">
+    <header className="flex h-16 w-full items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 md:px-6 shrink-0">
       <div className="flex items-center gap-4">
         {onMenuClick && (
           <button onClick={onMenuClick} className="text-gray-500 hover:text-gray-900 focus:outline-none">
@@ -172,7 +172,7 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
         </Link>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         <Link 
           href="/messages" 
           className="relative flex items-center justify-center h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950/60 border border-blue-100/80 dark:border-blue-900/40 shadow-xs hover:shadow-sm hover:scale-105 active:scale-95 transition-all duration-200 mr-2" 

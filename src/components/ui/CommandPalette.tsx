@@ -223,7 +223,7 @@ export function CommandPalette() {
     >
       <div
         ref={modalRef}
-        className="w-full max-w-lg rounded-2xl bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 shadow-2xl overflow-hidden flex flex-col max-h-[50vh] transform scale-100 animate-in zoom-in-95 duration-200"
+        className="w-[calc(100%-2rem)] sm:w-full sm:max-w-lg rounded-2xl bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 shadow-2xl overflow-hidden flex flex-col max-h-[65vh] sm:max-h-[50vh] transform scale-100 animate-in zoom-in-95 duration-200"
       >
         {/* Search Input Bar */}
         <div className="flex h-13 items-center gap-3 px-4 border-b border-gray-100 dark:border-gray-800">

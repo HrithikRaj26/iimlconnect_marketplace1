@@ -69,10 +69,10 @@ export function Modal({ open, onClose, children, labelledBy, variant = "center" 
 
   const cardClass =
     variant === "bottom"
-      ? "relative z-10 w-full max-w-lg rounded-t-3xl bg-white dark:bg-gray-900 shadow-2xl"
+      ? "relative z-10 w-full max-w-lg max-h-[90dvh] flex flex-col overflow-hidden rounded-t-3xl bg-white dark:bg-gray-900 shadow-2xl"
       : variant === "right"
-      ? "relative z-10 h-full w-full max-w-md bg-white dark:bg-gray-900 shadow-2xl"
-      : "relative z-10 w-full max-w-md rounded-2xl bg-white dark:bg-gray-900 shadow-2xl";
+      ? "relative z-10 h-full w-full max-w-md flex flex-col overflow-hidden bg-white dark:bg-gray-900 shadow-2xl"
+      : "relative z-10 w-full max-w-md max-h-[90dvh] flex flex-col overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-2xl";
 
   return createPortal(
     <AnimatePresence>

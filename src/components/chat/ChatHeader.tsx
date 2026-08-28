@@ -10,9 +10,10 @@ interface ChatHeaderProps {
   onMakeOffer: () => void;
   onDeleteThread?: () => void;
   onBack?: () => void;
+  onViewDealStatus?: () => void;
 }
 
-export function ChatHeader({ participant, listing, transaction, onMakeOffer, onDeleteThread, onBack }: ChatHeaderProps) {
+export function ChatHeader({ participant, listing, transaction, onMakeOffer, onDeleteThread, onBack, onViewDealStatus }: ChatHeaderProps) {
   const dealClosed = transaction.status === "agreed" || transaction.status === "completed";
 
   return (
@@ -89,6 +90,17 @@ export function ChatHeader({ participant, listing, transaction, onMakeOffer, onD
 
       {/* Right side actions */}
       <div className="flex items-center gap-2.5">
+        {onViewDealStatus && (
+          <button
+            type="button"
+            onClick={onViewDealStatus}
+            className="lg:hidden flex items-center justify-center h-9 px-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all active:scale-95 text-xs font-bold"
+            title="View Deal Status"
+          >
+            Details
+          </button>
+        )}
+
         {dealClosed ? (
           <span className="flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 px-3 py-1.5 text-sm font-bold text-emerald-600 dark:text-emerald-400">
             <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">

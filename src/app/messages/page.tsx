@@ -11,6 +11,8 @@ import { ChatInput } from "@/components/chat/ChatInput";
 import { MakeOfferModal } from "@/components/chat/MakeOfferModal";
 import { useConversation } from "@/hooks/useConversation";
 import { chatService } from "@/services/chatService";
+import { AnimatePresence, motion } from "framer-motion";
+import { X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Conversation } from "@/types";
 import { useToast } from "@/context/ToastContext";
@@ -449,6 +451,7 @@ function ChatWorkspace({
   } = useConversation(initialConversation);
 
   const [mobileView, setMobileView] = useState<"list" | "thread">("list");
+  const [mobileNegotiationOpen, setMobileNegotiationOpen] = useState(false);
 
   // Sync mobile view on active chat changes
   useEffect(() => {
@@ -495,6 +498,7 @@ function ChatWorkspace({
             onMakeOffer={() => setOfferModalOpen(true)}
             onDeleteThread={() => onDeleteConversation(conversation.id)}
             onBack={() => setMobileView("list")}
+            onViewDealStatus={() => setMobileNegotiationOpen(true)}
           />
 
           <MessageThread
@@ -517,7 +521,7 @@ function ChatWorkspace({
         </div>
 
         {/* Right Column: Dedicated Negotiation Sidebar */}
-        <div className="hidden lg:block w-80 shrink-0 bg-white dark:bg-gray-950 h-full overflow-y-auto border-l border-gray-100 dark:border-gray-850">
+        <div className="hidden lg:block w-80 shrink-0 bg-white dark:bg-gray-950 h-full overflow-y-auto border-l border-gray-100 dark:border-gray-850 pb-[env(safe-area-inset-bottom)]">
           <NegotiationSidebar
             conversation={conversation}
             transaction={transaction}
@@ -527,6 +531,45 @@ function ChatWorkspace({
             onMakeOffer={() => setOfferModalOpen(true)}
           />
         </div>
+
+        {/* Mobile Negotiation Drawer */}
+        <AnimatePresence>
+          {mobileNegotiationOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setMobileNegotiationOpen(false)}
+                className="fixed inset-0 z-[60] bg-gray-900/40 backdrop-blur-sm lg:hidden"
+              />
+              <motion.div
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="fixed inset-x-0 bottom-0 z-[70] h-[85vh] rounded-t-3xl bg-white dark:bg-gray-900 shadow-2xl lg:hidden flex flex-col"
+              >
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 shrink-0">
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">Deal Status</h2>
+                  <button onClick={() => setMobileNegotiationOpen(false)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <X size={20} className="text-gray-500" />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)]">
+                  <NegotiationSidebar
+                    conversation={conversation}
+                    transaction={transaction}
+                    onAcceptOffer={(id) => { respondToOffer(id, "accept"); setMobileNegotiationOpen(false); }}
+                    onDeclineOffer={(id) => { respondToOffer(id, "decline"); setMobileNegotiationOpen(false); }}
+                    onCounterOffer={() => { setOfferModalOpen(true); setMobileNegotiationOpen(false); }}
+                    onMakeOffer={() => { setOfferModalOpen(true); setMobileNegotiationOpen(false); }}
+                  />
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
 
       <MakeOfferModal

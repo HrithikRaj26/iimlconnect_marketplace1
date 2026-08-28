@@ -138,7 +138,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const hasText = value.trim().length > 0 || pendingFile !== null;
 
   return (
-    <div className={`border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 px-3 py-3 transition-all duration-200 ${shake ? "animate-shake" : ""}`}>
+    <div className={`border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] transition-all duration-200 ${shake ? "animate-shake" : ""}`}>
       <input
         type="file"
         ref={fileInputRef}

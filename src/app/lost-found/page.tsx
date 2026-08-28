@@ -11,8 +11,9 @@ import { useLostFoundAuth } from "@/hooks/useLostFoundAuth";
 import { lostFoundService } from "@/services/lostFoundService";
 import { CATEGORIES, InstantMatch, ReportSummary } from "@/types/lostFound";
 import Fuse from "fuse.js";
-import { Mic } from "lucide-react";
+import { Mic, X } from "lucide-react";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
+import { AnimatePresence, motion } from "framer-motion";
 
 // "available" is redundant with "open" (both just mean "still active") and
 // is dropped entirely. "matched" only makes sense as a My Reports filter —
@@ -146,6 +147,7 @@ function LostFoundBrowsePageInner() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [matches, setMatches] = useState<InstantMatch[]>([]);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   const search = useCallback(async () => {
     setLoading(true);
@@ -325,7 +327,9 @@ function LostFoundBrowsePageInner() {
       </div>
 
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-6 lg:flex-row">
-        <aside className="w-full shrink-0 lg:w-64">
+        
+        {/* Desktop Sidebar */}
+        <aside className="hidden lg:block w-full shrink-0 lg:w-64">
           <div className="space-y-5 rounded-xl border border-gray-200 bg-white p-5 shadow-card">
             <h2 className="text-base font-semibold text-gray-900">Filters</h2>
 
@@ -418,7 +422,88 @@ function LostFoundBrowsePageInner() {
           </div>
         </aside>
 
+        {/* Mobile Filter Drawer */}
+        <AnimatePresence>
+          {mobileFiltersOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setMobileFiltersOpen(false)}
+                className="fixed inset-0 z-[60] bg-gray-900/40 backdrop-blur-sm lg:hidden"
+              />
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="fixed inset-y-0 right-0 z-[70] w-full max-w-xs bg-white dark:bg-gray-900 shadow-2xl lg:hidden flex flex-col"
+              >
+                <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 dark:border-gray-800">
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">Filters</h2>
+                  <button onClick={() => setMobileFiltersOpen(false)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <X size={20} className="text-gray-500" />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 space-y-5">
+                  <TextInput
+                    label="Search (Keywords)"
+                    placeholder="E.g. spiderman wallet..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-gray-800 dark:text-gray-300">Category</label>
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className="h-11 w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm text-gray-900 dark:text-white capitalize outline-none transition-colors"
+                    >
+                      <option value="">All categories</option>
+                      {CATEGORIES.map((c) => (
+                        <option key={c} value={c} className="capitalize">
+                          {c}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <TextInput
+                    label="Location"
+                    placeholder="Contains…"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                  />
+                  <div>
+                    <label className="mb-1.5 block text-sm font-medium text-gray-800 dark:text-gray-300">Status</label>
+                    <div className="flex flex-wrap gap-2">
+                      <FilterPill active={!status} onClick={() => setStatus(undefined)}>All</FilterPill>
+                      {statusOptions.map((s) => (
+                        <FilterPill key={s} active={status === s} onClick={() => setStatus(s)}>{s}</FilterPill>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 pb-[env(safe-area-inset-bottom)]">
+                  <Button fullWidth onClick={() => setMobileFiltersOpen(false)}>Apply Filters</Button>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+
         <div className="min-w-0 flex-1">
+          <div className="lg:hidden flex justify-between items-center mb-4">
+            <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+              {loading && tabResults.length === 0 ? "Loading..." : `${tabResults.length} Reports`}
+            </h1>
+            <button
+              onClick={() => setMobileFiltersOpen(true)}
+              className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 shadow-sm"
+            >
+              Filters
+            </button>
+          </div>
           {loading && tabResults.length === 0 && <Loader message="Loading reports..." />}
           {error && <p className="py-4 text-sm font-medium text-red-500">{error}</p>}
           {!loading && tabResults.length === 0 && !error && (
