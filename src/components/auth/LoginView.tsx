@@ -5,6 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, Lock, Sparkles, LogIn, ArrowLeft } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export default function LoginView({ onLogin }: { onLogin: (session: any) => void }) {
   const [phone, setPhone] = useState("");
@@ -119,6 +120,9 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
 
   return (
     <div className="relative flex min-h-screen flex-col bg-gray-50 dark:bg-gray-950 overflow-hidden transition-colors duration-300">
+      <div className="absolute top-4 right-4 md:top-6 md:right-6 z-50">
+        <ThemeToggle />
+      </div>
       {/* Premium Decorative Glow Orbs */}
       <div className="absolute top-1/4 left-1/4 -z-10 w-72 md:w-96 h-72 md:h-96 bg-blue-400/20 dark:bg-blue-600/10 rounded-full blur-[80px] md:blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
       <div className="absolute bottom-1/4 right-1/4 -z-10 w-72 md:w-96 h-72 md:h-96 bg-indigo-400/20 dark:bg-indigo-600/10 rounded-full blur-[80px] md:blur-[120px] animate-pulse" style={{ animationDuration: '10s' }} />

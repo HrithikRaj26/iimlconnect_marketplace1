@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { MessageSquare, LogOut, Sparkles, Sun, Moon } from "lucide-react";
-import { useTheme } from "@/components/ui/ThemeProvider";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 interface TopNavProps {
   /** Which nav item to highlight as active. */
@@ -14,7 +14,6 @@ interface TopNavProps {
 
 export function TopNav({ active = "marketplace", onMenuClick, profile: propProfile }: TopNavProps) {
   const router = useRouter();
-  const { theme, toggle } = useTheme();
   const [profile, setProfile] = useState<{ name: string; avatar: string } | null>(propProfile || null);
   const [unreadChats, setUnreadChats] = useState(0);
 
@@ -205,33 +204,8 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
           </span>
         </Link>
         
-        {/* Theme toggle: two-button pill */}
-        <div className="flex items-center rounded-full border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 p-0.5 gap-0.5">
-          <button
-            onClick={() => theme !== 'light' && toggle()}
-            title="Light Mode"
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${
-              theme === 'light'
-                ? 'bg-white dark:bg-gray-900 text-amber-600 shadow-sm'
-                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-            }`}
-          >
-            <Sun size={13} />
-            <span className="hidden sm:inline">Light</span>
-          </button>
-          <button
-            onClick={() => theme !== 'dark' && toggle()}
-            title="Dark Mode"
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-bold transition-all duration-200 ${
-              theme === 'dark'
-                ? 'bg-gray-900 text-blue-400 shadow-sm'
-                : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
-            }`}
-          >
-            <Moon size={13} />
-            <span className="hidden sm:inline">Dark</span>
-          </button>
-        </div>
+        {/* Theme toggle */}
+        <ThemeToggle />
 
         <button
           onClick={handleLogout}

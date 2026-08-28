@@ -23,7 +23,7 @@ export function CommandPalette() {
   const [activeIndex, setActiveIndex] = useState(0);
   
   const router = useRouter();
-  const { toggle: toggleTheme } = useTheme();
+  const { activeTheme, setPreference } = useTheme();
   const inputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -90,9 +90,9 @@ export function CommandPalette() {
       subtitle: "Switch between light and dark display theme",
       category: "Actions",
       icon: <Sparkles size={16} className="text-purple-500" />,
-      action: () => { toggleTheme(); setOpen(false); }
+      action: () => { setPreference(activeTheme === "dark" ? "light" : "dark"); setOpen(false); }
     }
-  ], [router, toggleTheme]);
+  ], [router, activeTheme, setPreference]);
 
   // Fetch search results from DB
   const performSearch = useCallback(async (searchQuery: string) => {

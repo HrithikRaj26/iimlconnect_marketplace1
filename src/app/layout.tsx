@@ -35,11 +35,13 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var stored = localStorage.getItem('iiml-theme');
-                  if (stored === 'dark') {
-                    document.documentElement.classList.add('dark');
-                  } else {
+                  var stored = localStorage.getItem('iiml-theme-pref');
+                  var hour = new Date().getHours();
+                  var isLight = stored === 'light' || (stored !== 'dark' && hour >= 6 && hour < 18);
+                  if (isLight) {
                     document.documentElement.classList.remove('dark');
+                  } else {
+                    document.documentElement.classList.add('dark');
                   }
                 } catch(e) {}
               })();
