@@ -10,8 +10,8 @@
 
   /* Dark mode base */
   html.dark body {
-    background-color: #030712;
-    color: #f9fafb;
+    background-color: #0B1120; /* Very dark slate/blue */
+    color: #E2E8F0; /* Softer slate/white */
   }
 
   /* Headings inherit base sans-serif font */
@@ -37,35 +37,35 @@
 }
 
 /* ===== Dark Mode: Backgrounds ===== */
-.dark .bg-white          { background-color: #111827; }
-.dark .bg-gray-50        { background-color: #030712; }
-.dark .bg-gray-100       { background-color: #1f2937; }
-.dark .bg-gray-200       { background-color: #374151; }
-.dark .hover\:bg-gray-50:hover  { background-color: #1f2937; }
-.dark .hover\:bg-gray-100:hover { background-color: #374151; }
+.dark .bg-white          { background-color: #1E293B; }
+.dark .bg-gray-50        { background-color: #0B1120; }
+.dark .bg-gray-100       { background-color: #334155; }
+.dark .bg-gray-200       { background-color: #475569; }
+.dark .hover\:bg-gray-50:hover  { background-color: #1E293B; }
+.dark .hover\:bg-gray-100:hover { background-color: #334155; }
 
 /* ===== Dark Mode: Borders ===== */
 .dark .border-gray-200,
 .dark .border-gray-150,
-.dark .border-gray-100 { border-color: #1f2937; }
+.dark .border-gray-100 { border-color: #334155; }
 
 /* ===== Dark Mode: Dividers ===== */
-.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: #1f2937; }
-.dark .divide-gray-50  > :not([hidden]) ~ :not([hidden]) { border-color: #1f2937; }
+.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: #334155; }
+.dark .divide-gray-50  > :not([hidden]) ~ :not([hidden]) { border-color: #334155; }
 
 /* ===== Dark Mode: Forms ===== */
 .dark input,
 .dark textarea,
 .dark select {
-  background-color: #1f2937;
-  color: #f9fafb;
-  border-color: #374151;
+  background-color: #1E293B;
+  color: #F8FAFC;
+  border-color: #475569;
 }
-.dark label { color: #d1d5db; }
+.dark label { color: #94A3B8; }
 
 /* ===== Dark Mode: Sidebar & Nav ===== */
-.dark header { background-color: #111827 !important; border-color: #1f2937 !important; }
-.dark nav, .dark aside { background-color: #111827 !important; border-color: #1f2937 !important; }
+.dark header { background-color: #1E293B !important; border-color: #334155 !important; }
+.dark nav, .dark aside { background-color: #1E293B !important; border-color: #334155 !important; }
 
 /* ===== Dark Mode: Cards & Surfaces ===== */
 .dark .shadow-sm,
@@ -77,7 +77,7 @@
 }
 
 /* ===== Dark Mode: Footer ===== */
-.dark footer { background-color: #111827 !important; border-color: #1f2937 !important; }
+.dark footer { background-color: #1E293B !important; border-color: #334155 !important; }
 
 /* ===== Smooth transitions for theme switch ===== */
 *, *::before, *::after {
