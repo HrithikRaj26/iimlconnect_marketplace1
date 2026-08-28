@@ -148,7 +148,7 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
 
 
   const linkClass = (key: TopNavProps["active"]) =>
-    key === active ? "text-brand" : "text-gray-500 hover:text-gray-800";
+    key === active ? "text-brand dark:text-brand-light" : "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200";
 
   return (
     <header className="flex h-16 w-full items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 md:px-6 shrink-0">

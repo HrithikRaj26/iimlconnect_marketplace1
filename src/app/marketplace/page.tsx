@@ -57,7 +57,7 @@ export default function MarketplacePage() {
             <button
               type="button"
               onClick={() => setMobileFiltersOpen((o) => !o)}
-              className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 lg:hidden"
+              className="rounded-lg border border-gray-200 dark:border-gray-700 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 lg:hidden hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
               Filters
             </button>

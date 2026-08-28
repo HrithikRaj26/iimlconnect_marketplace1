@@ -288,7 +288,7 @@ function LostFoundBrowsePageInner() {
               onClick={() => switchTab("lost")}
               className={[
                 "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
-                tab === "lost" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
+                tab === "lost" ? "border-brand text-brand dark:text-brand-light dark:border-brand-light" : "border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200",
               ].join(" ")}
             >
               Lost
@@ -298,7 +298,7 @@ function LostFoundBrowsePageInner() {
               onClick={() => switchTab("found")}
               className={[
                 "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
-                tab === "found" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
+                tab === "found" ? "border-brand text-brand dark:text-brand-light dark:border-brand-light" : "border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200",
               ].join(" ")}
             >
               Found
@@ -308,7 +308,7 @@ function LostFoundBrowsePageInner() {
               onClick={() => switchTab("mine")}
               className={[
                 "border-b-2 px-1 py-3 text-sm font-semibold transition-colors",
-                tab === "mine" ? "border-brand text-brand" : "border-transparent text-gray-500 hover:text-gray-800",
+                tab === "mine" ? "border-brand text-brand dark:text-brand-light dark:border-brand-light" : "border-transparent text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200",
               ].join(" ")}
             >
               My Reports
