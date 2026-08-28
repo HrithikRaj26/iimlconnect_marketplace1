@@ -212,7 +212,7 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
                       Phone Number
                     </label>
                     <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 dark:text-gray-600">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 dark:text-gray-500">
                         <Phone size={16} />
                       </div>
                       <input
@@ -263,7 +263,7 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
                       Enter 6-digit OTP
                     </label>
                     <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 dark:text-gray-600">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 dark:text-gray-500">
                         <Lock size={16} />
                       </div>
                       <input
@@ -332,7 +332,7 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
                       Your Full Name
                     </label>
                     <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 dark:text-gray-600">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 dark:text-gray-500">
                         <Sparkles size={16} />
                       </div>
                       <input
@@ -425,17 +425,17 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Platform Map</h4>
             <ul className="space-y-2 text-xs font-bold text-gray-600 dark:text-gray-400">
               <li>
-                <Link href="/" className="flex items-center gap-1.5 hover:text-brand transition-colors">
+                <Link href="/" className="flex items-center gap-1.5 hover:text-brand dark:hover:text-brand-light transition-colors">
                   <Home size={14} /> Dashboard
                 </Link>
               </li>
               <li>
-                <Link href="/marketplace" className="flex items-center gap-1.5 hover:text-brand transition-colors">
+                <Link href="/marketplace" className="flex items-center gap-1.5 hover:text-brand dark:hover:text-brand-light transition-colors">
                   <ShoppingBag size={14} /> Marketplace
                 </Link>
               </li>
               <li>
-                <Link href="/lost-found" className="flex items-center gap-1.5 hover:text-brand transition-colors">
+                <Link href="/lost-found" className="flex items-center gap-1.5 hover:text-brand dark:hover:text-brand-light transition-colors">
                   <Search size={14} /> Lost &amp; Found
                 </Link>
               </li>
@@ -447,7 +447,7 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Support &amp; SLA</h4>
             <ul className="space-y-2 text-xs font-bold text-gray-600 dark:text-gray-400">
               <li>
-                <a href="mailto:support@iiml.ac.in" className="flex items-center gap-1.5 hover:text-brand transition-colors">
+                <a href="mailto:support@iiml.ac.in" className="flex items-center gap-1.5 hover:text-brand dark:hover:text-brand-light transition-colors">
                   <Mail size={14} /> Helpdesk Email
                 </a>
               </li>

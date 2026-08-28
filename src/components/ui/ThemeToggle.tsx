@@ -50,7 +50,7 @@ export function ThemeToggle() {
         aria-pressed={preference === "dark"}
         className={`flex items-center justify-center h-[26px] w-[26px] rounded-full transition-all duration-200 ${
           preference === "dark"
-            ? "bg-gray-900 text-blue-400 shadow-sm"
+            ? "bg-gray-900 text-blue-400 shadow-sm dark:bg-gray-700"
             : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
         }`}
       >
