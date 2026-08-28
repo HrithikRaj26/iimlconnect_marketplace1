@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, Lock, Sparkles, LogIn, ArrowLeft } from "lucide-react";
+import { Phone, Lock, Sparkles, LogIn, ArrowLeft, Home, ShoppingBag, Search, Mail, FileText } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export default function LoginView({ onLogin }: { onLogin: (session: any) => void }) {
@@ -425,13 +425,19 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Platform Map</h4>
             <ul className="space-y-2 text-xs font-bold text-gray-600 dark:text-gray-400">
               <li>
-                <Link href="/" className="hover:text-brand transition-colors">🏠 Dashboard</Link>
+                <Link href="/" className="flex items-center gap-1.5 hover:text-brand transition-colors">
+                  <Home size={14} /> Dashboard
+                </Link>
               </li>
               <li>
-                <Link href="/marketplace" className="hover:text-brand transition-colors">🛒 Marketplace</Link>
+                <Link href="/marketplace" className="flex items-center gap-1.5 hover:text-brand transition-colors">
+                  <ShoppingBag size={14} /> Marketplace
+                </Link>
               </li>
               <li>
-                <Link href="/lost-found" className="hover:text-brand transition-colors">🔍 Lost &amp; Found</Link>
+                <Link href="/lost-found" className="flex items-center gap-1.5 hover:text-brand transition-colors">
+                  <Search size={14} /> Lost &amp; Found
+                </Link>
               </li>
             </ul>
           </div>
@@ -441,10 +447,14 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Support &amp; SLA</h4>
             <ul className="space-y-2 text-xs font-bold text-gray-600 dark:text-gray-400">
               <li>
-                <a href="mailto:support@iiml.ac.in" className="hover:text-brand transition-colors">✉️ Helpdesk Email</a>
+                <a href="mailto:support@iiml.ac.in" className="flex items-center gap-1.5 hover:text-brand transition-colors">
+                  <Mail size={14} /> Helpdesk Email
+                </a>
               </li>
               <li>
-                <span className="text-gray-500 dark:text-gray-550">📄 Version 1.4.2</span>
+                <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-550">
+                  <FileText size={14} /> Version 1.4.2
+                </span>
               </li>
               <li>
                 <span className="text-gray-450 dark:text-gray-550 text-[10px]">L-Campus Connect</span>

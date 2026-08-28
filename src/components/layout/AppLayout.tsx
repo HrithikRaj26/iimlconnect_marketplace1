@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronUp, Sparkles } from "lucide-react";
+import { ChevronUp, Sparkles, Home, User, ShoppingBag, Search, Rocket, MessageSquare, Mail, FileText } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { TopNav } from "@/components/ui/TopNav";
 import { checkAndUpdateLoginStreak } from "@/services/streakService";
@@ -203,36 +203,41 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Link 
               href="/" 
               onClick={() => setSidebarOpen(false)}
-              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname === "/" ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"}`}
+              className={`flex items-center gap-2.5 px-4 py-2 rounded-lg text-sm font-medium ${pathname === "/" ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"}`}
             >
-              🏠 Dashboard
+              <Home size={18} />
+              Dashboard
             </Link>
             <Link 
               href="/profile" 
               onClick={() => setSidebarOpen(false)}
-              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/profile") ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"}`}
+              className={`flex items-center gap-2.5 px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/profile") ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"}`}
             >
-              👤 My Profile
+              <User size={18} />
+              My Profile
             </Link>
             <Link 
               href="/marketplace" 
               onClick={() => setSidebarOpen(false)}
-              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/marketplace") ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"}`}
+              className={`flex items-center gap-2.5 px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/marketplace") ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"}`}
             >
-              🛒 Buy and Sell
+              <ShoppingBag size={18} />
+              Buy and Sell
             </Link>
             <Link
               href="/lost-found"
               onClick={() => setSidebarOpen(false)}
-              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/lost-found") ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"}`}
+              className={`flex items-center gap-2.5 px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/lost-found") ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"}`}
             >
-              🔍 Lost and Found
+              <Search size={18} />
+              Lost and Found
             </Link>
             <Link 
               href="/ventures" 
-              className={`block px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/ventures") ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"}`}
+              className={`flex items-center gap-2.5 px-4 py-2 rounded-lg text-sm font-medium ${pathname.startsWith("/ventures") ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"}`}
             >
-              🚀 Venture Hub
+              <Rocket size={18} />
+              Venture Hub
             </Link>
           </nav>
 
@@ -299,13 +304,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <h4 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Platform Map</h4>
                 <ul className="space-y-2 text-xs font-bold text-gray-600 dark:text-gray-300">
                   <li>
-                    <Link href="/" className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">🏠 Dashboard</Link>
+                    <Link href="/" className="flex items-center gap-1.5 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
+                      <Home size={14} /> Dashboard
+                    </Link>
                   </li>
                   <li>
-                    <Link href="/marketplace" className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">🛒 Marketplace</Link>
+                    <Link href="/marketplace" className="flex items-center gap-1.5 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
+                      <ShoppingBag size={14} /> Marketplace
+                    </Link>
                   </li>
                   <li>
-                    <Link href="/lost-found" className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">🔍 Lost & Found</Link>
+                    <Link href="/lost-found" className="flex items-center gap-1.5 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
+                      <Search size={14} /> Lost & Found
+                    </Link>
                   </li>
                 </ul>
               </div>
@@ -315,10 +326,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <h4 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Support & SLA</h4>
                 <ul className="space-y-2 text-xs font-bold text-gray-600 dark:text-gray-300">
                   <li>
-                    <a href="mailto:support@iiml.ac.in" className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">✉️ Helpdesk Email</a>
+                    <a href="mailto:support@iiml.ac.in" className="flex items-center gap-1.5 hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
+                      <Mail size={14} /> Helpdesk Email
+                    </a>
                   </li>
                   <li>
-                    <span className="text-gray-500 dark:text-gray-400">📄 Version 1.4.2</span>
+                    <span className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
+                      <FileText size={14} /> Version 1.4.2
+                    </span>
                   </li>
                   <li>
                     <span className="text-gray-450 dark:text-gray-500 text-[10px]">L-Campus Connect</span>
@@ -372,11 +387,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 safe-area-pb shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
         <div className="flex items-stretch">
           {[
-            { href: "/", icon: "🏠", label: "Home", match: (p: string) => p === "/" },
-            { href: "/marketplace", icon: "🛒", label: "Market", match: (p: string) => p.startsWith("/marketplace") },
-            { href: "/lost-found", icon: "🔍", label: "Lost & Found", match: (p: string) => p.startsWith("/lost-found") },
-            { href: "/ventures", icon: "🚀", label: "Ventures", match: (p: string) => p.startsWith("/ventures") },
-            { href: "/messages", icon: "💬", label: "Messages", match: (p: string) => p.startsWith("/messages") },
+            { href: "/", icon: <Home size={20} />, label: "Home", match: (p: string) => p === "/" },
+            { href: "/marketplace", icon: <ShoppingBag size={20} />, label: "Market", match: (p: string) => p.startsWith("/marketplace") },
+            { href: "/lost-found", icon: <Search size={20} />, label: "Lost & Found", match: (p: string) => p.startsWith("/lost-found") },
+            { href: "/ventures", icon: <Rocket size={20} />, label: "Ventures", match: (p: string) => p.startsWith("/ventures") },
+            { href: "/messages", icon: <MessageSquare size={20} />, label: "Messages", match: (p: string) => p.startsWith("/messages") },
           ].map((item) => {
             const isActive = item.match(pathname);
             return (
@@ -389,7 +404,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     : "text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-400"
                 }`}
               >
-                <span className={`text-xl leading-none transition-transform duration-150 ${isActive ? "scale-110" : ""}`}>
+                <span className={`text-xl leading-none transition-transform duration-150 ${isActive ? "scale-110" : "opacity-80"}`}>
                   {item.icon}
                 </span>
                 <span className={`text-[9px] font-bold tracking-tight leading-none transition-colors ${isActive ? "text-brand" : ""}`}>
