@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, Lock, Sparkles, LogIn, ArrowLeft, Home, ShoppingBag, Search, Mail, FileText } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { useTheme } from "@/components/ui/ThemeProvider";
 
 export default function LoginView({ onLogin }: { onLogin: (session: any) => void }) {
   const [phone, setPhone] = useState("");
@@ -15,18 +16,28 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
   const [savedSession, setSavedSession] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
+  const { activeTheme } = useTheme();
+
   useEffect(() => {
     if (typeof window !== 'undefined' && (window as any).google) {
       (window as any).google.accounts.id.initialize({
         client_id: "115760004033-6o92pdosobhjkhe1gjs54ls93oqa5rfb.apps.googleusercontent.com",
         callback: handleGoogleLogin,
       });
-      (window as any).google.accounts.id.renderButton(
-        document.getElementById("gsi-container"),
-        { theme: "outline", size: "large", type: "standard", width: "100%" }
-      );
+      const container = document.getElementById("gsi-container");
+      if (container) {
+        container.innerHTML = "";
+        (window as any).google.accounts.id.renderButton(
+          container,
+          { 
+            theme: activeTheme === "dark" ? "filled_black" : "outline", 
+            size: "large", 
+            type: "standard"
+          }
+        );
+      }
     }
-  }, []);
+  }, [activeTheme]);
 
   const handleGoogleLogin = async (response: any) => {
     try {
@@ -394,7 +405,7 @@ export default function LoginView({ onLogin }: { onLogin: (session: any) => void
             )}
             <div
               id="gsi-container"
-              className="flex justify-center w-full min-h-[44px] rounded-xl overflow-hidden hover:brightness-105 transition-all shadow-sm border border-gray-200 dark:border-gray-700"
+              className="flex justify-center w-full min-h-[44px]"
             />
           </div>
         </motion.div>
