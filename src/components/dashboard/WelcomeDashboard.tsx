@@ -112,9 +112,9 @@ export default function WelcomeDashboard({ session }: { session: any }) {
                     key={action.label}
                     type="button"
                     onClick={() => router.push(action.path)}
-                    className="group flex items-center justify-center rounded-md bg-gray-50 dark:bg-gray-900/50 p-4 transition-all duration-150 hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 active:scale-95 min-h-[3.5rem]"
+                    className="group flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-800 p-4 transition-all duration-150 hover:bg-gray-200 dark:hover:bg-gray-700 border border-transparent active:scale-95 min-h-[3.5rem]"
                   >
-                    <span className="text-[11px] font-bold text-gray-700 dark:text-gray-350 text-center leading-tight group-hover:text-gray-950 dark:group-hover:text-white transition-colors">
+                    <span className="text-[11px] font-bold text-gray-800 dark:text-gray-200 text-center leading-tight group-hover:text-black dark:group-hover:text-white transition-colors">
                       {action.label}
                     </span>
                   </button>
