@@ -14,14 +14,16 @@ export default function RootPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+      const activeSession = session || (typeof window !== "undefined" ? JSON.parse(localStorage.getItem("iiml-demo-session") || "null") : null);
+      setSession(activeSession);
       setLoading(false);
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+      const activeSession = session || (typeof window !== "undefined" ? JSON.parse(localStorage.getItem("iiml-demo-session") || "null") : null);
+      setSession(activeSession);
     });
 
     return () => subscription.unsubscribe();

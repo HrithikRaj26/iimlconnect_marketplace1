@@ -3,6 +3,7 @@ import { ChatMessage } from "@/types";
 import { MessageTicks } from "@/components/chat/MessageTicks";
 import { CURRENT_USER_ID } from "@/constants/chat";
 import { useToast } from "@/context/ToastContext";
+import { Pencil, Trash2, FileText, X } from "lucide-react";
 
 interface TextBubbleProps {
   message: ChatMessage;
@@ -77,22 +78,26 @@ export function TextBubble({ message, time, onRetry, onEdit, onDelete }: TextBub
   return (
     <div className={["flex group items-end gap-2", isMine ? "justify-end" : "justify-start"].join(" ")}>
       {isMine && !isEditing && message.status !== "failed" && (
-        <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-150 shrink-0 items-center mb-1">
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150 shrink-0 items-center mb-1">
           {message.kind === "text" && !msgText.startsWith("data:") && (
             <button
               type="button"
               onClick={() => setIsEditing(true)}
-              className="flex items-center gap-0.5 rounded-lg px-2 py-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-500 transition-all cursor-pointer"
+              aria-label="Edit message"
+              className="flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] font-medium text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
             >
-              ✏️ Edit
+              <Pencil size={11} />
+              <span>Edit</span>
             </button>
           )}
           <button
             type="button"
             onClick={handleDeleteClick}
-            className="flex items-center gap-0.5 rounded-lg px-2 py-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 transition-all cursor-pointer"
+            aria-label="Delete message"
+            className="flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] font-medium text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer"
           >
-            🗑️ Delete
+            <Trash2 size={11} />
+            <span>Delete</span>
           </button>
         </div>
       )}
@@ -174,7 +179,9 @@ export function TextBubble({ message, time, onRetry, onEdit, onDelete }: TextBub
             </div>
           ) : msgText.startsWith("data:") ? (
             <div className="flex items-center gap-3 py-1.5 px-0.5">
-              <span className="text-3xl cursor-pointer hover:scale-105 transition-transform" onClick={() => setShowPreview(true)} title="Preview File">📁</span>
+              <span className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 cursor-pointer transition-colors" onClick={() => setShowPreview(true)} title="Preview File">
+                <FileText size={20} />
+              </span>
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-bold truncate max-w-[150px] cursor-pointer hover:underline" onClick={() => setShowPreview(true)}>
                   Attachment File
@@ -231,10 +238,11 @@ export function TextBubble({ message, time, onRetry, onEdit, onDelete }: TextBub
           {/* Close button */}
           <button 
             type="button"
+            aria-label="Close preview"
             className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer border border-white/5 shadow-lg"
             onClick={() => setShowPreview(false)}
           >
-            ✕
+            <X size={18} />
           </button>
           
           {msgText.startsWith("data:image/") || (msgText.startsWith("http") && msgText.match(/\.(jpeg|jpg|gif|png|webp)/i)) ? (

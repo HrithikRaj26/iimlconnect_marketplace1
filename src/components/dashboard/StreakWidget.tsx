@@ -123,35 +123,16 @@ export default function StreakWidget({ userId }: StreakWidgetProps) {
               <motion.div
                 key={r.label}
                 variants={row}
-                className={`relative flex items-center gap-3 p-4 rounded-2xl border ${r.bgColor} ${r.borderColor} overflow-hidden`}
+                className={`relative flex items-center gap-3 p-4 rounded-xl border ${r.bgColor} ${r.borderColor} overflow-hidden`}
               >
-                {/* Glow halo for hot streaks */}
-                {isHot && (
-                  <div
-                    className={`absolute inset-0 rounded-2xl opacity-20 blur-md pointer-events-none ${
-                      r.color.includes("orange")
-                        ? "bg-orange-400"
-                        : r.color.includes("blue")
-                        ? "bg-blue-400"
-                        : "bg-amber-400"
-                    }`}
-                  />
-                )}
-
                 {/* Icon */}
                 <div
-                  className={`relative flex items-center justify-center w-10 h-10 rounded-xl ${r.bgColor} border ${r.borderColor} shrink-0`}
+                  className={`relative flex items-center justify-center w-10 h-10 rounded-lg ${r.bgColor} border ${r.borderColor} shrink-0`}
                 >
                   <Icon
                     size={18}
-                    className={`${r.color} ${isHot ? "animate-pulse" : ""}`}
+                    className={r.color}
                   />
-                  {isHot && (
-                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500" />
-                    </span>
-                  )}
                 </div>
 
                 {/* Numbers */}

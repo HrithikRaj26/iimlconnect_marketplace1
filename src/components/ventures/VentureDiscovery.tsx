@@ -10,7 +10,7 @@ import { TextArea } from "@/components/ui/TextArea";
 import { supabase } from "@/lib/supabase";
 import { updateReviewStreak } from "@/services/streakService";
 import { playSuccessSound } from "@/utils/audio";
-import { Mic, Search } from "lucide-react";
+import { Mic, Search, Copy, Check, Mail, MessageCircle, Globe, ExternalLink } from "lucide-react";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 
 const CATEGORIES: (VentureCategory | "All")[] = ["All", "Tech", "F&B", "Fashion", "Consulting/Freelance", "Creative/Art", "Services"];
@@ -606,73 +606,52 @@ export default function VentureDiscovery() {
                                 <div className="flex flex-col gap-3">
                                   {activeVenture.contact_links.whatsapp && (
                                     <div className="flex flex-col gap-1.5">
-                                      <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">WhatsApp Contact</span>
-                                      <div className="relative overflow-hidden rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 p-3 min-h-[50px] flex flex-col justify-center">
-                                        <div className="flex flex-col gap-2">
-                                          <div className="flex items-center justify-between gap-2">
-                                            <span className="text-xs font-bold text-gray-700 dark:text-gray-300 select-all">{activeVenture.contact_links.whatsapp}</span>
-                                            <button
-                                              type="button"
-                                              onClick={() => {
-                                                navigator.clipboard.writeText(activeVenture.contact_links.whatsapp || "");
-                                                setWhatsappCopied(true);
-                                                setTimeout(() => setWhatsappCopied(false), 2000);
-                                              }}
-                                              className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white rounded-md px-2.5 py-1 text-[10px] font-black tracking-wider uppercase transition-colors"
-                                            >
-                                              {whatsappCopied ? "✓ Copied" : "📋 Copy"}
-                                            </button>
+                                      <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">WhatsApp</span>
+                                      <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400">
+                                            <MessageCircle size={16} />
                                           </div>
+                                          <span className="text-xs font-medium text-gray-800 dark:text-gray-200 truncate select-all">{activeVenture.contact_links.whatsapp}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              navigator.clipboard.writeText(activeVenture.contact_links.whatsapp || "");
+                                              setWhatsappCopied(true);
+                                              setTimeout(() => setWhatsappCopied(false), 2000);
+                                            }}
+                                            className="px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-1"
+                                          >
+                                            {whatsappCopied ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
+                                            <span>{whatsappCopied ? "Copied" : "Copy"}</span>
+                                          </button>
                                           <a
                                             href={`https://wa.me/${activeVenture.contact_links.whatsapp.replace(/\D/g, '')}`}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="w-full text-center bg-green-600 hover:bg-green-700 text-white rounded-md py-1.5 text-[10px] font-black tracking-wider uppercase transition-colors flex items-center justify-center gap-1 shadow-xs"
+                                            className="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-semibold transition-colors flex items-center gap-1 shadow-xs"
                                           >
-                                            <span>Open WhatsApp</span>
-                                            <span>↗</span>
+                                            <span>Open</span>
+                                            <ExternalLink size={12} />
                                           </a>
                                         </div>
-
-                                        {!revealedWhatsapp && (
-                                          <button
-                                            type="button"
-                                            onClick={() => {
-                                              if (!scratchingWhatsapp) {
-                                                setScratchingWhatsapp(true);
-                                                setTimeout(() => {
-                                                  try {
-                                                    const whatsapps = JSON.parse(localStorage.getItem("revealed_whatsapps") || "[]");
-                                                    if (!whatsapps.includes(activeVenture.id)) {
-                                                      whatsapps.push(activeVenture.id);
-                                                      localStorage.setItem("revealed_whatsapps", JSON.stringify(whatsapps));
-                                                    }
-                                                  } catch (err) {}
-                                                  setRevealedWhatsapp(true);
-                                                  setScratchingWhatsapp(false);
-                                                }, 600);
-                                              }
-                                            }}
-                                            className={`absolute inset-0 z-10 w-full h-full bg-gray-100 dark:bg-gray-800 border border-dashed border-gray-300 dark:border-gray-700 rounded-md flex items-center justify-center cursor-pointer transition-all duration-300 hover:brightness-105 active:brightness-95 ${
-                                              scratchingWhatsapp ? "animate-scratch-wipe pointer-events-none" : ""
-                                            }`}
-                                          >
-                                            <span className="text-xs font-black text-gray-700 dark:text-gray-300 flex items-center gap-1.5 animate-pulse">
-                                              <span>💬</span>
-                                              <span>Reveal WhatsApp</span>
-                                            </span>
-                                          </button>
-                                        )}
                                       </div>
                                     </div>
                                   )}
 
                                   {activeVenture.contact_links.email && (
                                     <div className="flex flex-col gap-1.5">
-                                      <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-wider block">Email Contact</span>
-                                      <div className="relative overflow-hidden rounded-md border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 p-3 min-h-[50px] flex flex-col justify-center">
-                                        <div className="flex items-center justify-between gap-2">
-                                          <span className="text-xs font-bold text-gray-700 dark:text-gray-300 truncate select-all">{activeVenture.contact_links.email}</span>
+                                      <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Email</span>
+                                      <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
+                                            <Mail size={16} />
+                                          </div>
+                                          <span className="text-xs font-medium text-gray-800 dark:text-gray-200 truncate select-all">{activeVenture.contact_links.email}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 shrink-0">
                                           <button
                                             type="button"
                                             onClick={() => {
@@ -680,65 +659,51 @@ export default function VentureDiscovery() {
                                               setEmailCopied(true);
                                               setTimeout(() => setEmailCopied(false), 2000);
                                             }}
-                                            className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white rounded-md px-2.5 py-1 text-[10px] font-black tracking-wider uppercase transition-colors"
+                                            className="px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-1"
                                           >
-                                            {emailCopied ? "✓ Copied" : "📋 Copy"}
+                                            {emailCopied ? <Check size={12} className="text-blue-600" /> : <Copy size={12} />}
+                                            <span>{emailCopied ? "Copied" : "Copy"}</span>
                                           </button>
+                                          <a
+                                            href={`mailto:${activeVenture.contact_links.email}`}
+                                            className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors flex items-center gap-1 shadow-xs"
+                                          >
+                                            <span>Send Mail</span>
+                                            <ExternalLink size={12} />
+                                          </a>
                                         </div>
-
-                                        {!revealedEmail && (
-                                          <button
-                                            type="button"
-                                            onClick={() => {
-                                              if (!scratchingEmail) {
-                                                setScratchingEmail(true);
-                                                setTimeout(() => {
-                                                  try {
-                                                    const emails = JSON.parse(localStorage.getItem("revealed_emails") || "[]");
-                                                    if (!emails.includes(activeVenture.id)) {
-                                                      emails.push(activeVenture.id);
-                                                      localStorage.setItem("revealed_emails", JSON.stringify(emails));
-                                                    }
-                                                  } catch (err) {}
-                                                  setRevealedEmail(true);
-                                                  setScratchingEmail(false);
-                                                }, 600);
-                                              }
-                                            }}
-                                            className={`absolute inset-0 z-10 w-full h-full bg-gray-100 dark:bg-gray-800 border border-dashed border-gray-300 dark:border-gray-700 rounded-md flex items-center justify-center cursor-pointer transition-all duration-300 hover:brightness-105 active:brightness-95 ${
-                                              scratchingEmail ? "animate-scratch-wipe pointer-events-none" : ""
-                                            }`}
-                                          >
-                                            <span className="text-xs font-black text-gray-700 dark:text-gray-300 flex items-center gap-1.5 animate-pulse">
-                                              <span>✉️</span>
-                                              <span>Reveal Email</span>
-                                            </span>
-                                          </button>
-                                        )}
                                       </div>
                                     </div>
                                   )}
 
-                                  {activeVenture.contact_links.instagram && (
-                                    <a
-                                      href={`https://instagram.com/${activeVenture.contact_links.instagram}`}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-800 py-2 text-xs font-bold text-white shadow-sm hover:bg-gray-900 transition-colors mt-1"
-                                    >
-                                      📸 Instagram Profile
-                                    </a>
-                                  )}
-                                  {activeVenture.contact_links.website && (
-                                    <a
-                                      href={activeVenture.contact_links.website}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 hover:bg-blue-700 py-2 text-xs font-bold text-white shadow-sm transition-colors"
-                                    >
-                                      🌐 Visit Website
-                                    </a>
-                                  )}
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
+                                    {activeVenture.contact_links.instagram && (
+                                      <a
+                                        href={`https://instagram.com/${activeVenture.contact_links.instagram}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 py-2.5 px-3 text-xs font-semibold text-gray-800 dark:text-gray-200 shadow-xs hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                      >
+                                        <svg className="w-3.5 h-3.5 text-pink-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                          <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                                          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                                          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+                                        </svg>
+                                        <span>Instagram Profile</span>
+                                      </a>
+                                    )}
+                                    {activeVenture.contact_links.website && (
+                                      <a
+                                        href={activeVenture.contact_links.website}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 hover:bg-blue-700 py-2.5 px-3 text-xs font-semibold text-white shadow-xs transition-colors"
+                                      >
+                                        <Globe size={15} />
+                                        <span>Visit Website</span>
+                                      </a>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </div>

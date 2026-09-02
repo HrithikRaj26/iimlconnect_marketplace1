@@ -132,105 +132,57 @@ export default function ReputationLeaderboard() {
               const unlocked = badge.check;
               const isFlipped = !!flippedBadges[badge.type];
               const isShaking = !!shakingBadges[badge.type];
-              
-              return (
+                return (
                 <div
                   key={badge.type}
-                  onClick={() => {
-                    if (unlocked) {
-                      setFlippedBadges(prev => ({
-                        ...prev,
-                        [badge.type]: !prev[badge.type]
-                      }));
-                    } else {
-                      // Trigger lock shake rattle
-                      setShakingBadges(prev => ({ ...prev, [badge.type]: true }));
-                      setTimeout(() => {
-                        setShakingBadges(prev => ({ ...prev, [badge.type]: false }));
-                      }, 400);
-                    }
-                  }}
-                  className={`h-48 w-full cursor-pointer perspective-1000 select-none group ${
-                    isShaking ? "animate-lock-shake" : ""
+                  className={`rounded-xl border p-4 flex flex-col justify-between transition-colors shadow-2xs ${
+                    unlocked 
+                      ? "bg-white dark:bg-gray-900 border-blue-200/80 dark:border-blue-900/50" 
+                      : "bg-gray-50/70 dark:bg-gray-900/40 border-gray-200 dark:border-gray-800 opacity-90"
                   }`}
                 >
-                  <div
-                    className={`relative w-full h-full duration-500 preserve-3d transition-transform ${
-                      isFlipped && unlocked ? "rotate-y-180" : ""
-                    }`}
-                  >
-                    {/* FRONT SIDE (Standard Badge Info) */}
-                    <div className={`absolute inset-0 backface-hidden rounded-md border p-5 flex flex-col justify-between transition-all bg-white/70 dark:bg-gray-900/75 backdrop-blur-md border-white/80 dark:border-gray-800 shadow-md group-hover:shadow-lg group-hover:border-blue-500/20 ${
-                      unlocked ? "opacity-100" : "opacity-80"
-                    }`}>
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="text-2xl">{badge.icon}</span>
-                          <span
-                            className={`rounded px-2 py-0.5 text-[9px] font-extrabold border uppercase tracking-wider ${
-                              unlocked ? "bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 border-blue-200/50 dark:border-blue-900/30" : "bg-gray-100 text-gray-500 border-gray-200"
-                            }`}
-                          >
-                            {unlocked ? "Unlocked" : "Locked"}
-                          </span>
-                        </div>
-                        <h4 className="text-sm font-extrabold text-gray-900">{badge.name}</h4>
-                        <p className="text-[11px] text-gray-500 leading-relaxed">{badge.description}</p>
-                      </div>
-
-                      {/* Progress tracker or Flip hint */}
-                      {unlocked ? (
-                        <div className="mt-2 text-[9px] font-extrabold text-blue-600 dark:text-blue-400 animate-pulse text-right">
-                          💡 Click to view trophy ⟳
-                        </div>
-                      ) : (
-                        <div className="mt-4 pt-3 border-t border-gray-150/40 space-y-1.5">
-                          <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Progress:</span>
-                          {badge.isMultiMetric ? (
-                            <p className="text-[10px] font-extrabold text-gray-600">{badge.progressText}</p>
-                          ) : badge.isActionBased ? (
-                            <p className="text-[10px] font-extrabold text-gray-600">Action: Launch startups</p>
-                          ) : (
-                            <div className="space-y-1">
-                              <div className="h-1.5 w-full rounded-full bg-gray-200 overflow-hidden">
-                                <div
-                                  className="h-full bg-blue-650"
-                                  style={{ width: `${Math.min(100, (badge.current! / badge.target!) * 100)}%` }}
-                                />
-                              </div>
-                              <p className="text-[10px] font-extrabold text-gray-600">
-                                {badge.current}/{badge.target} {badge.metric}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* BACK SIDE (Trophy Details) */}
-                    <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-md border p-5 flex flex-col items-center justify-center text-center bg-blue-600 border-blue-700 text-white shadow-xl space-y-2">
-                      <div className="text-4xl animate-bounce">🏆</div>
-                      <h4 className="text-sm font-black uppercase tracking-widest">{badge.name}</h4>
-                      {unlocked ? (
-                        <div className="space-y-1">
-                          <p className="text-[11px] font-extrabold text-blue-100">Milestone Completed!</p>
-                          <p className="text-[10px] text-white/95 leading-relaxed bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 mt-1">
-                            Verified on-campus contributor. Your feedback and projects help the IIML ecosystem thrive.
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="space-y-1">
-                          <p className="text-[11px] font-bold text-amber-100">Currently Locked</p>
-                          <p className="text-[10px] text-white/80 leading-relaxed mt-1">
-                            Complete the progress goals shown on the front side to unlock this digital badge asset.
-                          </p>
-                        </div>
-                      )}
-                      <span className="text-[8px] font-black text-white/70 tracking-widest uppercase mt-2">
-                        Click to Flip Back ⟳
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-2xl">{badge.icon}</span>
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold border ${
+                          unlocked 
+                            ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50" 
+                            : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700"
+                        }`}
+                      >
+                        {unlocked ? "Unlocked" : "Locked"}
                       </span>
                     </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{badge.name}</h4>
+                      <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{badge.description}</p>
+                    </div>
                   </div>
+
+                  {unlocked ? (
+                    <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                      <span>Milestone Achieved</span>
+                      <span>✓</span>
+                    </div>
+                  ) : (
+                    <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800 space-y-1.5">
+                      <div className="flex items-center justify-between text-[11px] font-medium text-gray-500 dark:text-gray-400">
+                        <span>Progress</span>
+                        <span>
+                          {badge.isMultiMetric ? badge.progressText : badge.isActionBased ? "Action needed" : `${badge.current}/${badge.target} ${badge.metric}`}
+                        </span>
+                      </div>
+                      {!badge.isMultiMetric && !badge.isActionBased && (
+                        <div className="h-1.5 w-full rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden">
+                          <div
+                            className="h-full bg-blue-600 rounded-full"
+                            style={{ width: `${Math.min(100, (badge.current! / badge.target!) * 100)}%` }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}

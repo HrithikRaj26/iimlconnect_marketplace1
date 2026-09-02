@@ -79,16 +79,9 @@ export function ReportCard({
 
   return (
     <article
-      className={[
-        "card-wobble flex flex-col overflow-hidden rounded-xl border shadow-card transition-shadow hover:shadow-md",
-        report.type === "found"
-          ? "border-green-100 bg-green-50/70"
-          : report.is_sensitive
-            ? "border-red-300 bg-red-50"
-            : "border-rose-100 bg-rose-50/70",
-      ].join(" ")}
+      className="flex flex-col overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-xs hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
     >
-      <div className="relative h-40 w-full bg-gray-100">
+      <div className="relative h-40 w-full bg-gray-100 dark:bg-gray-800">
         {report.photo_url ? (
           <Image
             src={report.photo_url}
@@ -99,7 +92,7 @@ export function ReportCard({
             unoptimized
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-xs font-semibold uppercase tracking-wide text-gray-400">
+          <div className="flex h-full w-full items-center justify-center text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500">
             {report.is_sensitive ? "Photo restricted" : "No photo"}
           </div>
         )}
@@ -107,31 +100,35 @@ export function ReportCard({
 
       <div className="flex flex-1 flex-col p-4">
         <div className="mb-2 flex items-center gap-2">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+          <span className={`rounded px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider ${
+            report.type === "lost" 
+              ? "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900/50" 
+              : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50"
+          }`}>
             {report.type === "lost" ? "Lost" : "Found"}
           </span>
         </div>
 
-        <h3 className="text-sm font-semibold capitalize text-gray-900">{report.category}</h3>
-        <p className="mt-1 truncate text-xs text-gray-500">Location: {location}</p>
+        <h3 className="text-sm font-semibold capitalize text-gray-900 dark:text-gray-100">{report.category}</h3>
+        <p className="mt-1 truncate text-xs text-gray-500 dark:text-gray-400">Location: {location}</p>
 
         <div className="mt-3 flex items-center gap-2">
-          <span className={["rounded px-2 py-0.5 text-[11px] font-semibold capitalize", statusTone[report.status] ?? "bg-gray-100 text-gray-500"].join(" ")}>
+          <span className={["rounded px-2 py-0.5 text-[11px] font-semibold capitalize", statusTone[report.status] ?? "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"].join(" ")}>
             {report.status}
           </span>
           {report.is_sensitive && (
-            <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-red-100 text-red-600">Sensitive</span>
+            <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900/40">Sensitive</span>
           )}
           {topMatch && (
-            <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-800">
+            <span className="rounded px-2 py-0.5 text-[11px] font-semibold bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-900/40">
               {Math.round(topMatch.score * 100)}% match
             </span>
           )}
         </div>
 
         {topMatch && activeMatches && (
-          <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
-            <p className="text-xs font-semibold text-amber-900">
+          <div className="mt-3 rounded-lg border border-amber-200 dark:border-amber-800/60 bg-amber-50/80 dark:bg-amber-950/30 p-3">
+            <p className="text-xs font-semibold text-amber-900 dark:text-amber-200">
               This {report.type} report may match{" "}
               {activeMatches.length > 1 ? `${activeMatches.length} different ${topMatch.matchedType} reports` : `a ${topMatch.matchedType} report`}
             </p>
@@ -237,7 +234,7 @@ export function ReportCard({
           <button
             type="button"
             onClick={() => onView(report.id)}
-            className="h-9 flex-1 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            className="h-9 flex-1 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-850 text-sm font-medium text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           >
             View Details
           </button>
@@ -245,7 +242,7 @@ export function ReportCard({
             <button
               type="button"
               onClick={() => onEdit(report.id)}
-              className="h-9 flex-1 rounded-lg border border-brand text-sm font-medium text-brand transition-colors hover:bg-brand-light"
+              className="h-9 flex-1 rounded-lg border border-blue-600 text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             >
               Edit
             </button>

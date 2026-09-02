@@ -18,12 +18,15 @@ export function RadioCard({
   return (
     <button
       type="button"
+      role="radio"
       onClick={onSelect}
-      aria-pressed={selected}
+      aria-checked={selected}
       className={[
-        "w-full rounded-xl border p-4 text-left transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]",
-        "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
-        selected ? "border-brand bg-brand-light dark:bg-brand/10" : "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-700",
+        "w-full rounded-xl border p-4 text-left transition-colors duration-150 select-none",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950",
+        selected
+          ? "border-brand bg-brand-light/70 dark:bg-brand/15 text-gray-900 dark:text-gray-100"
+          : "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-700",
       ].join(" ")}
     >
       <div

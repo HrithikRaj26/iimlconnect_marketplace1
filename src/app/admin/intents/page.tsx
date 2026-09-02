@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/moving-border";
 import { Plus, Save, Trash2, Zap } from "lucide-react";
 
 type IntentDictionary = Record<string, string[]>;

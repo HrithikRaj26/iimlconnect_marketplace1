@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
 import { TextArea } from "@/components/ui/TextArea";
 import { useRouter } from "next/navigation";
+import { Camera } from "lucide-react";
 
 export default function ProfileBuilder() {
   const router = useRouter();
@@ -121,13 +122,10 @@ export default function ProfileBuilder() {
       
       setMessage({ type: "success", text: "Profile updated successfully! Redirecting..." });
       
-      // Force page reload after redirect to update navbar avatar state
       setTimeout(() => {
         router.push("/");
-        setTimeout(() => {
-          window.location.reload();
-        }, 100);
-      }, 1500);
+        router.refresh();
+      }, 1200);
     } catch (err: any) {
       console.error(err);
       setMessage({ type: "error", text: err.message || "Failed to update profile." });
@@ -191,21 +189,24 @@ export default function ProfileBuilder() {
                   type="button"
                   onClick={() => document.getElementById("avatar-file-input")?.click()}
                   disabled={uploading}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-bold text-gray-700 hover:bg-gray-50 focus:outline-none disabled:opacity-50 transition-colors shadow-sm"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3.5 py-2 text-xs font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:opacity-50 transition-colors shadow-2xs"
                 >
                   {uploading ? (
                     <>
                       <span className="h-3 w-3 animate-spin rounded-full border-2 border-gray-500 border-t-transparent" />
-                      Uploading...
+                      <span>Uploading...</span>
                     </>
                   ) : (
-                    <>📷 Upload Custom Photo</>
+                    <>
+                      <Camera size={14} className="text-gray-500 dark:text-gray-400" />
+                      <span>Upload Custom Photo</span>
+                    </>
                   )}
                 </button>
               </div>
               
               {/* Preset selectors divider */}
-              <div className="h-8 w-px bg-gray-200 hidden sm:block" />
+              <div className="h-8 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block" />
 
               {/* Preset selectors */}
               <div className="flex flex-wrap gap-2.5">
@@ -221,8 +222,8 @@ export default function ProfileBuilder() {
                     type="button"
                     key={idx}
                     onClick={() => setAvatarUrl(preset)}
-                    className={`h-12 w-12 rounded-full overflow-hidden border-2 bg-gray-50 hover:scale-105 active:scale-95 transition-all ${
-                      avatarUrl === preset ? "border-orange-500 ring-2 ring-orange-500/20" : "border-gray-200"
+                    className={`h-11 w-11 rounded-full overflow-hidden border-2 bg-gray-50 dark:bg-gray-800 transition-colors ${
+                      avatarUrl === preset ? "border-blue-600 ring-2 ring-blue-500/20" : "border-gray-200 dark:border-gray-700 hover:border-gray-300"
                     }`}
                   >
                     <img src={preset} alt="" className="h-full w-full object-cover" />
@@ -233,7 +234,7 @@ export default function ProfileBuilder() {
 
             {/* Custom URL Option */}
             <div className="pt-2">
-              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-wide mb-1">Or paste a custom hosted image URL:</label>
+              <label className="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Or paste a custom hosted image URL:</label>
               <TextInput
                 type="url"
                 placeholder="https://example.com/my-photo.jpg"
@@ -275,7 +276,7 @@ export default function ProfileBuilder() {
                 value={batch}
                 onChange={(e) => setBatch(e.target.value)}
                 disabled={isGuest}
-                className="appearance-none w-full rounded-xl border-2 border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 pl-3.5 pr-10 py-2.5 text-sm font-medium text-gray-900 dark:text-gray-100 focus:border-brand focus:outline-none focus:ring-4 focus:ring-brand/10 hover:border-gray-300 dark:hover:border-gray-700 outline-none transition-all disabled:opacity-75 disabled:bg-gray-50 dark:disabled:bg-gray-800 bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%25234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.75rem_center] bg-[size:1.1rem_1.1rem] bg-no-repeat"
+                className="appearance-none w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 pl-3.5 pr-10 py-2.5 text-sm font-medium text-gray-900 dark:text-gray-100 focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition-colors disabled:opacity-75 disabled:bg-gray-50 dark:disabled:bg-gray-800 bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%25234b5563%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M6%209l6%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_0.75rem_center] bg-[size:1.1rem_1.1rem] bg-no-repeat"
               >
                 {isGuest ? (
                   <option value="External Guest">External Guest</option>

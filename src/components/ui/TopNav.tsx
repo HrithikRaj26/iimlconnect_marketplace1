@@ -151,36 +151,42 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
     key === active ? "text-brand dark:text-brand-light" : "text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200";
 
   return (
-    <header className="flex h-16 w-full items-center justify-between border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 md:px-6 shrink-0">
+    <header className="flex h-16 w-full items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 md:px-6 shrink-0 z-30">
       <div className="flex items-center gap-4">
         {onMenuClick && (
-          <button onClick={onMenuClick} className="text-gray-500 hover:text-gray-900 focus:outline-none">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button
+            type="button"
+            onClick={onMenuClick}
+            aria-label="Toggle navigation menu"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
         )}
-        <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-transparent">
+        <Link href="/" className="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-lg p-1">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-transparent">
             <img src="/favicon.svg" alt="IIML Connect Logo" className="h-8 w-8 object-contain" />
           </span>
           <div className="leading-tight">
             <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
-              IIML <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Connect</span>
+              IIML <span className="text-blue-600 dark:text-blue-400 font-extrabold">Connect</span>
             </p>
           </div>
         </Link>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-4">
+      <div className="flex items-center gap-2 sm:gap-3">
         <Link 
           href="/messages" 
-          className="relative flex items-center justify-center h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-950/60 border border-blue-100/80 dark:border-blue-900/40 shadow-xs hover:shadow-sm hover:scale-105 active:scale-95 transition-all duration-200 mr-2" 
+          className="relative flex items-center justify-center h-10 w-10 rounded-lg text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-colors" 
           title="Messages"
+          aria-label={unreadChats > 0 ? `Messages (${unreadChats} unread)` : "Messages"}
         >
-          <MessageSquare size={18} strokeWidth={2.2} />
+          <MessageSquare size={19} strokeWidth={2} />
           {unreadChats > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[8px] font-black text-white ring-2 ring-white dark:ring-gray-900 animate-bounce shadow-md">
+            <span className="absolute top-1 right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-red-600 text-[9px] font-bold text-white shadow-sm">
               {unreadChats}
             </span>
           )}
@@ -190,16 +196,17 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
         <Link 
           href="/profile" 
           title="Edit Profile"
-          className="flex items-center gap-2 rounded-xl p-1 hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100"
+          aria-label="Edit Profile"
+          className="flex items-center gap-2 rounded-lg p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
         >
           {profile?.avatar ? (
-            <img src={profile.avatar} alt="User Avatar" className="h-8 w-8 rounded-full object-cover border border-gray-200" />
+            <img src={profile.avatar} alt="User Avatar" className="h-7 w-7 rounded-full object-cover border border-gray-200 dark:border-gray-700" />
           ) : (
-            <div className="h-8 w-8 rounded-full bg-gradient-to-r from-orange-500 to-amber-600 flex items-center justify-center text-white text-[10px] font-bold shadow-sm">
-              {profile?.name ? profile.name[0].toUpperCase() : "👤"}
+            <div className="h-7 w-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">
+              {profile?.name ? profile.name[0].toUpperCase() : "S"}
             </div>
           )}
-          <span className="hidden sm:inline text-xs font-bold text-gray-700 max-w-[100px] truncate">
+          <span className="hidden sm:inline text-xs font-semibold text-gray-700 dark:text-gray-200 max-w-[120px] truncate">
             {profile?.name || "My Profile"}
           </span>
         </Link>
@@ -208,9 +215,11 @@ export function TopNav({ active = "marketplace", onMenuClick, profile: propProfi
         <ThemeToggle />
 
         <button
+          type="button"
           onClick={handleLogout}
           title="Sign Out"
-          className="flex items-center justify-center h-10 w-10 rounded-full hover:bg-red-50 text-gray-500 hover:text-red-600 transition-colors"
+          aria-label="Sign Out"
+          className="flex items-center justify-center h-10 w-10 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
         >
           <LogOut size={18} />
         </button>

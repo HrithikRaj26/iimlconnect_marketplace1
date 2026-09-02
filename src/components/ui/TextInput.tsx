@@ -44,15 +44,15 @@ export function TextInput({
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : undefined}
           className={[
-            "h-11 w-full rounded-xl border-2 bg-white dark:bg-gray-900 text-sm font-medium text-gray-900 dark:text-gray-100 outline-none transition-all duration-200",
-            "placeholder:text-gray-400 dark:placeholder:text-gray-600",
-            "focus:border-brand focus:ring-4 focus:ring-brand/10 dark:focus:ring-brand/10",
-            "hover:border-gray-300 dark:hover:border-gray-700",
-            prefix ? "pl-10" : "pl-3.5",
-            actionButton ? "pr-10" : "pr-3.5",
+            "h-10 w-full rounded-lg border bg-white dark:bg-gray-900 text-sm font-medium text-gray-900 dark:text-gray-100 outline-none transition-colors duration-150",
+            "placeholder:text-gray-400 dark:placeholder:text-gray-500",
+            "focus:border-brand focus:ring-2 focus:ring-brand/20 dark:focus:border-brand dark:focus:ring-brand/25",
+            "hover:border-gray-300 dark:hover:border-gray-600",
+            prefix ? "pl-10" : "pl-3",
+            actionButton ? "pr-10" : "pr-3",
             error
-              ? "border-red-400 dark:border-red-600 bg-red-50/30 dark:bg-red-950/10 animate-shake"
-              : "border-gray-200 dark:border-gray-800",
+              ? "border-red-500 dark:border-red-500 bg-red-50/20 dark:bg-red-950/20 focus:border-red-500 focus:ring-red-500/20"
+              : "border-gray-200 dark:border-gray-700",
             className,
           ].join(" ")}
           {...rest}

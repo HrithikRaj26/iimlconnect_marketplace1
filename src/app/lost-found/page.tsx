@@ -279,8 +279,8 @@ function LostFoundBrowsePageInner() {
   for (const list of matchesByReportId.values()) list.sort((a, b) => b.score - a.score);
 
   return (
-    <div className="min-h-screen bg-surface">
-      <div className="border-b border-gray-100 bg-white">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors">
+      <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:py-0">
           <div className="flex gap-6">
             <button
@@ -330,8 +330,8 @@ function LostFoundBrowsePageInner() {
         
         {/* Desktop Sidebar */}
         <aside className="hidden lg:block w-full shrink-0 lg:w-64">
-          <div className="space-y-5 rounded-xl border border-gray-200 bg-white p-5 shadow-card">
-            <h2 className="text-base font-semibold text-gray-900">Filters</h2>
+          <div className="space-y-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-xs">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Filters</h2>
 
             <TextInput
               label="Search (Keywords)"
@@ -512,7 +512,7 @@ function LostFoundBrowsePageInner() {
             </p>
           )}
 
-          <div className="rounded-xl bg-brand-light/50 p-4">
+          <div className="w-full">
             {/*
               A uniform CSS grid sizes every row to its tallest cell, so a
               card with a match banner (much taller than a plain card) left

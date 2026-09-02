@@ -11,7 +11,7 @@ import { SortDropdown } from "@/components/marketplace/SortDropdown";
 import { Button } from "@/components/ui/Button";
 import { useMarketplaceSearch } from "@/hooks/useMarketplaceSearch";
 import { AnimatePresence, motion } from "framer-motion";
-import { X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 
 export default function MarketplacePage() {
   const router = useRouter();
@@ -133,9 +133,10 @@ export default function MarketplacePage() {
       {/* Mobile Floating Action Button (FAB) for Sell an Item */}
       <Link 
         href="/listing/create" 
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-brand text-2xl text-white shadow-lg sm:hidden hover:bg-brand-light hover:text-brand transition-colors"
+        aria-label="Sell an item"
+        className="fixed bottom-20 right-5 z-40 flex h-13 w-13 items-center justify-center rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg sm:hidden transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
       >
-        +
+        <Plus size={24} strokeWidth={2.5} />
       </Link>
     </div>
   );

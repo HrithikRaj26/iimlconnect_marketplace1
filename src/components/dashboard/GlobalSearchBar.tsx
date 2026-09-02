@@ -2,11 +2,9 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Loader2, Mic, X } from "lucide-react";
-import { Button } from "@/components/ui/moving-border";
+import { Search, Loader2, Mic, X, Sparkles, Zap } from "lucide-react";
 import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 import { routeQuery } from "@/lib/intentRouter";
-import { Sparkles, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type ChatMessage = { role: "user" | "ai"; content: string; options?: { label: string; url: string }[] };
@@ -225,49 +223,62 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
       <div className="relative w-full">
         <form onSubmit={handleSearch} className="w-full relative z-50">
           <div
-            className={`w-full h-14 md:h-16 flex items-center rounded-md border px-2 py-1 md:px-4 md:py-2 transition-all duration-300 ${
+            className={`w-full h-14 md:h-16 flex items-center rounded-2xl border px-3 py-1.5 md:px-5 md:py-2 transition-colors shadow-xs ${
               searchMode === "llm"
                 ? "border-blue-500 bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:ring-blue-500/20"
-                : "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:ring-gray-900/10 focus-within:border-gray-700"
+                : "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:ring-brand/20 focus-within:border-brand"
             }`}
           >
-            <div className="flex items-center justify-center p-2 text-gray-400">
+            <div className="flex items-center justify-center p-1 text-gray-400">
               {isLoading || isIntentLoading ? (
-                <Loader2 size={22} strokeWidth={2.5} className={`animate-spin ${searchMode === 'llm' ? 'text-blue-600' : 'text-blue-500'}`} />
+                <Loader2 size={20} strokeWidth={2.5} className="animate-spin text-blue-600 dark:text-blue-400" />
               ) : searchMode === "llm" ? (
-                <Sparkles size={22} strokeWidth={2.5} className="text-blue-500" />
+                <Sparkles size={20} strokeWidth={2.5} className="text-blue-600 dark:text-blue-400" />
               ) : (
-                <Search size={22} strokeWidth={2.5} />
+                <Search size={20} strokeWidth={2.5} className="text-gray-400 dark:text-gray-500" />
               )}
             </div>
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={searchMode === "llm" ? "Ask the AI to find anything..." : "Ask anything, search across all modules..."}
-              className={`flex-1 bg-transparent border-none focus:outline-none focus:ring-0 text-sm md:text-lg px-2 transition-colors duration-300 ${
-                searchMode === "llm" ? "text-blue-900 placeholder-blue-300" : "text-gray-800 placeholder-gray-400"
+              placeholder={searchMode === "llm" ? "Ask campus AI to find anything..." : "Search items, lost objects, ventures..."}
+              className={`flex-1 bg-transparent border-none focus:outline-none focus:ring-0 text-sm md:text-base px-2 transition-colors ${
+                searchMode === "llm" ? "text-gray-900 dark:text-gray-100 placeholder-blue-400/70" : "text-gray-900 dark:text-gray-100 placeholder-gray-400"
               }`}
               onFocus={() => { if (query.trim().length >= 2) setShowDropdown(true); }}
               onBlur={() => { setTimeout(() => setShowDropdown(false), 200); }}
+              aria-label="Global search input"
             />
-            
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search input"
+                className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <X size={16} />
+              </button>
+            )}
             <button
               type="button"
               onClick={startListening}
-              className={`p-2 rounded-md transition-colors mr-1 md:mr-2 ${isListening ? 'bg-red-100 text-red-500 animate-pulse' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
-              title="Voice Search"
+              aria-label="Voice search"
+              className={`p-2 rounded-lg transition-colors ${
+                isListening 
+                  ? "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400" 
+                  : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+              }`}
             >
-              <Mic size={22} strokeWidth={2} />
+              <Mic size={18} strokeWidth={2} />
             </button>
-
             <button
               type="submit"
-              disabled={!query.trim()}
-              className={`ml-1 px-4 py-2 md:px-6 md:py-2.5 rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed hidden md:block ${
+              disabled={isLoading}
+              className={`ml-1 px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed hidden md:block ${
                 searchMode === "llm" 
                   ? "bg-blue-600 text-white hover:bg-blue-700" 
-                  : "bg-gray-900 text-white hover:bg-gray-800"
+                  : "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-white"
               }`}
             >
               Search
@@ -275,29 +286,31 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
           </div>
         </form>
 
-        <div className="mt-4 flex justify-center">
-          <div className="bg-gray-100 dark:bg-gray-800 p-1 rounded-md inline-flex items-center">
+        <div className="mt-3.5 flex justify-center">
+          <div className="bg-gray-100 dark:bg-gray-800 p-1 rounded-lg inline-flex items-center gap-1 border border-gray-200/60 dark:border-gray-700/60">
             <button
               type="button"
               onClick={() => setSearchMode("regex")}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1 rounded-md text-xs font-semibold transition-colors ${
                 searchMode === "regex" 
-                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm" 
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-850 dark:hover:text-gray-250"
+                  ? "bg-white dark:bg-gray-750 text-gray-900 dark:text-white shadow-xs" 
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
               }`}
             >
-              Regex Router
+              <Search size={13} />
+              Instant Search
             </button>
             <button
               type="button"
               onClick={() => setSearchMode("llm")}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-3.5 py-1 rounded-md text-xs font-semibold transition-colors ${
                 searchMode === "llm" 
-                  ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm" 
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-850 dark:hover:text-gray-250"
+                  ? "bg-white dark:bg-gray-750 text-blue-600 dark:text-blue-400 shadow-xs" 
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
               }`}
             >
-              LLM Assist
+              <Sparkles size={13} />
+              AI Assistant
             </button>
           </div>
         </div>

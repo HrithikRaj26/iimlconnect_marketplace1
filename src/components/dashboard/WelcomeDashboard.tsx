@@ -24,7 +24,7 @@ const SECTIONS = [
     borderClass: "border-t-4 border-t-blue-600 dark:border-t-blue-500",
     actions: [
       { label: "Browse Listings", path: "/marketplace" },
-      { label: "List Item", path: "/marketplace/new" },
+      { label: "List Item", path: "/listing/create" },
     ],
   },
   {
@@ -90,20 +90,20 @@ export default function WelcomeDashboard({ session }: { session: any }) {
           {SECTIONS.map((section) => (
             <div
               key={section.key}
-              className={`rounded-md border border-gray-200 dark:border-gray-800 ${section.borderClass} bg-white dark:bg-gray-900 p-5 flex flex-col gap-4 transition-all duration-200`}
+              className={`rounded-xl border border-gray-200 dark:border-gray-800 ${section.borderClass} bg-white dark:bg-gray-900 p-5 flex flex-col gap-4 shadow-xs`}
             >
               {/* Section header */}
               <div className="flex items-center gap-2.5">
-                <div className={`flex h-9 w-9 items-center justify-center rounded-md ${section.colorClass} text-white shadow-xs`}>
-                  <section.icon strokeWidth={1.8} size={18} />
+                <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${section.colorClass} text-white shadow-xs`}>
+                  <section.icon strokeWidth={2} size={18} />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-gray-800 dark:text-gray-100">{section.title}</p>
+                  <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{section.title}</p>
                 </div>
               </div>
 
               {/* Divider separator */}
-              <div className="h-px w-full bg-gray-100 dark:bg-gray-800/60" />
+              <div className="h-px w-full bg-gray-100 dark:bg-gray-800" />
 
               {/* Action buttons */}
               <div className="grid grid-cols-2 gap-2">
@@ -112,9 +112,9 @@ export default function WelcomeDashboard({ session }: { session: any }) {
                     key={action.label}
                     type="button"
                     onClick={() => router.push(action.path)}
-                    className="group flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-800 p-4 transition-all duration-150 hover:bg-gray-200 dark:hover:bg-gray-700 border border-transparent active:scale-95 min-h-[3.5rem]"
+                    className="group flex items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800/80 p-3 hover:bg-gray-100 dark:hover:bg-gray-700/80 border border-gray-200/60 dark:border-gray-700/60 transition-colors min-h-[3.25rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
                   >
-                    <span className="text-[11px] font-bold text-gray-800 dark:text-gray-200 text-center leading-tight group-hover:text-black dark:group-hover:text-white transition-colors">
+                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-200 text-center leading-snug group-hover:text-gray-950 dark:group-hover:text-white transition-colors">
                       {action.label}
                     </span>
                   </button>
@@ -128,18 +128,18 @@ export default function WelcomeDashboard({ session }: { session: any }) {
         <button
           type="button"
           onClick={() => router.push("/messages")}
-          className="w-full flex items-center justify-between rounded-md border border-gray-200 dark:border-gray-850 bg-white dark:bg-gray-900 border-l-4 border-l-teal-600 dark:border-l-teal-500 px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-all duration-200 group active:scale-[0.99]"
+          className="w-full flex items-center justify-between rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 border-l-4 border-l-teal-600 dark:border-l-teal-500 px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors group shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-teal-600 dark:bg-teal-700 text-white shadow-xs">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-600 dark:bg-teal-700 text-white shadow-xs">
               <MessageSquare size={18} strokeWidth={2} />
             </div>
             <div className="text-left">
-              <p className="text-sm font-bold text-gray-800 dark:text-gray-100">Messages</p>
-              <p className="text-xs text-gray-450 dark:text-gray-500">Chat with buyers and sellers</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Messages</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Chat with buyers and sellers</p>
             </div>
           </div>
-          <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-gray-400 group-hover:translate-x-0.5 transition-transform" stroke="currentColor" strokeWidth="2.5">
+          <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200 transition-colors" stroke="currentColor" strokeWidth="2.5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
         </button>
