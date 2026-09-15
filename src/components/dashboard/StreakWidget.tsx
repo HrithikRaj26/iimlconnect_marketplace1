@@ -17,10 +17,10 @@ interface StreakRow {
 }
 
 function getMilestoneLabel(current: number): string | null {
-  if (current >= 30) return "Legendary! 🏆";
-  if (current >= 14) return "On Fire! 🔥";
-  if (current >= 7) return "Blazing! ⚡";
-  if (current >= 3) return "Warming up 🌡️";
+  if (current >= 30) return "Legendary run";
+  if (current >= 14) return "Strong streak";
+  if (current >= 7) return "One week held";
+  if (current >= 3) return "Momentum building";
   return null;
 }
 
@@ -59,18 +59,18 @@ export default function StreakWidget({ userId }: StreakWidgetProps) {
       current: streaks.loginCurrent,
       best: streaks.loginBest,
       unit: "days",
-      color: "text-orange-600 dark:text-orange-400",
-      bgColor: "bg-orange-50 dark:bg-orange-900/20",
-      borderColor: "border-orange-200 dark:border-orange-800",
+      color: "text-teal-700 dark:text-teal-300",
+      bgColor: "bg-teal-50/80 dark:bg-teal-950/20",
+      borderColor: "border-teal-200 dark:border-teal-900/70",
     },
     {
       label: "Weekly Listing",
       icon: Package,
       current: streaks.sellerCurrent,
       unit: "weeks",
-      color: "text-blue-600 dark:text-blue-400",
-      bgColor: "bg-blue-50 dark:bg-blue-900/20",
-      borderColor: "border-blue-200 dark:border-blue-800",
+      color: "text-zinc-700 dark:text-stone-200",
+      bgColor: "bg-zinc-50 dark:bg-stone-900/70",
+      borderColor: "border-zinc-200 dark:border-stone-800",
     },
     {
       label: "Review Streak",
@@ -78,9 +78,9 @@ export default function StreakWidget({ userId }: StreakWidgetProps) {
       current: streaks.reviewCurrent,
       best: streaks.reviewBest,
       unit: "reviews",
-      color: "text-amber-500 dark:text-amber-400",
-      bgColor: "bg-amber-50 dark:bg-amber-900/20",
-      borderColor: "border-amber-200 dark:border-amber-800",
+      color: "text-amber-700 dark:text-amber-300",
+      bgColor: "bg-amber-50/90 dark:bg-amber-950/20",
+      borderColor: "border-amber-200 dark:border-amber-900/70",
     },
   ];
 
@@ -96,20 +96,20 @@ export default function StreakWidget({ userId }: StreakWidgetProps) {
 
   return (
     <motion.div
-      className="w-full max-w-6xl mx-auto mt-6"
+      className="w-full"
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.4 } }}
     >
-      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl px-6 py-5 shadow-sm">
+      <div className="rounded-2xl border border-zinc-200 bg-white px-5 py-5 shadow-[0_18px_45px_-36px_rgba(24,24,27,0.5)] dark:border-stone-800 dark:bg-stone-950/80">
         <div className="flex items-center gap-2 mb-4">
-          <Flame size={16} className="text-orange-500" />
-          <h2 className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+          <Flame size={16} className="text-teal-700 dark:text-teal-300" />
+          <h2 className="text-[11px] font-semibold text-zinc-400 dark:text-stone-500 uppercase tracking-[0.18em]">
             Activity Streaks
           </h2>
         </div>
 
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+          className="grid grid-cols-1 gap-3"
           variants={container}
           initial="hidden"
           animate="visible"
@@ -123,7 +123,7 @@ export default function StreakWidget({ userId }: StreakWidgetProps) {
               <motion.div
                 key={r.label}
                 variants={row}
-                className={`relative flex items-center gap-3 p-4 rounded-xl border ${r.bgColor} ${r.borderColor} overflow-hidden`}
+                className={`relative flex items-center gap-3 overflow-hidden rounded-xl border p-4 ${r.bgColor} ${r.borderColor}`}
               >
                 {/* Icon */}
                 <div
@@ -154,7 +154,7 @@ export default function StreakWidget({ userId }: StreakWidgetProps) {
                     </p>
                   ) : r.best && r.best > 0 ? (
                     <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-600 mt-0.5">
-                      Best: {r.best} {r.unit}
+                      Best {r.best} {r.unit}
                     </p>
                   ) : null}
                 </div>

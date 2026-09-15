@@ -60,36 +60,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   const getScrollToTopColorClass = () => {
-    // 🟠 Ventures — orange/amber brand
     if (pathname.startsWith("/ventures")) {
-      return "bg-orange-600 hover:bg-orange-700 shadow-sm";
+      return "bg-amber-700 hover:bg-amber-800 shadow-sm";
     }
-    // 🟣 Lost & Found — purple/fuchsia
     if (pathname.startsWith("/lost-found")) {
-      return "bg-purple-600 hover:bg-purple-700 shadow-sm";
+      return "bg-zinc-800 hover:bg-zinc-900 shadow-sm";
     }
-    // 💬 Messages — teal/cyan
     if (pathname.startsWith("/messages")) {
-      return "bg-teal-600 hover:bg-teal-700 shadow-sm";
+      return "bg-teal-700 hover:bg-teal-800 shadow-sm";
     }
-    // 👤 Profile — violet/slate
     if (pathname.startsWith("/profile")) {
-      return "bg-violet-600 hover:bg-violet-700 shadow-sm";
+      return "bg-zinc-800 hover:bg-zinc-900 shadow-sm";
     }
-    // 🛒 Marketplace & listing create flow — blue/indigo
     if (pathname.startsWith("/marketplace") || pathname.startsWith("/listing")) {
-      return "bg-blue-600 hover:bg-blue-700 shadow-sm";
+      return "bg-teal-700 hover:bg-teal-800 shadow-sm";
     }
-    // 🔍 Search — sky/blue
     if (pathname.startsWith("/search")) {
-      return "bg-sky-600 hover:bg-sky-700 shadow-sm";
+      return "bg-teal-700 hover:bg-teal-800 shadow-sm";
     }
-    // 🛡️ Admin — red/rose
     if (pathname.startsWith("/admin")) {
       return "bg-red-600 hover:bg-red-700 shadow-sm";
     }
-    // 🏠 Dashboard / home — brand blue (default)
-    return "bg-blue-600 hover:bg-blue-700 shadow-sm";
+    return "bg-teal-700 hover:bg-teal-800 shadow-sm";
   };
 
   useEffect(() => {
@@ -167,7 +159,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
+    <div className="flex min-h-[100dvh] overflow-hidden bg-zinc-50 dark:bg-[#111111]">
       {/* Mobile Backdrop */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -184,34 +176,34 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       {/* Sidebar - Desktop Collapsible / Mobile Overlay */}
       <aside 
         aria-label="Sidebar navigation"
-        className={`fixed inset-y-0 left-0 z-[60] w-64 shrink-0 transform bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-transform duration-200 ease-in-out lg:relative lg:z-0 ${
+        className={`fixed inset-y-0 left-0 z-[60] w-64 shrink-0 transform border-r border-zinc-200 bg-white transition-transform duration-200 ease-in-out dark:border-stone-800 dark:bg-stone-950 lg:relative lg:z-0 ${
           sidebarOpen 
             ? "translate-x-0 shadow-2xl lg:shadow-none block" 
             : "-translate-x-full hidden lg:hidden"
         }`}
       >
-        <div className="flex h-full flex-col overflow-y-auto overflow-x-hidden w-64 bg-white dark:bg-gray-900">
+        <div className="flex h-full w-64 flex-col overflow-y-auto overflow-x-hidden bg-white dark:bg-stone-950">
           {/* Sidebar Header with Profile */}
-          <div className="flex flex-col items-center p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-950/20">
+          <div className="flex flex-col items-center border-b border-zinc-100 bg-zinc-50/70 p-6 dark:border-stone-800 dark:bg-[#111111]/35">
             {profile?.avatar ? (
               <img src={profile.avatar} alt="Profile" className="h-16 w-16 rounded-full object-cover shadow-xs mb-3 border border-gray-200 dark:border-gray-700" />
             ) : (
-              <div className="h-16 w-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-bold shadow-xs mb-3">
+              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-teal-700 text-xl font-bold text-white shadow-xs">
                 {profile?.name ? profile.name[0].toUpperCase() : "S"}
               </div>
             )}
-            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100 text-center leading-tight truncate w-full px-2">{profile?.name || "Student"}</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <h2 className="w-full truncate px-2 text-center text-base font-semibold leading-tight text-zinc-950 dark:text-stone-100">{profile?.name || "Student"}</h2>
+            <p className="mt-1 text-xs text-zinc-500 dark:text-stone-400">
               {profile?.isGuest ? "External Guest" : "Verified Student"}
             </p>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 space-y-1 px-3 py-4 bg-white dark:bg-gray-900">
+          <nav className="flex-1 space-y-1 bg-white px-3 py-4 dark:bg-stone-950">
             <Link 
               href="/" 
               onClick={() => { if (typeof window !== "undefined" && window.innerWidth < 1024) setSidebarOpen(false); }}
-              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${pathname === "/" ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white"}`}
+              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${pathname === "/" ? "bg-teal-50 dark:bg-teal-950/30 text-teal-800 dark:text-teal-300 font-semibold" : "text-zinc-600 dark:text-stone-400 hover:bg-zinc-50 dark:hover:bg-stone-900 hover:text-zinc-950 dark:hover:text-stone-100"}`}
             >
               <Home size={18} />
               Dashboard
@@ -219,7 +211,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Link 
               href="/profile" 
               onClick={() => { if (typeof window !== "undefined" && window.innerWidth < 1024) setSidebarOpen(false); }}
-              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${pathname.startsWith("/profile") ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white"}`}
+              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${pathname.startsWith("/profile") ? "bg-teal-50 dark:bg-teal-950/30 text-teal-800 dark:text-teal-300 font-semibold" : "text-zinc-600 dark:text-stone-400 hover:bg-zinc-50 dark:hover:bg-stone-900 hover:text-zinc-950 dark:hover:text-stone-100"}`}
             >
               <User size={18} />
               My Profile
@@ -227,7 +219,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Link 
               href="/marketplace" 
               onClick={() => { if (typeof window !== "undefined" && window.innerWidth < 1024) setSidebarOpen(false); }}
-              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${pathname.startsWith("/marketplace") ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white"}`}
+              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${pathname.startsWith("/marketplace") ? "bg-teal-50 dark:bg-teal-950/30 text-teal-800 dark:text-teal-300 font-semibold" : "text-zinc-600 dark:text-stone-400 hover:bg-zinc-50 dark:hover:bg-stone-900 hover:text-zinc-950 dark:hover:text-stone-100"}`}
             >
               <ShoppingBag size={18} />
               Buy and Sell
@@ -235,7 +227,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Link
               href="/lost-found"
               onClick={() => { if (typeof window !== "undefined" && window.innerWidth < 1024) setSidebarOpen(false); }}
-              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${pathname.startsWith("/lost-found") ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white"}`}
+              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${pathname.startsWith("/lost-found") ? "bg-teal-50 dark:bg-teal-950/30 text-teal-800 dark:text-teal-300 font-semibold" : "text-zinc-600 dark:text-stone-400 hover:bg-zinc-50 dark:hover:bg-stone-900 hover:text-zinc-950 dark:hover:text-stone-100"}`}
             >
               <Search size={18} />
               Lost and Found
@@ -243,7 +235,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Link 
               href="/ventures" 
               onClick={() => { if (typeof window !== "undefined" && window.innerWidth < 1024) setSidebarOpen(false); }}
-              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${pathname.startsWith("/ventures") ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 font-semibold" : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/60 hover:text-gray-900 dark:hover:text-white"}`}
+              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${pathname.startsWith("/ventures") ? "bg-teal-50 dark:bg-teal-950/30 text-teal-800 dark:text-teal-300 font-semibold" : "text-zinc-600 dark:text-stone-400 hover:bg-zinc-50 dark:hover:bg-stone-900 hover:text-zinc-950 dark:hover:text-stone-100"}`}
             >
               <Rocket size={18} />
               Venture Hub
@@ -279,10 +271,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <main ref={mainRef} className="flex-1 overflow-y-auto flex flex-col justify-between">
           <div className="flex-1">
             {profile && (profile.name === "Guest" || profile.name === "Student" || !profile.name.trim()) && (
-              <div className="bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-900/40 text-amber-800 dark:text-amber-400 font-extrabold text-xs py-3 px-4 text-center flex flex-wrap items-center justify-center gap-2 shadow-xs animate-pulse">
-                <span>⚠️ Your profile is incomplete. Please set your actual name to complete registration.</span>
+              <div className="flex flex-wrap items-center justify-center gap-2 border-b border-amber-200 bg-amber-50 px-4 py-3 text-center text-xs font-semibold text-amber-800 shadow-xs dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
+                <span>Your profile is incomplete. Please set your actual name to complete registration.</span>
                 <Link href="/profile" className="underline font-black hover:text-amber-950 dark:hover:text-amber-300">
-                  Update Profile Now →
+                  Update Profile Now
                 </Link>
               </div>
             )}

@@ -207,15 +207,18 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
   const hasResults = results && (results.marketplace.length > 0 || results.ventures.length > 0 || results.lostFound.length > 0);
 
   return (
-    <div className="w-full max-w-4xl mx-auto flex flex-col items-center mb-16 px-4 pt-12">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
       {greetingFirstPart && (
-        <div className="mb-8 text-center tracking-tight">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-2">
+        <div className="max-w-3xl tracking-normal">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-400 dark:text-stone-500">
+            IIML Connect
+          </p>
+          <h1 className="text-3xl font-semibold leading-tight text-zinc-950 dark:text-stone-100 md:text-5xl">
             {greetingFirstPart}
           </h1>
-          <p className="text-lg md:text-xl text-gray-500 dark:text-gray-400 font-medium h-8">
+          <p className="mt-3 min-h-8 text-base font-medium leading-7 text-zinc-500 dark:text-stone-400 md:text-lg">
             {typedSecondPart}
-            <span className="animate-pulse text-brand">|</span>
+            <span className="animate-pulse text-teal-700 dark:text-teal-300">|</span>
           </p>
         </div>
       )}
@@ -223,19 +226,19 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
       <div className="relative w-full">
         <form onSubmit={handleSearch} className="w-full relative z-50">
           <div
-            className={`w-full h-14 md:h-16 flex items-center rounded-2xl border px-3 py-1.5 md:px-5 md:py-2 transition-colors shadow-xs ${
+            className={`flex h-14 w-full items-center rounded-2xl border px-3 py-1.5 shadow-[0_24px_60px_-42px_rgba(24,24,27,0.65)] transition md:h-16 md:px-5 md:py-2 ${
               searchMode === "llm"
-                ? "border-blue-500 bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:ring-blue-500/20"
-                : "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:ring-brand/20 focus-within:border-brand"
+                ? "border-teal-500 bg-white dark:bg-stone-950 focus-within:ring-2 focus-within:ring-teal-500/20"
+                : "border-zinc-200 bg-white focus-within:border-teal-600 focus-within:ring-2 focus-within:ring-teal-600/15 dark:border-stone-800 dark:bg-stone-950"
             }`}
           >
             <div className="flex items-center justify-center p-1 text-gray-400">
               {isLoading || isIntentLoading ? (
-                <Loader2 size={20} strokeWidth={2.5} className="animate-spin text-blue-600 dark:text-blue-400" />
+                <Loader2 size={20} strokeWidth={2.5} className="animate-spin text-teal-700 dark:text-teal-300" />
               ) : searchMode === "llm" ? (
-                <Sparkles size={20} strokeWidth={2.5} className="text-blue-600 dark:text-blue-400" />
+                <Sparkles size={20} strokeWidth={2.5} className="text-teal-700 dark:text-teal-300" />
               ) : (
-                <Search size={20} strokeWidth={2.5} className="text-gray-400 dark:text-gray-500" />
+                <Search size={20} strokeWidth={2.5} className="text-zinc-400 dark:text-stone-500" />
               )}
             </div>
             <input
@@ -244,7 +247,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
               onChange={(e) => setQuery(e.target.value)}
               placeholder={searchMode === "llm" ? "Ask campus AI to find anything..." : "Search items, lost objects, ventures..."}
               className={`flex-1 bg-transparent border-none focus:outline-none focus:ring-0 text-sm md:text-base px-2 transition-colors ${
-                searchMode === "llm" ? "text-gray-900 dark:text-gray-100 placeholder-blue-400/70" : "text-gray-900 dark:text-gray-100 placeholder-gray-400"
+                searchMode === "llm" ? "text-zinc-950 placeholder-teal-700/50 dark:text-stone-100 dark:placeholder-teal-300/55" : "text-zinc-950 placeholder-zinc-400 dark:text-stone-100 dark:placeholder-stone-500"
               }`}
               onFocus={() => { if (query.trim().length >= 2) setShowDropdown(true); }}
               onBlur={() => { setTimeout(() => setShowDropdown(false), 200); }}
@@ -255,7 +258,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
                 type="button"
                 onClick={() => setQuery("")}
                 aria-label="Clear search input"
-                className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="rounded-full p-1.5 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-600 active:scale-[0.98] dark:hover:bg-stone-800 dark:hover:text-stone-200"
               >
                 <X size={16} />
               </button>
@@ -267,7 +270,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
               className={`p-2 rounded-lg transition-colors ${
                 isListening 
                   ? "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400" 
-                  : "text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                  : "text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-stone-800 dark:hover:text-stone-200"
               }`}
             >
               <Mic size={18} strokeWidth={2} />
@@ -275,10 +278,10 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
             <button
               type="submit"
               disabled={isLoading}
-              className={`ml-1 px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed hidden md:block ${
+              className={`ml-1 hidden rounded-xl px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98] md:block ${
                 searchMode === "llm" 
-                  ? "bg-blue-600 text-white hover:bg-blue-700" 
-                  : "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-white"
+                  ? "bg-teal-700 text-white hover:bg-teal-800" 
+                  : "bg-zinc-950 text-white hover:bg-zinc-800 dark:bg-stone-100 dark:text-zinc-950 dark:hover:bg-white"
               }`}
             >
               Search
@@ -287,14 +290,14 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
         </form>
 
         <div className="mt-3.5 flex justify-center">
-          <div className="bg-gray-100 dark:bg-gray-800 p-1 rounded-lg inline-flex items-center gap-1 border border-gray-200/60 dark:border-gray-700/60">
+          <div className="inline-flex items-center gap-1 rounded-xl border border-zinc-200/70 bg-zinc-100 p-1 dark:border-stone-800 dark:bg-stone-900">
             <button
               type="button"
               onClick={() => setSearchMode("regex")}
               className={`flex items-center gap-1.5 px-3.5 py-1 rounded-md text-xs font-semibold transition-colors ${
                 searchMode === "regex" 
-                  ? "bg-white dark:bg-gray-750 text-gray-900 dark:text-white shadow-xs" 
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                  ? "bg-white text-zinc-950 shadow-sm dark:bg-stone-950 dark:text-stone-100" 
+                  : "text-zinc-500 hover:text-zinc-800 dark:text-stone-400 dark:hover:text-stone-200"
               }`}
             >
               <Search size={13} />
@@ -305,8 +308,8 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
               onClick={() => setSearchMode("llm")}
               className={`flex items-center gap-1.5 px-3.5 py-1 rounded-md text-xs font-semibold transition-colors ${
                 searchMode === "llm" 
-                  ? "bg-white dark:bg-gray-750 text-blue-600 dark:text-blue-400 shadow-xs" 
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                  ? "bg-white text-teal-700 shadow-sm dark:bg-stone-950 dark:text-teal-300" 
+                  : "text-zinc-500 hover:text-zinc-800 dark:text-stone-400 dark:hover:text-stone-200"
               }`}
             >
               <Sparkles size={13} />
@@ -316,7 +319,7 @@ export default function GlobalSearchBar({ firstName }: { firstName: string }) {
         </div>
 
         {showDropdown && (
-          <div className="absolute top-16 left-0 right-0 bg-white dark:bg-gray-900 rounded-md shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden z-40 max-h-[70vh] overflow-y-auto">
+          <div className="absolute left-0 right-0 top-16 z-40 max-h-[70vh] overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-xl dark:border-stone-800 dark:bg-stone-950">
             {liveIntent && searchMode === "regex" && (
               <div 
                 onClick={() => handleResultClick(liveIntent.redirectTo)}
